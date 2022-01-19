@@ -11,6 +11,6 @@ setup(
         'matplotlib>=3.2.1',
 	'fenics==2019.1.0',
 	'scipy>=1.4.1',
-	'pytorch'
+	'torch'
     ]
 )
