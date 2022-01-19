@@ -10,9 +10,8 @@ setup(
         'numpy>=1.18.1',
         'matplotlib>=3.2.1',
 	'fenics==2019.1.0',
-	'mshr',
+	'mshr@https://bitbucket.org/fenics-project/mshr/downloads/mshr-2019.1.0.tar.gz',
 	'scipy>=1.4.1',
 	'pytorch>=1.5.0'
-    ],
-    dependency_links=['https://bitbucket.org/fenics-project/mshr/']
+    ]
 )
