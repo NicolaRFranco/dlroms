@@ -9,7 +9,7 @@ setup(
         'numpy>=1.18.1',
         'matplotlib>=3.2.1',
 	'fenics==2019.1.0',
-	'mshr==2019.1.0-py38hf9f41d3_3',
+	'mshr<=2019.1.0',
 	'scipy>=1.4.1',
 	'pytorch>=1.5.0'
     ]
