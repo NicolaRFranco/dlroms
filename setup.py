@@ -10,7 +10,7 @@ setup(
         'numpy>=1.18.1',
         'matplotlib>=3.2.1',
 	'fenics==2019.1.0',
-	'mshr@https://bitbucket.org/fenics-project/mshr/src/master',
+	'mshr@https://anaconda.org/conda-forge/mshr/2019.1.0/download/linux-64/mshr-2019.1.0-py38hf9f41d3_3.tar.bz2',
 	'scipy>=1.4.1',
 	'pytorch>=1.5.0'
     ]
