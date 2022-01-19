@@ -2,8 +2,9 @@ import matplotlib.pyplot as plt
 import numpy
 import torch
 import dolfin
-import mshr
 import gifs
+
+mshr = None
 
 def loadmesh(path):
     return dolfin.cpp.mesh.Mesh(path)
