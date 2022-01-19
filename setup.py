@@ -12,5 +12,8 @@ setup(
 	'mshr<=2019.1.0',
 	'scipy>=1.4.1',
 	'pytorch>=1.5.0'
+    ],
+    dependency_links=[
+        'https://anaconda.org/conda-forge/mshr/2019.1.0/download/linux-64/mshr-2019.1.0-py36hf9f41d3_3.tar.bz2'
     ]
 )
