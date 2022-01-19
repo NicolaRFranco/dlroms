@@ -1,0 +1,792 @@
+import numpy
+import pandas
+import torch
+import matplotlib.pyplot as plt
+from time import perf_counter     
+from cores import CPU, GPU
+from IPython.display import clear_output
+
+ReLU = torch.nn.ReLU()
+leakyReLU = torch.nn.LeakyReLU(0.1) 
+        
+        
+class Layer(torch.nn.Module):
+    """Layer of a neural network. It is implemented as a subclass of 'torch.nn.Module'. Acts as an abstract class.
+    Objects of class layer have the following attributes:
+    
+    core (Core): specifies wheather the layer is stored on CPU or GPU.
+    rho (function): the activation function of the layer.
+    
+    All objects of class layer should implement an abstract method '.module()' that returns the underlying torch.nn.Module.
+    Layers can be applied to tensors using .forward() or simply .(), i.e. following the syntax of function calls.
+    """
+    
+    def __init__(self, activation):
+        """Creates a new layer with a given activation function (activation). By default, the layer is initiated on CPU."""
+        super(Layer, self).__init__()
+        self.rho = activation
+        if(activation == None):
+            self.rho = torch.nn.Identity()
+        self.core = CPU
+        
+    def w(self):
+        """Returns the weights of the layer."""
+        return self.module().weight
+    
+    def b(self):
+        """Returns the bias vector of the layer."""
+        return self.module().bias
+    
+    def scale(self, factor):
+        """Sets to zero the bias and scales the weight matrix by 'factor'."""
+        self.load(factor*self.w().detach().cpu().numpy(), 0.0*self.b().detach().cpu().numpy())
+        
+    def zeros(self):
+        """Sets to zero all weights and biases."""
+        self.module().weight = torch.nn.Parameter(0.0*self.module().weight)
+        self.module().bias = torch.nn.Parameter(0.0*self.module().bias)
+        
+    def moveOn(self, core):
+        """Transfers the layer structure on the specified core."""
+        self.core = core
+        if(core != CPU):
+            self.cuda()
+        else:
+            self.cpu()
+        
+    def cuda(self):
+        """Transfers the layer to the GPU."""
+        self.module().cuda()
+        
+    def cpu(self):
+        """Transfers the layer to the CPU."""
+        self.module().cpu()
+        
+    def l2(self):
+        """Returns the square sum of all weights within the layer."""
+        return (self.module().weight**2).sum()
+    
+    def l1(self):
+        """Returns the absolute sum of all weights within the layer."""
+        return self.module().weight.abs().sum()
+    
+    def outdim(self, inputdim):
+        """Given a tuple for the input dimension, returns the corresponding output dimension."""
+        return tuple(self.forward(self.core.zeros(*inputdim)).size())
+        
+    def load(self, w, b = None):
+        """Given a pair of weights and biases, it loads them as parameters for the Layer.
+        
+        Input:
+        w (numpy array): weights
+        b (numpy array): bias vector. Defaults to None (i.e., only loads w).
+        """
+        self.module().weight = torch.nn.Parameter(self.core.tensor(w))
+        try:
+            self.module().bias = torch.nn.Parameter(self.core.tensor(b))
+        except:
+            None
+        
+    def inherit(self, other):
+        """Inherits the weight and bias from another network. Additional entries are left to zero.
+        It can be seen as a naive form of transfer learning.
+        
+        Input:
+        other (Layer): the layer from which the parameters are learned.
+        
+        Output:
+        None, but the current network has now updated parameters.
+        """
+        self.zeros()
+        with torch.no_grad():
+            where = tuple([slice(0,s) for s in other.w().size()])
+            self.module().weight[where] = torch.nn.Parameter(self.core.tensor(other.w().detach().cpu().numpy())) 
+            where = tuple([slice(0,s) for s in other.b().size()])
+            self.module().bias[where] = torch.nn.Parameter(self.core.tensor(other.b().detach().cpu().numpy())) 
+
+        
+    def __add__(self, other):
+        """Connects the current layer to another layer (or a sequence of layers), and returns
+        the corresponding nested architecture.
+       
+        Input:
+        self (Layer): the current layer
+        other (Layer / Consecutive): the architecture to be connected on top.
+        
+        Output:
+        The full architecture, stored as 'Consecutive' object.
+        """
+        if(isinstance(other, Consecutive) and (not isinstance(other, Parallel))):
+            n = len(other)
+            layers = [self]+[other[i] for i in range(n)]
+            return Consecutive(*tuple(layers))
+        else:
+            if(other == 0.0):
+                return self
+            else:
+                return Consecutive(self, other)    
+            
+    def __pow__(self, number):
+        """Creates a Parallel architecture by pasting 'number' copies of the same layer next to each other."""
+        if(number > 1):
+            l = [self]
+            for i in range(number-1):
+                l.append(self.copy())
+            return Parallel(*tuple(l))
+        elif(number == 1):
+            return self
+        else:
+            return 0.0
+    
+    def __mul__(self, number):
+        """Creates a deep neural network by pasting 'number' copies of the same layer."""
+        if(number > 1):
+            x = self + self
+            for i in range(number-2):
+                x = x+self
+            return x
+        elif(number == 1):
+            return self
+        else:
+            return 0.0
+    
+    def __rmul__(self, number):
+        """See self.__mul__."""
+        return self*number
+    
+    def dof(self):
+        """Degrees of freedom in the layer, defined as the number of active weights and biases."""
+        return numpy.prod(tuple(self.module().weight.size())) + len(self.module().bias)
+                     
+    def He(self, seed = None):
+        """He initialization of the weights."""
+        if(seed != None):
+            torch.manual_seed(seed)
+        torch.nn.init.kaiming_normal_(self.module().weight, mode='fan_out', nonlinearity='leaky_relu', a = 0.1)
+        
+    def inputdim(self):
+        """Returns the expected input dimension for the layer."""
+        return self.module().in_features
+    
+    def freeze(self, w = True, b = True):
+        """Freezes the layer so that its parameters to not require gradients.
+        Input:
+        w (boolean): wheather to fix or not the weights.
+        b (boolean): wheather to fix or not the bias."""
+        if(w and b):
+            self.module().requires_grad_(False)
+        elif(w):
+            self.module().weight.requires_grad_(False)
+        elif(b):
+            self.module().bias.requires_grad_(False)
+        
+    def dictionary(self, label = ""):
+        """Returns a dictionary with the layer parameters. An additional label can be added."""
+        return {('w'+label):self.w().detach().cpu().numpy(), ('b'+label):self.b().detach().cpu().numpy()}
+    
+    def parameters(self):
+        ps = list(super(Layer, self).parameters())
+        res = []
+        for p in ps:
+            if(p.requires_grad):
+                res.append(p)
+                
+        return res
+    
+
+class Dense(Layer):
+    """Fully connected Layer."""
+    
+    def __init__(self, input_dim, output_dim, activation = leakyReLU):
+        """Creates a Dense Layer with given input dimension, output dimension and activation function."""
+        super(Dense, self).__init__(activation)
+        self.lin = torch.nn.Linear(input_dim, output_dim)
+        
+    def module(self):
+        return self.lin
+        
+    def forward(self, x):
+        return self.rho(self.lin(x))
+    
+class Residual(Layer):
+    """Residual layer. Differs from a dense layer has x -> x + f(x) instead of x -> f(x)."""
+    
+    def __init__(self, dim, activation = leakyReLU):
+        """Creates a Residual layer with input-output dimension 'dim' and activation function 'activation'."""
+        super(Residual, self).__init__(activation)
+        self.lin = torch.nn.Linear(dim, dim)
+        
+    def module(self):
+        return self.lin
+    
+    def forward(self, x):
+        return x + self.rho(self.lin(x))   
+
+class Sparse(Layer):
+    """Layer with weights that have a (priorly) fixed sparsity."""
+    
+    def __init__(self, mask, activation = leakyReLU):
+        """Creates a Sparse layer.
+        
+        Input:
+        mask (numpy 2D array): a 2D array that works as sample for the weight matrix. 
+        It should have the same sparsity required to the weight matrix.
+        activation (function): activation function of the layer.
+        """
+        super(Sparse, self).__init__(activation)
+        self.loc = numpy.nonzero(mask)
+        self.in_d, self.out_d = mask.shape
+        self.weight = torch.nn.Parameter(CPU.zeros(len(self.loc[0])))
+        self.bias = torch.nn.Parameter(CPU.zeros(self.out_d))
+        
+    def moveOn(self, core):
+        self.core = core
+        with torch.no_grad():
+            if(core == GPU):      
+                self.weight = torch.nn.Parameter(self.weight.cuda())
+                self.bias = torch.nn.Parameter(self.bias.cuda())
+            else:
+                self.weight = torch.nn.Parameter(self.weight.cpu())
+                self.bias = torch.nn.Parameter(self.bias.cpu())
+        
+    def module(self):
+        return self
+    
+    def forward(self, x):
+        W = self.core.zeros(self.in_d, self.out_d)
+        W[self.loc] = self.weight
+        return self.rho(self.bias + x.mm(W))
+    
+    def inherit(self, other):
+        W = self.core.zeros(self.in_d, self.out_d)
+        W[other.loc] = other.weight
+        with torch.no_grad():
+            self.weight = torch.nn.Parameter(self.core.copy(W[self.loc]))
+            self.bias = torch.nn.Parameter(self.core.copy(other.bias))        
+
+    def He(self, seed = None):
+        nw = len(self.weight)
+        with torch.no_grad():
+            self.weight = torch.nn.Parameter(torch.rand(nw)/numpy.sqrt(nw))
+            
+    def W(self):
+        W = self.core.zeros(self.in_d, self.out_d)
+        W[self.loc] = self.weight
+        return W
+        
+class Weightless(Layer):
+    """Subclass of Layer that handles the case of weightless layers (no trainable parameters).
+    By default, this layers have .w() = None, .b() = None, .rho = None and .dof() = 0, etc.
+    All redundant methods have been overwritten."""
+    
+    def __init__(self):
+        super(Weightless, self).__init__(None)
+        self.rho = None
+        self.core = CPU
+        
+    def inherit(self, other):
+        None
+        
+    def scale(self, factor):
+        None
+    
+    def w(self):
+        return None
+    
+    def b(self):
+        return None
+    
+    def zeros(self):
+        None
+        
+    def cuda(self):
+        None
+        
+    def cpu(self):
+        None
+        
+    def l2(self):
+        return 0.0
+    
+    def l1(self):
+        return 0.0
+        
+    def dof(self):
+        return 0
+    
+    def He(self, seed):
+        None
+        
+    def freeze(self, w = True, b = True):
+        None
+        
+    def load(self, w, b):
+        None
+        
+    def dictionary(self, label):
+        return dict()
+
+class Reshape(Weightless):
+    """Weightless layer used for reshaping tensors. Object of this class have the additional attribute:
+    
+    newdim (tuple): the new shape after reshaping. 
+    
+    As all Layers and Modules, it is expected to operate on multiple instances simultaneously.
+    If newdim = (p1,..., pj), then an input of size [n, d1,..., dk] is reshaped to [n, p1,..., pj]
+    as the new dimension is applied to each tensor in the sample.
+    It is expected that d1*...*dk = p1*...*pj.
+    """
+    def __init__(self, *shape):
+        """Creates a Reshape layer with newdim = shape."""
+        super(Reshape, self).__init__()
+        self.newdim = shape
+        
+    def forward(self, x):
+        """Reshapes the input tensor x."""
+        n = len(x)
+        return x.view(n,*self.newdim)    
+    
+    def inputdim(self):
+        """Expected input dimension."""
+        return numpy.prod(self.newdim)
+    
+class Inclusion(Weightless):
+    """Weightless layer that embedds R^m into R^n, m < n, with x -> [0,...,0, x]."""
+    
+    def __init__(self, in_dim, out_dim):
+        super(Inclusion, self).__init__()
+        self.d = out_dim - in_dim
+        
+    def forward(self, x):
+        z = self.core.zeros(len(x), self.d)
+        return torch.cat((z, x), axis = 1)
+    
+class Trunk(Weightless):
+    
+    def __init__(self, out_dim):
+        super(Trunk, self).__init__()
+        self.d = out_dim
+        
+    def forward(self, x):
+        return x[:,:self.d]
+        
+class Conv2D(Layer):
+    """Layer that performs 2D convolutions (cf. Pytorch documentation, torch.nn.Conv2d)."""
+    
+    def __init__(self, window, channels = (1,1), stride = 1, padding = 0, activation = leakyReLU):
+        """Creates a convolutional 2D layer.
+        
+        Input:
+        window (tuple or int): 2D shape of the rectangular filter to be applied. Passing an integer k is equivalent to passing (k, k).
+        channels (tuple): pair containing the number of input and output channels.
+        stride (int): stride of the filter (i.e. gap between the movements of the filter). Defaults to 1.
+        padding (int): padding applied (pre or post?) to the convolution (cf. torch.nn.Conv2d documentation).
+        activation (function): activation function of the layer
+        
+        Expects 4D tensors as input with the convention [#observations, #channels, #height, #width]."""
+        super(Conv2D, self).__init__(activation)
+        self.conv = torch.nn.Conv2d(channels[0], channels[1], window, stride = stride, padding = padding)
+        
+    def module(self):
+        return self.conv
+        
+    def forward(self, x):
+        return self.rho(self.conv(x))    
+
+    def inputdim(self):
+        raise RuntimeError("Convolutional2D layers do not have a fixed input dimension.")
+        
+    def He(self, seed = None):
+        if(seed != None):
+            torch.manual_seed(seed)
+        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')        
+    
+class Deconv2D(Layer):
+    """Layer that performs a transposed 2D convolution (cf. Pytorch documentation, torch.nn.ConvTranspose2d)."""
+    
+    def __init__(self, window, channels = (1,1), stride = 1, padding = 0, activation = leakyReLU):
+        """Creates a Deconvolutional2D layer. Arguments read as in Convolutional2D.__init__."""
+        super(Deconv2D, self).__init__(activation)
+        self.deconv = torch.nn.ConvTranspose2d(channels[0], channels[1], window, stride = stride, padding = padding)
+        
+    def module(self):
+        return self.deconv
+        
+    def forward(self, x):
+        return self.rho(self.deconv(x))
+            
+    def inputdim(self):
+        raise RuntimeError("Deconvolutional2D layers do not have fixed input dimension.")
+        
+    def He(self, seed = None):
+        if(seed != None):
+            torch.manual_seed(seed)
+        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
+
+class Conv1D(Layer):    
+    """Analogous to Convolutional2D but considers 1D convolutions."""
+    def __init__(self, window, channels = (1,1), stride = 1, padding = 0, activation = leakyReLU):
+        super(Convolutional1D, self).__init__(activation)
+        self.conv = torch.nn.Conv1d(channels[0], channels[1], window, stride = stride, padding = padding)
+        
+    def module(self):
+        return self.conv
+        
+    def forward(self, x):
+        return self.rho(self.conv(x))    
+
+    def inputdim(self):
+        raise RuntimeError("Convolutional1D layers do not have fixed input dimension.")
+        
+    def He(self, seed = None):
+        if(seed != None):
+            torch.manual_seed(seed)
+        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
+        
+class Deconv1D(Layer):    
+    """Analogous to Deconvolutional2D but considers trasposed 1D convolutions."""
+    def __init__(self, window, channels = (1,1), stride = 1, padding = 0, activation = leakyReLU):
+        super(Deconvolutional1D, self).__init__(activation)
+        self.deconv = torch.nn.ConvTranspose1d(channels[0], channels[1], window, stride = stride, padding = padding)
+        
+    def module(self):
+        return self.deconv
+        
+    def forward(self, x):
+        return self.rho(self.deconv(x))
+            
+    def inputdim(self):
+        raise RuntimeError("Deconvolutional1D layers do not have fixed input dimension.")
+        
+    def He(self, seed = None):
+        if(seed != None):
+            torch.manual_seed(seed)
+        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
+
+        
+class Consecutive(torch.nn.Sequential):
+    """Class that handles deep neural networks, obtained by connecting multiple layers. 
+    It is implemented as a subclass of torch.nn.Sequential.
+    
+    Objects of this class support indexing, so that self[k] returns the kth Layer in the architecture.
+    """
+    
+    def scale(self, factor):
+        """Scales all layers in the architecture (see Layer.scale)."""
+        for nn in self:
+            nn.scale(factor)
+    
+    def l2(self):
+        """Returns the squared sum of all weights in the architecture."""
+        m = 0.0
+        N = len(self)
+        for i in range(N):
+            m += self[i].l2()
+        return m
+    
+    def l1(self):
+        """Returns the absolute sum of all weights in the architecture."""
+        m = 0.0
+        N = len(self)
+        for i in range(N):
+            m += self[i].l1norm()
+        return m
+    
+    def zeros(self):
+        """Sets to zero all weights and biases in the architecture."""
+        N = len(self)
+        for i in range(N):
+            self[i].zeros()
+            
+    def outdim(self, input_dim = None):
+        """Analogous to Layer.outdim."""
+        if(input_dim == None):
+            input_dim = self[0].inputdim()
+        m = input_dim
+        N = len(self)
+        for i in range(N):
+            m = self[i].outdim(m)
+        return m
+    
+    def inputdim(self):
+        """Analogous to Layer.inputdim."""
+        return self[0].inputdim()
+    
+    def moveOn(self, core):
+        """Transfers all layers to the specified core."""
+        for layer in self:
+                    layer.moveOn(core)
+    
+    def cuda(self):
+        """Transfers all layers to the GPU."""
+        N = len(self)
+        for i in range(N):
+            m = self[i].cuda()
+            
+    def cpu(self):
+        """Transfers all layers to the CPU."""
+        N = len(self)
+        for i in range(N):
+            m = self[i].cpu()
+    
+    def dictionary(self, label = ""):
+        """Returns a dictionary with all the parameters in the network. An additional label can be passed."""
+        params = dict()
+        k = 0
+        for nn in self:
+            k +=1
+            params.update(nn.dictionary(str(k)+label))
+        return params
+    
+    def save(self, path, label = ""):
+        """Stores the whole architecture to the specified path. An additional label can be added (does not influence the name of
+        the file, it is only used internally; defaults to '')."""
+        params = self.dictionary(label)
+        numpy.savez(path, **params)
+        
+    def load(self, path, label = ""):
+        """Loads the architecture parameters from stored data.
+        
+        Input:
+        path (string): system path where the parameters are stored.
+        label (string): additional label required if the stored data had one.
+        """
+        params = numpy.load(path)
+        k = 0
+        for nn in self:
+            k += 1
+            try:
+                nn.load(params['w'+str(k)+label], params['b'+str(k)+label])
+            except:
+                None
+                
+    def __add__(self, other):
+        """Augments the current architecture by connecting it with a second one.
+        
+        Input:
+        self (Consecutive): current architecture.
+        other (Layer / Consecutive): neural network to be added at the end.
+        
+        Output:
+        A Consecutive object consisting of the nested neural network self+other. 
+        """
+        if(isinstance(other, Consecutive)):
+            n1 = len(self)
+            n2 = len(other)
+            layers = [self[i] for i in range(n1)]+[other[i] for i in range(n2)]
+            return Consecutive(*tuple(layers))
+        else:
+            if(other == 0.0):
+                return self
+            else:
+                n1 = len(self)
+                layers = [self[i] for i in range(n1)]
+                layers.append(other)
+                return Consecutive(*tuple(layers))      
+        
+    def dof(self):
+        """Total number of (learnable) weights and biases in the network."""
+        res = 0
+        for x in self:
+            res += x.dof()
+        return res  
+    
+    def He(self, seed = None):
+        """Applies the He initialization to all layers in the architecture."""
+        for x in self:
+            x.He(seed)
+    
+    def parameters(self):
+        """Returns the list of all learnable parameters in the network. Used as argument for torch optimizers."""
+        p = []
+        for f in self:
+            p += list(f.parameters())
+        return p
+    
+    def dims(self, inputdim = None):
+        """Returns the sequence of dimensions through which an input passes when transformed by the network."""
+        if(inputdim == None):
+            inp = (1, self[0].inputdim())
+        else:
+            inp = inputdim
+        journey = ""
+        ii = inp[1:]
+        if(len(ii)==1):
+            journey += str(ii[0])
+        else:
+            journey += str(inp[1:])
+        for f in self:
+            journey += " -> "
+            inp = f.outdim(inp)
+            ii = inp[1:]
+            if(len(ii)==1):
+                journey += str(ii[0])
+            else:
+                journey += str(inp[1:])         
+        return journey
+    
+    def freeze(self, w = True, b = True):
+        """Freezes all layers in the network (see Layer.freeze)."""
+        for f in self:
+            f.freeze(w, b)
+            
+    def inherit(self, other):
+        """Inherits the networks parameters from a given architecture (cf. Layer.inherit). 
+        The NN 'other' should have a depth less or equal to that of 'self'.
+        
+        Input:
+        other (Consecutive): the architecture from which self shoud learn."""
+        for i, nn in enumerate(other):
+            if(type(self[i])==type(nn)):
+                self[i].inherit(nn)
+        
+class Parallel(Consecutive):
+    """Architecture with multiple layers that work in parallel. Implemented as a subclass of Consecutive.
+    If f1,...,fk is the collection of layers, then Consecutive(f1,..,fk)(x) = fk(...f1(x)) while
+    Parallel(f1,...,fk) = f1(x)+...+fk(x)."""
+    
+    def __init__(self, *args):
+        super(Parallel, self).__init__(*args)
+        
+    def forward(self, x):
+        res = 0.0
+        for f in self:
+            res = res + f(x)          
+        return res
+    
+                    
+    def __add__(self, other):
+        """Augments the current architecture by connecting it with a second one.
+        
+        Input:
+        self (Parallel): current architecture.
+        other (Layer / Consecutive): neural network to be added at the end.
+        
+        Output:
+        A Consecutive object consisting of the nested neural network self+other. 
+        """
+        if(isinstance(other, Consecutive) and (not isinstance(other, Parallel))):
+            n1 = len(self)
+            n2 = len(other)
+            layers = [self]+[other[i] for i in range(n2)]
+            return Consecutive(*tuple(layers))
+        else:
+            if(other == 0.0):
+                return self
+            else:
+                return Consecutive(self, other) 
+    
+class Channelled(Consecutive):
+    """Architecture with multiple layers that work in parallel but channel-wise. Implemented as a subclass of Consecutive.
+    If f1,...,fk is the collection of layers, then Channelled(f1,..,fk)(x) = fk(xk)+...+f1(x1), where x = [x1,...,xk] is
+    structured in k channels."""
+    
+    def __init__(self, *args):
+        super(Channelled, self).__init__(*args)
+        
+    def forward(self, x):
+        res = 0.0
+        k = 0
+        for f in self:
+            res = res + f(x[:,k])    
+            k += 1
+        return res
+
+
+class Clock(object):
+    """Class for measuring (computational) time intervals. Objects of this class have the following attributes:
+    
+    tstart (float): time at which the clock was started (in seconds).
+    tstop  (float): time at which the clock was stopped (in seconds).
+    """
+    
+    def __init__(self):
+        """Creates a new clock."""
+        self.tstart = 0
+        self.tstop = 0
+        
+    def start(self):
+        """Starts the clock."""
+        self.tstart = perf_counter()
+        
+    def stop(self):
+        """Stops the clock."""
+        self.tstop = perf_counter()
+        
+    def elapsed(self):
+        """Returns the elapsed time between the calls .start() and .stop()."""
+        dt = self.tstop-self.tstart
+        
+        if(dt<0):
+            raise RuntimeError("Clock still running.")
+        else:
+            return dt 
+        
+    def elapsedTime(self):
+        """Analogous to .elapsed() but returns the output in string format."""
+        return Clock.parse(self.elapsed())
+
+        
+    @classmethod
+    def parse(cls, time):
+        """Converts an amount of seconds in a string of the form '# hours #minutes #seconds'."""
+        h = time//3600
+        m = (time-3600*h)//60
+        s = time-3600*h-60*m
+        
+        if(h>0):
+            return ("%d hours %d minutes %.2f seconds" % (h,m,s))
+        elif(m>0):
+            return ("%d minutes %.2f seconds" % (m,s))
+        else:
+            return ("%.2f seconds" % s)
+        
+        
+    @classmethod
+    def shortparse(cls, time):
+        """Analogous to Clock.parse but uses the format '#h #m #s'."""
+        h = time//3600
+        m = (time-3600*h)//60
+        s = time-3600*h-60*m
+        
+        if(h>0):
+            return ("%d h %d m %.2f s" % (h,m,s))
+        elif(m>0):
+            return ("%d m %.2f s" % (m,s))
+        else:
+            return ("%.2f s" % s)
+        
+        
+def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True):
+    optimizer = optim(dnn.parameters(), lr = lr)
+    ntest = len(mu)-ntrain
+    mutrain, utrain, mutest, utest = mu[:ntrain], u[:ntrain], mu[-ntest:], u[-ntest:]
+    
+    if(error == None):
+        def error(a, b):
+            return str(lossf(a,b).item())
+
+    err = []
+    clock = Clock()
+    clock.start()
+
+    for e in range(epochs):
+
+        def closure():
+            optimizer.zero_grad()
+            loss = lossf(utrain, dnn(mutrain))
+            loss.backward()
+            return loss
+        optimizer.step(closure)
+
+        with torch.no_grad():
+            err.append([error(utrain, dnn(mutrain)),
+                        error(utest, dnn(mutest))])
+            if(verbose):
+                clear_output(wait = True)
+                print("\t\tTrain\tTest")
+                print("Epoch "+ str(e+1) + ":\t" + err[-1][0] + "\t" + err[-1][1] + ".")
+    clock.stop()
+    if(verbose):
+        print("\n Training complete. Elapsed time: " + clock.elapsedTime() + ".")
+    return err, clock.elapsed()
