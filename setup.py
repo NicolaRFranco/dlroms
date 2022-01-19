@@ -14,5 +14,5 @@ setup(
 	'scipy>=1.4.1',
 	'pytorch>=1.5.0'
     ],
-    dependency_links=['https://bitbucket.org/fenics-project/mshr/src/master/']
+    dependency_links=['https://bitbucket.org/fenics-project/mshr/src/']
 )
