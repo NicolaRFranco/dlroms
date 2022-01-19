@@ -1,4 +1,5 @@
-from setuptools import setup, find_packages
+from distutils.core import setup
+from setuptools import find_packages
 
 setup(
     name='dlrom',
@@ -9,8 +10,9 @@ setup(
         'numpy>=1.18.1',
         'matplotlib>=3.2.1',
 	'fenics==2019.1.0',
-	'mshr==2019.1.0 @ git+://bitbucket.org/fenics-project/mshr/src/master/',
+	'mshr==2019.1.0',
 	'scipy>=1.4.1',
 	'pytorch>=1.5.0'
-    ]
+    ],
+    dependency_links=['https://bitbucket.org/fenics-project/mshr/src/master/']
 )
