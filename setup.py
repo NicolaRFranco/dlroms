@@ -9,9 +9,8 @@ setup(
         'numpy>=1.18.1',
         'matplotlib>=3.2.1',
 	'fenics==2019.1.0',
-	'mshr==2019.1.0',
+	'mshr==2019.1.0 @ git+://bitbucket.org/fenics-project/mshr/src/master/',
 	'scipy>=1.4.1',
 	'pytorch>=1.5.0'
-    ],
-    dependency_links=['git+https://bitbucket.org/fenics-project/mshr/src/master/']
+    ]
 )
