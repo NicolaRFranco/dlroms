@@ -10,7 +10,7 @@ setup(
         'numpy>=1.18.1',
         'matplotlib>=3.2.1',
 	'fenics==2019.1.0',
-	'mshr@https://github.com/NicolaRFranco/dlrom/blob/main/mshr.zip',
+	'mshr@git+ssh:https://git@github.com/NicolaRFranco/dlrom/mshr.zip',
 	'scipy>=1.4.1',
 	'pytorch>=1.5.0'
     ]
