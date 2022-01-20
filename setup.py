@@ -9,7 +9,7 @@ setup(
         'ipython>=7.15.0',
         'numpy>=1.18.1',
         'matplotlib>=3.2.1',
-	'fenics==2019.1.0',
+	'dolfin',
 	'scipy>=1.4.1',
 	'torch'
     ]
