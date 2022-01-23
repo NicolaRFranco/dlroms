@@ -1,4 +1,4 @@
-import fespaces
+from dlroms import fespaces
 import dolfin
 import numpy as np
 import scipy.sparse.linalg as spla
