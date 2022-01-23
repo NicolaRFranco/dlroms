@@ -3,7 +3,7 @@ import pandas
 import torch
 import matplotlib.pyplot as plt
 from time import perf_counter     
-from cores import CPU, GPU
+from dlroms.cores import CPU, GPU
 from IPython.display import clear_output
 
 ReLU = torch.nn.ReLU()
