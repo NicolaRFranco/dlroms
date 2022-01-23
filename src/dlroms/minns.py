@@ -1,6 +1,6 @@
-from cores import CPU, GPU
-import fespaces
-import dnns
+from dlroms.cores import CPU, GPU
+from dlroms import fespaces
+from dlroms import dnns
 import numpy as np
 import torch
 import dolfin
