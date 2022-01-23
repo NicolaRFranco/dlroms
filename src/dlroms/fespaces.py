@@ -3,7 +3,7 @@ import numpy
 import torch
 import dolfin
 import mshr
-import gifs
+from dlroms import gifs
 
 def loadmesh(path):
     return dolfin.cpp.mesh.Mesh(path)
