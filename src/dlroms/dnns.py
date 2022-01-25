@@ -789,3 +789,8 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
     if(verbose):
         print("\n Training complete. Elapsed time: " + clock.elapsedTime() + ".")
     return err, clock.elapsed()
+
+def to01(T):
+    vmax = T.max(axis = 0)[0]
+    vmin = T.min(axis = 0)[0]
+    return ((T-vmin)/(vmax-vmin))
