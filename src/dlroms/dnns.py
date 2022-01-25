@@ -1,5 +1,4 @@
 import numpy
-import pandas
 import torch
 import matplotlib.pyplot as plt
 from time import perf_counter     
