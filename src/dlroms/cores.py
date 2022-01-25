@@ -50,3 +50,9 @@ class Core(object):
     
 CPU = Core("CPU")
 GPU = Core("GPU")
+
+def coreof(u):
+    if(isinstance(u, torch.Tensor)):
+        None
+    else:
+        raise RuntimeError("Can only retrieve the core of a torch tensor.")
