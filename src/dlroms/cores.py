@@ -53,6 +53,11 @@ GPU = Core("GPU")
 
 def coreof(u):
     if(isinstance(u, torch.Tensor)):
-        None
+        if(u.device == CPU):
+            return CPU
+        elif(u.device == GPU):
+            return GPU
+        else:
+            raise RuntimeError("Tensor is stored on an unknown core.")
     else:
         raise RuntimeError("Can only retrieve the core of a torch tensor.")
