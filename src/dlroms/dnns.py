@@ -372,7 +372,7 @@ class Trunk(Weightless):
 class Conv2D(Layer):
     """Layer that performs 2D convolutions (cf. Pytorch documentation, torch.nn.Conv2d)."""
     
-    def __init__(self, window, channels = (1,1), stride = 1, padding = 0, activation = leakyReLU):
+    def __init__(self, window, channels = (1,1), stride = 1, padding = 0, groups = 1, dilation = 1, activation = leakyReLU):
         """Creates a convolutional 2D layer.
         
         Input:
@@ -384,7 +384,7 @@ class Conv2D(Layer):
         
         Expects 4D tensors as input with the convention [#observations, #channels, #height, #width]."""
         super(Conv2D, self).__init__(activation)
-        self.conv = torch.nn.Conv2d(channels[0], channels[1], window, stride = stride, padding = padding)
+        self.conv = torch.nn.Conv2d(channels[0], channels[1], window, stride = stride, padding = padding, groups = groups, dilation = dilation)
         
     def module(self):
         return self.conv
@@ -403,10 +403,10 @@ class Conv2D(Layer):
 class Deconv2D(Layer):
     """Layer that performs a transposed 2D convolution (cf. Pytorch documentation, torch.nn.ConvTranspose2d)."""
     
-    def __init__(self, window, channels = (1,1), stride = 1, padding = 0, activation = leakyReLU):
+    def __init__(self, window, channels = (1,1), stride = 1, padding = 0,  groups = 1, dilation = 1, activation = leakyReLU):
         """Creates a Deconvolutional2D layer. Arguments read as in Convolutional2D.__init__."""
         super(Deconv2D, self).__init__(activation)
-        self.deconv = torch.nn.ConvTranspose2d(channels[0], channels[1], window, stride = stride, padding = padding)
+        self.deconv = torch.nn.ConvTranspose2d(channels[0], channels[1], window, stride = stride, padding = padding, groups = groups, dilation = dilation)
         
     def module(self):
         return self.deconv
@@ -424,9 +424,9 @@ class Deconv2D(Layer):
 
 class Conv1D(Layer):    
     """Analogous to Convolutional2D but considers 1D convolutions."""
-    def __init__(self, window, channels = (1,1), stride = 1, padding = 0, activation = leakyReLU):
+    def __init__(self, window, channels = (1,1), stride = 1, padding = 0,  groups = 1, dilation = 1, activation = leakyReLU):
         super(Convolutional1D, self).__init__(activation)
-        self.conv = torch.nn.Conv1d(channels[0], channels[1], window, stride = stride, padding = padding)
+        self.conv = torch.nn.Conv1d(channels[0], channels[1], window, stride = stride, padding = padding, groups = groups, dilation = dilation)
         
     def module(self):
         return self.conv
@@ -444,9 +444,9 @@ class Conv1D(Layer):
         
 class Deconv1D(Layer):    
     """Analogous to Deconvolutional2D but considers trasposed 1D convolutions."""
-    def __init__(self, window, channels = (1,1), stride = 1, padding = 0, activation = leakyReLU):
+    def __init__(self, window, channels = (1,1), stride = 1, padding = 0,  groups = 1, dilation = 1, activation = leakyReLU):
         super(Deconvolutional1D, self).__init__(activation)
-        self.deconv = torch.nn.ConvTranspose1d(channels[0], channels[1], window, stride = stride, padding = padding)
+        self.deconv = torch.nn.ConvTranspose1d(channels[0], channels[1], window, stride = stride, padding = padding, groups = groups, dilation = dilation)
         
     def module(self):
         return self.deconv
