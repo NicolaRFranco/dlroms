@@ -425,7 +425,7 @@ class Deconv2D(Layer):
 class Conv1D(Layer):    
     """Analogous to Convolutional2D but considers 1D convolutions."""
     def __init__(self, window, channels = (1,1), stride = 1, padding = 0,  groups = 1, dilation = 1, activation = leakyReLU):
-        super(Convolutional1D, self).__init__(activation)
+        super(Conv1D, self).__init__(activation)
         self.conv = torch.nn.Conv1d(channels[0], channels[1], window, stride = stride, padding = padding, groups = groups, dilation = dilation)
         
     def module(self):
@@ -445,7 +445,7 @@ class Conv1D(Layer):
 class Deconv1D(Layer):    
     """Analogous to Deconvolutional2D but considers trasposed 1D convolutions."""
     def __init__(self, window, channels = (1,1), stride = 1, padding = 0,  groups = 1, dilation = 1, activation = leakyReLU):
-        super(Deconvolutional1D, self).__init__(activation)
+        super(Deconv1D, self).__init__(activation)
         self.deconv = torch.nn.ConvTranspose1d(channels[0], channels[1], window, stride = stride, padding = padding, groups = groups, dilation = dilation)
         
     def module(self):
