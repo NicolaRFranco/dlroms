@@ -11,7 +11,7 @@ class GaussianRandomField(object):
         self.singvalues, self.eigenfunctions = KarhunenLoeve(mesh, self.cov, self.n)
         self.singvalues = np.sqrt(self.singvalues)       
         
-    def sample(self, seed, asvector = False, coeff = False):
+    def sample(self, seed, coeff = False):
         np.random.seed(seed)
         c = np.random.randn(self.n)
         v = np.dot(self.eigenfunctions, self.singvalues*c)
