@@ -10,7 +10,7 @@ class Local(dnns.Sparse):
         M = 0
         dim = len(mesh1.coordinates()[0])
         for j in range(dim):
-            dj = mesh1.coordinates()[:,0].reshape(-1,1) -mesh2.coordinates()[:,0].reshape(1,-1)
+            dj = mesh1.coordinates()[:,j].reshape(-1,1) -mesh2.coordinates()[:,j].reshape(1,-1)
             M = M + dj**2
         M = np.sqrt(M) < support
         super(Local, self).__init__(M, activation)
