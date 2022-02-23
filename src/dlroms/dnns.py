@@ -377,7 +377,7 @@ class Transpose(Weightless):
         self.d1 = dim1
         
     def forward(self, x):
-        return x.transpose(dim0 = dim0+1, dim1 = dim1+1)
+        return x.transpose(dim0 = self.d0+1, dim1 = self.d1+1)
         
         
 class Conv2D(Layer):
