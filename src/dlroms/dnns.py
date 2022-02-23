@@ -343,7 +343,7 @@ class Reshape(Weightless):
     def forward(self, x):
         """Reshapes the input tensor x."""
         n = len(x)
-        return x.view(n,*self.newdim)    
+        return x.reshape(n,*self.newdim)    
     
     def inputdim(self):
         """Expected input dimension."""
@@ -368,6 +368,17 @@ class Trunk(Weightless):
         
     def forward(self, x):
         return x[:,:self.d]
+
+class Transpose(Weightless):
+        
+    def __init__(self, dim0, dim1):
+        super(Transpose, self).__init__()
+        self.d0 = dim0
+        self.d1 = dim1
+        
+    def forward(self, x):
+        return x.transpose(dim0 = dim0+1, dim1 = dim1+1)
+        
         
 class Conv2D(Layer):
     """Layer that performs 2D convolutions (cf. Pytorch documentation, torch.nn.Conv2d)."""
@@ -416,6 +427,59 @@ class Deconv2D(Layer):
             
     def inputdim(self):
         raise RuntimeError("Deconvolutional2D layers do not have fixed input dimension.")
+        
+    def He(self, seed = None):
+        if(seed != None):
+            torch.manual_seed(seed)
+        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
+
+class Conv3D(Layer):
+    """Layer that performs 3D convolutions (cf. Pytorch documentation, torch.nn.Conv2d)."""
+    
+    def __init__(self, window, channels = (1,1), stride = 1, padding = 0, groups = 1, dilation = 1, activation = leakyReLU):
+        """Creates a convolutional 3D layer.
+        
+        Input:
+        window (tuple or int): 3D shape of the rectangular filter to be applied. Passing an integer k is equivalent to passing (k, k).
+        channels (tuple): pair containing the number of input and output channels.
+        stride (int): stride of the filter (i.e. gap between the movements of the filter). Defaults to 1.
+        padding (int): padding applied (pre or post?) to the convolution (cf. torch.nn.Conv2d documentation).
+        activation (function): activation function of the layer
+        
+        Expects 5D tensors as input with the convention [#observations, #channels, #height, #width, #depth]."""
+        super(Conv3D, self).__init__(activation)
+        self.conv = torch.nn.Conv3d(channels[0], channels[1], window, stride = stride, padding = padding, groups = groups, dilation = dilation)
+        
+    def module(self):
+        return self.conv
+        
+    def forward(self, x):
+        return self.rho(self.conv(x))    
+
+    def inputdim(self):
+        raise RuntimeError("Convolutional3D layers do not have a fixed input dimension.")
+        
+    def He(self, seed = None):
+        if(seed != None):
+            torch.manual_seed(seed)
+        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')        
+    
+class Deconv3D(Layer):
+    """Layer that performs a transposed 3D convolution (cf. Pytorch documentation, torch.nn.ConvTranspose3d)."""
+    
+    def __init__(self, window, channels = (1,1), stride = 1, padding = 0,  groups = 1, dilation = 1, activation = leakyReLU):
+        """Creates a Deconvolutional3D layer. Arguments read as in Convolutional3D.__init__."""
+        super(Deconv2D, self).__init__(activation)
+        self.deconv = torch.nn.ConvTranspose3d(channels[0], channels[1], window, stride = stride, padding = padding, groups = groups, dilation = dilation)
+        
+    def module(self):
+        return self.deconv
+        
+    def forward(self, x):
+        return self.rho(self.deconv(x))
+            
+    def inputdim(self):
+        raise RuntimeError("Deconvolutional3D layers do not have fixed input dimension.")
         
     def He(self, seed = None):
         if(seed != None):
