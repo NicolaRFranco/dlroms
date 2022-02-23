@@ -127,6 +127,28 @@ class Linf(dnns.Weightless):
     def forward(self, x):
         return x.abs().max(axis = -1)[0]
     
+class Integral(dnns.Dense):
+    def __init__(self, mesh, obj = 'CG', degree = 1):
+        W = dolfin.function.functionspace.FunctionSpace(mesh, obj, degree)
+        if(degree == 1):
+            perm = np.ndarray.astype(dolfin.cpp.fem.vertex_to_dof_map(W), 'int')
+        else:
+            perm = np.arange(mesh.num_cells())
+        v1, v2 = dolfin.function.argument.TrialFunction(W), dolfin.function.argument.TestFunction(W)
+        M = dolfin.fem.assembling.assemble(v1*v2*dolfin.dx).array()[:, perm][perm, :]
+        super(Integral, self).__init__(M.shape[0], 1, activation = None)
+        self.zeros()
+        self.load(np.sum(M, axis = 1).reshape(1,-1))
+        self.freeze()
+        
+    def moveOn(self, core):
+        super(Integral, self).moveOn(core)
+        self.freeze()
+        
+class L1(Integral):
+    def forward(self, x):
+        return super(L1, self).forward(x.abs())
+    
 def projections(vs, hm, lm):
     vhs = [fespaces.asvector(v, hm) for v in vs]
     for vh in vhs:
