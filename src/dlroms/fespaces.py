@@ -5,6 +5,23 @@ import dolfin
 import mshr
 from dlroms import gifs
 
+dx = dolfin.dx
+ds = dolfin.ds
+grad = dolfin.grad
+inner = dolfin.inner
+
+def space(mesh, obj, deg):
+    return dolfin.function.functionspace.FunctionSpace(mesh, obj, deg)
+
+def dofmap(V, inverse = False):
+    if(inverse):
+        return dolfin.cpp.fem.dof_to_vertex_map(V)
+    else:
+        return dolfin.cpp.fem.vertex_to_dof_map(V)
+    
+def closest(mesh, x):
+    return numpy.argmin(numpy.sum((numpy.array(x)-mesh.coordinates())**2, axis = 1))
+
 def loadmesh(path):
     return dolfin.cpp.mesh.Mesh(path)
     
