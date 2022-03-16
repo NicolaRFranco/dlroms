@@ -67,7 +67,7 @@ def asvector(u, mesh, obj = 'CG', deg = 1):
             uv.vector()[:] = un
         return uv
     else:
-        ux, uy = data
+        ux, uy = u
         uvx, uvy = asvector(ux, mesh, obj, deg), asvector(uy, mesh, obj, deg)
         return dolfin.fem.projection.project(uvx*dolfin.function.constant.Constant((1.0, 0.0))+
                                              uvy*dolfin.function.constant.Constant((0.0, 1.0)),
