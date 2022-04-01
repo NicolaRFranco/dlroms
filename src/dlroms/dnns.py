@@ -272,6 +272,14 @@ class Sparse(Layer):
         W = self.core.zeros(self.in_d, self.out_d)
         W[self.loc] = self.weight
         return W
+
+    def dictionary(self, label = ""):
+        return {('w'+label):self.w().detach().cpu().numpy(), ('b'+label):self.b().detach().cpu().numpy(), ('indexes'+label):self.loc}
+
+    def load(self, w, b = None, indexes = None):
+        super(Sparse, load).load(w, b)
+        if(indexes != None):
+             self.loc = indexes
         
 class Weightless(Layer):
     """Subclass of Layer that handles the case of weightless layers (no trainable parameters).
@@ -619,7 +627,10 @@ class Consecutive(torch.nn.Sequential):
         for nn in self:
             k += 1
             try:
-                nn.load(params['w'+str(k)+label], params['b'+str(k)+label])
+                if(isinstance(nn, Sparse)):
+                    nn.load(params['w'+str(k)+label], params['b'+str(k)+label], params['indexes'+str(k)+label])
+                else:
+                    nn.load(params['w'+str(k)+label], params['b'+str(k)+label])
             except:
                 None
                 
