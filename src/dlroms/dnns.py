@@ -278,7 +278,8 @@ class Sparse(Layer):
 
     def load(self, w, b = None, indexes = None):
         super(Sparse, self).load(w, b)
-        self.loc = indexes
+        if(isinstance(indexes, numpy.ndarray)):
+            self.loc = indexes
         
 class Weightless(Layer):
     """Subclass of Layer that handles the case of weightless layers (no trainable parameters).
