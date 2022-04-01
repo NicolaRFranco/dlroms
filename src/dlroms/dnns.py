@@ -277,7 +277,7 @@ class Sparse(Layer):
         return {('w'+label):self.w().detach().cpu().numpy(), ('b'+label):self.b().detach().cpu().numpy(), ('indexes'+label):self.loc}
 
     def load(self, w, b = None, indexes = None):
-        super(Sparse, load).load(w, b)
+        super(Sparse, self).load(w, b)
         if(indexes != None):
              self.loc = indexes
         
