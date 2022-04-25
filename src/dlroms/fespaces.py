@@ -18,6 +18,10 @@ def dofmap(V, inverse = False):
         return dolfin.cpp.fem.dof_to_vertex_map(V)
     else:
         return dolfin.cpp.fem.vertex_to_dof_map(V)
+
+def boundary(mesh):
+    indexes = list(dolfin.fem.dirichletbc.DirichletBC(dolfin.function.functionspace.FunctionSpace(mesh, 'CG', 1), 0.0, lambda x,y:y).get_boundary_values().keys())
+    return dofmap(FunctionSpace(mesh, 'CG', 1), inverse = True)[indexes]
     
 def closest(mesh, x):
     return numpy.argmin(numpy.sum((numpy.array(x)-mesh.coordinates())**2, axis = 1))
