@@ -3,6 +3,17 @@ import imageio
 import matplotlib.pyplot as plt
 
 def save(drawframe, frames, name, transparency = False, remove = True):
+    """Constructs a GIF given a way to plot each frame.
+    
+    Input
+        drawframe       (function)      Function that specifies how to plot each frame. It should have a single argument,
+                                        that being the number of the current frame.
+        frames          (int)           Total number of frames.
+        name            (str)           Path where to save the GIF file.
+        transparency    (bool)          Whether to impose or not a transparent background. Defaults to False.
+        remove          (bool)          Whether to leave on the disk or not the files corresponding to each frame.
+                                        Defaults to True.
+    """
     filenames = []
     for i in range(frames):
         # plot frame
