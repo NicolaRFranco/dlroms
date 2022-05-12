@@ -831,14 +831,14 @@ class Clock(object):
             return ("%.2f s" % s)
         
         
-def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True):
+def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True, until = None, conv = num2p):
     optimizer = optim(dnn.parameters(), lr = lr)
     ntest = len(mu)-ntrain
     mutrain, utrain, mutest, utest = mu[:ntrain], u[:ntrain], mu[-ntest:], u[-ntest:]
     
     if(error == None):
         def error(a, b):
-            return str(lossf(a,b).item())
+            return lossf(a,b).item()
 
     err = []
     clock = Clock()
@@ -859,7 +859,10 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
             if(verbose):
                 clear_output(wait = True)
                 print("\t\tTrain\tTest")
-                print("Epoch "+ str(e+1) + ":\t" + err[-1][0] + "\t" + err[-1][1] + ".")
+                print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + "\t" + conv(err[-1][1]) + ".")
+            if(until!=None):
+                if(err[-1][0] < until):
+                        break
     clock.stop()
     if(verbose):
         print("\n Training complete. Elapsed time: " + clock.elapsedTime() + ".")
