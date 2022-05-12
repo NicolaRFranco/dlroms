@@ -279,10 +279,10 @@ def gif(name, U, dt, T, mesh, obj = 'CG', deg = 1, axis = "off", figsize = (4,4)
         figsize (tuple)                             Sizes of the window where to plot, width = figsize[0], height = figsize[1].
                                                     See matplotlib.pyplot.plot.
     """
-        frames = int(T/dt)
-        N = len(U)
-        step = N//frames
-        def drawframe(i):
-            plt.figure(figsize = figsize)
-            plot(u = U[i*step], mesh = mesh, obj = obj, deg = deg, axis = axis)
-        gifs.save(drawframe, frames, name)
+    frames = int(T/dt)
+    N = len(U)
+    step = N//frames
+    def drawframe(i):
+        plt.figure(figsize = figsize)
+        plot(u = U[i*step], mesh = mesh, obj = obj, deg = deg, axis = axis)
+    gifs.save(drawframe, frames, name)
