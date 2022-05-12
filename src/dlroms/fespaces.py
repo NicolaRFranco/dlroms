@@ -91,7 +91,7 @@ def savemesh(path, mesh):
         None.
     """
     if(".xml" not in path):
-        raise RuntimeError("Wrong extension. Meshes can only be saved in .xml format").
+        raise RuntimeError("Wrong extension. Meshes can only be saved in .xml format")
     dolfin.cpp.io.File(path).write(mesh)
     
 def point(p):
