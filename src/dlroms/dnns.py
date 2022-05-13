@@ -864,7 +864,7 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
                 print("\t\tTrain\tTest")
                 print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + "\t" + conv(err[-1][1]) + ".")
             if(early and e > 0):
-                if(err[-1][1] > err[-2][1]):
+                if((err[-1][1] > err[-2][1]) and (err[-1][0] < err[-2][0])):
                         break
             if(until!=None):
                 if(err[-1][0] < until):
