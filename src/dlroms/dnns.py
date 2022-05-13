@@ -855,6 +855,8 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
         optimizer.step(closure)
 
         with torch.no_grad():
+            if(dnn.l2().isnan().item()):
+                break
             err.append([error(utrain, dnn(mutrain)),
                         error(utest, dnn(mutest))])
             if(verbose):
