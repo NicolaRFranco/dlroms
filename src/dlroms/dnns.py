@@ -624,7 +624,10 @@ class Consecutive(torch.nn.Sequential):
         path (string): system path where the parameters are stored.
         label (string): additional label required if the stored data had one.
         """
-        params = numpy.load(path)
+        try:
+            params = numpy.load(path)
+        except:
+            params = numpy.load(path+".npz")
         k = 0
         for nn in self:
             k += 1
@@ -715,6 +718,9 @@ class Consecutive(torch.nn.Sequential):
         for i, nn in enumerate(other):
             if(type(self[i])==type(nn)):
                 self[i].inherit(nn)
+                
+    def files(self, string):
+        return [string+".npz"]
         
 class Parallel(Consecutive):
     """Architecture with multiple layers that work in parallel. Implemented as a subclass of Consecutive.
@@ -882,8 +888,9 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
         print(err[-1][1], bestv)
     
     if(best):
-        dnn.load("temp%d.npz" % tempcode)
-        #os.remove("temp%d.npz" % tempcode)
+        dnn.load("temp%d" % tempcode) 
+        for file in dnn.files("temp%d" % tempcode):
+            os.remove(file)
     clock.stop()
     if(verbose):
         print("\n Training complete. Elapsed time: " + clock.elapsedTime() + ".")
