@@ -879,8 +879,8 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
                         dnn.save("temp%d" % tempcode)
     
     if(best):
-        dnn.load("temp%d" % tempcode)
-        os.remove("temp%d" % tempcode)
+        dnn.load("temp%d.npz" % tempcode)
+        os.remove("temp%d.npz" % tempcode)
     clock.stop()
     if(verbose):
         print("\n Training complete. Elapsed time: " + clock.elapsedTime() + ".")
