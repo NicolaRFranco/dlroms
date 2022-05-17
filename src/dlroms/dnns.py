@@ -875,7 +875,7 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
                         break
             if(best and e > 0):
                 if(err[-1][1] < bestv):
-                        bestv = err[-1][1]
+                        bestv = err[-1][1] + 0.0
                         dnn.save("temp%d" % tempcode)
     
     if(best):
