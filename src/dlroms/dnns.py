@@ -5,6 +5,7 @@ from time import perf_counter
 from dlroms.cores import CPU, GPU
 from dlroms.roms import num2p
 from IPython.display import clear_output
+import os
 
 ReLU = torch.nn.ReLU()
 leakyReLU = torch.nn.LeakyReLU(0.1) 
@@ -832,7 +833,8 @@ class Clock(object):
             return ("%.2f s" % s)
         
         
-def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True, until = None, early = False, conv = num2p):
+def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True, until = None, early = False, conv = num2p,
+          best = False):
     optimizer = optim(dnn.parameters(), lr = lr)
     ntest = len(mu)-ntrain
     mutrain, utrain, mutest, utest = mu[:ntrain], u[:ntrain], mu[-ntest:], u[-ntest:]
@@ -844,6 +846,8 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
     err = []
     clock = Clock()
     clock.start()
+    bestv = numpy.inf
+    tempcode = int(numpy.random.rand(1)*1000)
 
     for e in range(epochs):
 
@@ -869,6 +873,14 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
             if(until!=None):
                 if(err[-1][0] < until):
                         break
+            if(best and e > 0):
+                if(err[-1][1] < bestv):
+                        bestv = err[-1][1]
+                        dnn.save("temp%d" % tempcode)
+    
+    if(best):
+        dnn.load("temp%d" % tempcode)
+        os.remove("temp%d" % tempcode)
     clock.stop()
     if(verbose):
         print("\n Training complete. Elapsed time: " + clock.elapsedTime() + ".")
