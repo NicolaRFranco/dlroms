@@ -834,7 +834,7 @@ class Clock(object):
         
         
 def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True, until = None, early = False, conv = num2p,
-          best = False):
+          best = False, cleanup = True):
     optimizer = optim(dnn.parameters(), lr = lr)
     ntest = len(mu)-ntrain
     mutrain, utrain, mutest, utest = mu[:ntrain], u[:ntrain], mu[-ntest:], u[-ntest:]
@@ -864,7 +864,8 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
             err.append([error(utrain, dnn(mutrain)),
                         error(utest, dnn(mutest))])
             if(verbose):
-                clear_output(wait = True)
+                if(cleanup):
+                        clear_output(wait = True)
                 print("\t\tTrain\tTest")
                 print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + "\t" + conv(err[-1][1]) + ".")
             if(early and e > 0):
@@ -875,6 +876,7 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
                         break
             if(best and e > 0):
                 if(err[-1][1] < bestv):
+                        print(err[-1][1], bestv)
                         bestv = err[-1][1] + 0.0
                         dnn.save("temp%d" % tempcode)
     
