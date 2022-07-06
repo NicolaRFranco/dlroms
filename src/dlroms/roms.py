@@ -33,10 +33,16 @@ def projectdown(vbasis, u):
     nh = len(u[0])
     return vbasis.matmul(utrue.reshape(-1,nh,1))
 
-def projectup(vbasis, ucoeff):
-    n = len(ucoeff)
-    nb = len(ucoeff[0])
-    return vbasis.transpose(dim0 = 1, dim1 = 2).matmul(ucoeff.reshape(-1,nb,1)).reshape(n, -1)
+def projectup(vbasis, c):
+    """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
+    a sequence of coefficients c = [c1,...,ck], where cj has length b, yields the batched
+    matrix vector multiplication [Vj.Tcj], i.e. the sequence of expanded vectors."""
+    n = len(c)
+    b = len(c[0])
+    return vbasis.transpose(dim0 = 1, dim1 = 2).matmul(c.reshape(-1,b,1)).reshape(n, -1)
 
-def project(vbasis, utrue):
-    return projectup(vbasis, projectdown(vbasis, utrue))
+def project(vbasis, u):
+    """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
+    a sequence of vectors u = [u1,...,uk], where uj has length Nh, yields the batched
+    matrix vector multiplication [Vj.TVjuj], i.e. the sequence of reconstructed vectors."""
+    return projectup(vbasis, projectdown(vbasis, u))
