@@ -649,7 +649,7 @@ class Consecutive(torch.nn.Sequential):
         Output:
         A Consecutive object consisting of the nested neural network self+other. 
         """
-        if(isinstance(other, Consecutive)):
+        if(isinstance(other, Consecutive) and (not isinstance(other, Parallel))):
             n1 = len(self)
             n2 = len(other)
             layers = [self[i] for i in range(n1)]+[other[i] for i in range(n2)]
