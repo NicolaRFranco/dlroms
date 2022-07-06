@@ -723,18 +723,16 @@ class Consecutive(torch.nn.Sequential):
         return [string+".npz"]
         
 class Parallel(Consecutive):
-    """Architecture with multiple layers that work in parallel. Implemented as a subclass of Consecutive.
-    If f1,...,fk is the collection of layers, then Consecutive(f1,..,fk)(x) = fk(...f1(x)) while
-    Parallel(f1,...,fk) = f1(x)+...+fk(x)."""
+    """Architecture with multiple layers that work in parallel but channel-wise. Implemented as a subclass of Consecutive.
+    If f1,...,fk is the collection of layers, then Parallel(f1,..,fk)(x) = [f1(x1),..., fk(xk)], where x = [x1,...,xk] is
+    structured in k channels."""
     
     def __init__(self, *args):
         super(Parallel, self).__init__(*args)
         
     def forward(self, x):
-        res = 0.0
-        for f in self:
-            res = res + f(x)          
-        return res
+        res = [self[k](x[:,k]) for k in range(len(self))]
+        return torch.stack(res, axis = 1)
     
                     
     def __add__(self, other):
