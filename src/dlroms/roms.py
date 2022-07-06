@@ -31,7 +31,7 @@ def projectdown(vbasis, u):
     a sequence of vectors u = [u1,...,uk], where uj has length Nh, yields the batched
     matrix vector multiplication [Vjuj], i.e. the sequence of basis coefficients."""
     nh = len(u[0])
-    return vbasis.matmul(utrue.reshape(-1,nh,1))
+    return vbasis.matmul(u.reshape(-1,nh,1))
 
 def projectup(vbasis, c):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
