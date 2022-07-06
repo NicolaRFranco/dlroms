@@ -25,3 +25,18 @@ def POD(U, k):
 def num2p(prob):
     """Converts a number to percentage format."""
     return ("%.2f" % (100*prob)) + "%"
+
+def projectdown(vbasis, u):
+    """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
+    a sequence of vectors u = [u1,...,uk], where uj has length Nh, yields the batched
+    matrix vector multiplication [Vjuj], i.e. the sequence of basis coefficients."""
+    nh = len(u[0])
+    return vbasis.matmul(utrue.reshape(-1,nh,1))
+
+def projectup(vbasis, ucoeff):
+    n = len(ucoeff)
+    nb = len(ucoeff[0])
+    return vbasis.transpose(dim0 = 1, dim1 = 2).matmul(ucoeff.reshape(-1,nb,1)).reshape(n, -1)
+
+def project(vbasis, utrue):
+    return projectup(vbasis, projectdown(vbasis, utrue))
