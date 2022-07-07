@@ -158,27 +158,37 @@ def mesh(domain, resolution):
     """
     return mshr.cpp.generate_mesh(domain, resolution = resolution)
 
-def unitsquaremesh(n):
+def unitsquaremesh(n, ny = None):
     """Yields a structured triangular (rectangular) mesh on the unit square [0,1]^2.
     
     Input
-        n   (int)   Number of intervals per edge.
+        n   (int)   Number of intervals per edge, or along the x-axis if ny != None.
+        ny  (int)   Number of intervals across the y-axis. Defaults to None, in
+                    which case ny = n.
         
     Output
         (dolfin.cpp.mesh.Mesh).
     """
-    return dolfin.cpp.generation.UnitSquareMesh(n,n)
+    n1 = n if (ny == None) else ny
+    return dolfin.cpp.generation.UnitSquareMesh(n,n1)
 
-def unitcubemesh(n):
+def unitcubemesh(n, ny = None, nz = None):
     """Yields a structured triangular (rectangular) mesh on the unit cube [0,1]^3.
     
     Input
-        n   (int)   Number of intervals per edge.
+        n   (int)   Number of intervals per edge, or along the x-axis if either
+                    ny!=None or nz!=None.
+        ny  (int)   Number of intervals across the y-axis. Defaults to None, in
+                    which case ny = n.
+        nz  (int)   Number of intervals across the z-axis. Defaults to None, in
+                    which case nz = n.
         
     Output
         (dolfin.cpp.mesh.Mesh).
     """
-    return dolfin.cpp.generation.UnitCubeMesh(n,n,n)
+    n1 = n if (ny == None) else ny
+    n2 = n if (nz == None) else nz
+    return dolfin.cpp.generation.UnitCubeMesh(n,n1,n2)
 
 def asvector(u, mesh, obj = 'CG', deg = 1):
     """Given a vector of dof values, returns the corresponding object in the functional space.
