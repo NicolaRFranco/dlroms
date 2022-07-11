@@ -30,7 +30,7 @@ def projectdown(vbasis, u):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
     a sequence of vectors u = [u1,...,uk], where uj has length Nh, yields the batched
     matrix vector multiplication [Vjuj], i.e. the sequence of basis coefficients."""
-    nh = len(u[0])
+    nh = np.prod(u[0].shape)
     return vbasis.matmul(u.reshape(-1,nh,1))
 
 def projectup(vbasis, c):
@@ -39,7 +39,7 @@ def projectup(vbasis, c):
     matrix vector multiplication [Vj.Tcj], i.e. the sequence of expanded vectors."""
     n = len(c)
     b = len(c[0])
-    return vbasis.transpose(dim0 = 1, dim1 = 2).matmul(c.reshape(-1,b,1)).reshape(n, -1)
+    return vbasis.transpose(dim0 = 1, dim1 = 2).matmul(c.reshape(-1,b,1)).reshape(*vbasis[:,0].shape)
 
 def project(vbasis, u):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
