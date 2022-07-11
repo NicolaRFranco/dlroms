@@ -6,7 +6,7 @@ import torch
 import dolfin
 
 class Local(dnns.Sparse):
-    def __init__(self, coordinates1 = None, coordinates2 = None, mesh1 = None, mesh2 = None, support, activation = dnns.leakyReLU):
+    def __init__(self, coordinates1 = None, coordinates2 = None, mesh1 = None, mesh2 = None, support = np.inf, activation = dnns.leakyReLU):
         M = 0
         coords1 = mesh1.coordinates() if(mesh1!=None) else coordinates1
         coords2 = mesh2.coordinates() if(mesh2!=None) else coordinates2
