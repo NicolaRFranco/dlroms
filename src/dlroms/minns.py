@@ -77,7 +77,7 @@ class L1(Integral):
     
     
 class Divergence(Operator):
-    def __init__(self, space):
+    def __init__(self, space, mesh):
         fSpace = FunctionSpace(mesh, 'DG', 0)
         vSpace = space
         a, b, c = TrialFunction(vSpace), TestFunction(fSpace), TrialFunction(fSpace)
