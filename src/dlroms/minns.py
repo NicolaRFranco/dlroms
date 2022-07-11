@@ -80,9 +80,9 @@ class Divergence(Operator):
     def __init__(self, space, mesh):
         fSpace = FunctionSpace(mesh, 'DG', 0)
         vSpace = space
-        a, b, c = TrialFunction(vSpace), TestFunction(fSpace), TrialFunction(fSpace)
-        A = assemble(b*div(a)*dx).array()
-        M = assemble(b*c*dx).array()
+        a, b, c = dolfin.function.argument.TrialFunction(vSpace), dolfin.function.argument.TestFunction(fSpace), dolfin.function.argument.TrialFunction(fSpace)
+        A = dolfin.fem.assembling.assemble(b*div(a)*dx).array()
+        M = dolfin.fem.assembling.assemble(b*c*dx).array()
         lumped = np.diag(1.0/np.sum(M, axis = 0))
         D = np.dot(lumped, A)
         super(Divergence, self).__init__(D.T)
