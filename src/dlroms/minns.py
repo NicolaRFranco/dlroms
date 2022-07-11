@@ -77,9 +77,9 @@ class L1(Integral):
     
     
 class Divergence(Operator):
-    def __init__(self, space, mesh):
-        fSpace = FunctionSpace(mesh, 'DG', 0)
-        vSpace = space
+    def __init__(self, spacein, spaceout):
+        fSpace = spaceout
+        vSpace = spacein
         a, b, c = dolfin.function.argument.TrialFunction(vSpace), dolfin.function.argument.TestFunction(fSpace), dolfin.function.argument.TrialFunction(fSpace)
         A = dolfin.fem.assembling.assemble(b*dolfin.div(a)*dolfin.dx).array()
         M = dolfin.fem.assembling.assemble(b*c*dolfin.dx).array()
