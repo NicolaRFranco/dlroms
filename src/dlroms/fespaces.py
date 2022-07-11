@@ -231,7 +231,7 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
             dolfin.common.plotting.plot(obj)
         else:
             uv = asvector(obj, space)
-            if(space.element().value_dimension(0)):
+            if(space.element().value_dimension(0) == 1):
                 c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax)
             else:
                 c = dolfin.common.plotting.plot(uv)
