@@ -4,7 +4,7 @@ import torch
 import dolfin
 import mshr
 from dlroms import gifs
-
+daje
 dx = dolfin.dx
 ds = dolfin.ds
 grad = dolfin.grad
