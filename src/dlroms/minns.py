@@ -15,44 +15,6 @@ class Local(dnns.Sparse):
         M = np.sqrt(M) < support
         super(Local, self).__init__(M, activation)
 
-class Diagonal(dnns.Layer):
-    def __init__(self, basein, baseout, svalues = None, activation = dnns.leakyReLU):
-        super(Diagonal, self).__init__(activation)
-        self.basein = CPU.tensor(basein)
-        self.baseout = CPU.tensor(baseout)
-        try:
-            self.svalues = CPU.tensor(svalues).view(-1,1)
-        except:
-            self.svalues = CPU.tensor([1])
-        self.weight = torch.nn.Parameter((CPU.zeros(len(basein)) + 1).view(-1,1))
-        self.bias = torch.nn.Parameter(CPU.zeros(1, len(baseout[0])))      
-        
-    def moveOn(self, core):
-        self.core = core
-        with torch.no_grad():
-            if(core == GPU):      
-                self.weight = torch.nn.Parameter(self.weight.cuda())
-                self.bias = torch.nn.Parameter(self.bias.cuda())
-                self.svalues = self.svalues.cuda()
-                self.basein = self.basein.cuda()
-                self.baseout = self.baseout.cuda()
-            else:
-                self.weight = torch.nn.Parameter(self.weight.cpu())
-                self.bias = torch.nn.Parameter(self.bias.cpu())
-                self.svalues = self.svalues.cpu()
-                self.basein = self.basein.cpu()
-                self.baseout = self.baseout.cpu()
-        
-    def module(self):
-        return self
-    
-    def forward(self, x):
-        B1 = self.basein
-        B2 = self.baseout
-        W = self.weight*self.svalues
-        return self.rho( (B1.mm(x.T)*W).T.mm(B2) + self.bias)
-              
-
 class Operator(dnns.Sparse):
     def __init__(self, matrix):
         matrix[np.abs(matrix)<1e-10] = 0
@@ -69,7 +31,7 @@ class Bilinear(Operator):
         space1 = space
         space2 = space if(vspace == None) else vspace 
         v1, v2 = dolfin.function.argument.TrialFunction(space1), dolfin.function.argument.TestFunction(space2)
-        M = dolfin.fem.assembling.assemble(operator(v1, v2)).array()[:, perm][perm, :]
+        M = dolfin.fem.assembling.assemble(operator(v1, v2)).array()
         super(Bilinear, self).__init__(M)
         
     def forward(self, x):
