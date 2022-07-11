@@ -6,11 +6,13 @@ import torch
 import dolfin
 
 class Local(dnns.Sparse):
-    def __init__(self, mesh1, mesh2, support, activation = dnns.leakyReLU):
+    def __init__(self, coordinates1 = None, coordinates2 = None, mesh1 = None, mesh2 = None, support, activation = dnns.leakyReLU):
         M = 0
-        dim = len(mesh1.coordinates()[0])
+        coords1 = mesh1.coordinates() if(mesh1!=None) else coordinates1
+        coords2 = mesh2.coordinates() if(mesh2!=None) else coordinates2
+        dim = len(coords1()[0]
         for j in range(dim):
-            dj = mesh1.coordinates()[:,j].reshape(-1,1) -mesh2.coordinates()[:,j].reshape(1,-1)
+            dj = coords1()[:,j].reshape(-1,1) - coords2()[:,j].reshape(1,-1)
             M = M + dj**2
         M = np.sqrt(M) < support
         super(Local, self).__init__(M, activation)
