@@ -85,12 +85,7 @@ class Divergence(Operator):
         M = dolfin.fem.assembling.assemble(b*c*dolfin.dx).array()
         lumped = np.diag(1.0/np.sum(M, axis = 0))
         D = np.dot(lumped, A)
-        super(Divergence, self).__init__(D.T)
-    
-    def forward(self, x):
-        X = x.transpose(dim0 = 1, dim1 = 2).reshape(len(x), -1)
-        return X.mm(self.W())
-    
+        super(Divergence, self).__init__(D.T) 
     
     
     
