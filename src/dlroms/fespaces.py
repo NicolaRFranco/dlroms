@@ -52,7 +52,10 @@ def coordinates(space):
     Output
         (numpy.ndarray).
     """
-    return space.tabulate_dof_coordinates()+0
+    x0 = space.tabulate_dof_coordinates()
+    x1 = numpy.zeros(x0.shape)
+    x1 = x0 + x1
+    return x1
 
 def boundary(mesh):
     """Returns the indexes of those nodes that lie on the boundary of a given domain.
