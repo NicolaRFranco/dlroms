@@ -226,7 +226,7 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
         shrink      (float)     Shrinks the colorbar by the specified factor (defaults to 0.8). Ignored if colorbar = False.
     """
     try:
-        if(space == None)):
+        if(space == None):
             dolfin.common.plotting.plot(obj)
         else:
             uv = asvector(obj, space)
