@@ -263,5 +263,5 @@ def gif(name, U, dt, T, space, axis = "off", figsize = (4,4)):
     step = N//frames
     def drawframe(i):
         plt.figure(figsize = figsize)
-        plot(u = U[i*step], space, axis = axis)
+        plot(U[i*step], space, axis = axis)
     gifs.save(drawframe, frames, name)
