@@ -7,6 +7,7 @@ from dlroms import gifs
 from ufl.finiteelement.mixedelement import VectorElement, FiniteElement
 from ufl.finiteelement.enrichedelement import NodalEnrichedElement
 from fenics import FunctionSpace
+from fenics import Function
 
 dx = dolfin.dx
 ds = dolfin.ds
