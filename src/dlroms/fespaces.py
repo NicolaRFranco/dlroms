@@ -43,6 +43,16 @@ def space(mesh, obj, deg, scalar = True, bubble = False):
     
     return FunctionSpace(mesh, element)
 
+def coordinates(space):
+    """Returns the coordinates of the degrees of freedom for the given functional space.
+    
+    Input
+        space   (dolfin.function.functionspace.FunctionSpace).      Functional space for which the dofs have to be located.
+        
+    Output
+        (numpy.ndarray).
+    """
+
 def boundary(mesh):
     """Returns the indexes of those nodes that lie on the boundary of a given domain.
     
@@ -210,21 +220,17 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
     """Plots mesh and functional objects.
     
     Input
-        *args       (tuple)     Two uses are available. One can pass a single object of dolfin.cpp.mesh.Mesh type: in
-                                that case, the mesh is plotted. Conversely, one may pass a pair (a, b) where: a
-                                is either a numpy.ndarray or torch.Tensor, while b is a dolfin.cpp.mesh.Mesh object.
-                                In the latter case, the first argument should contain the values of some functional
-                                object at the degrees of freedom; the second argument, should instead provide the
-                                underlying mesh where the object is defined.
-        obj         (str)       Type of functional object that is to be plotted (cf. dlroms.fespaces.space).
-                                Ignored if len(*args)=1.
-        deg         (int)       Polynomial degree at the mesh elements. Ignored if len(*args)=1.
-        vmin        (float)     If a colorbar is added, then the color legend is calibrated in such a way that vmin
-                                is considered the smallest value. Ignored if len(*args)=1.
-        vmax        (float)     Analogous to vmin.
-        colorbar    (bool)      Whether to add or not a colorbar. Ignored if len(*args)=1.
-        axis        (obj)       Axis specifics (cf. matplotlib.pyplot.axis). Defaults to "off", thus hiding the axis.
-        shrink      (float)     Shrinks the colorbar by the specified factor (defaults to 0.8). Ignored if colorbar = False.
+        obj         (dolfin.cpp.mesh.Mesh, numpy.ndarray or torch.Tensor)   Object to be plotted. It should be either a mesh
+                                                                            or an array containing the values of some function
+                                                                            at the degrees of freedom.
+        space       (dolfin.function.functionspace.FunctionSpace)           Functional space where 'obj' belongs (assuming 'obj' is not a mesh).
+                                                                            Defaults to None, in which case 'obj' is assumed to be a mesh.
+        vmin        (float)                                                 If a colorbar is added, then the color legend is calibrated in such a way that vmin
+                                                                            is considered the smallest value. Ignored if space = None.
+        vmax        (float)                                                 Analogous to vmin.
+        colorbar    (bool)                                                  Whether to add or not a colorbar. Ignored if len(*args)=1.
+        axis        (obj)                                                   Axis specifics (cf. matplotlib.pyplot.axis). Defaults to "off", thus hiding the axis.
+        shrink      (float)                                                 Shrinks the colorbar by the specified factor (defaults to 0.8). Ignored if colorbar = False.
     """
     try:
         if(space == None):
@@ -245,19 +251,15 @@ def gif(name, U, dt, T, space, axis = "off", figsize = (4,4)):
     """Builds a GIF animation given the values of a functional object at multiple time steps.
     
     Input
-        name    (str)                               Path where to save the GIF file.
-        U       (numpy.ndarray or torch.Tensor)     Array of either shape (N,n) or (N,k,n). U[j] should contain the
-                                                    values of a functional object at its degrees of freedom (in the
-                                                    first case, U[j] is a scalar-valued map, in the second case it
-                                                    is a vector field with k components; cf. dlroms.fespaces.asvector).
-        dt      (float)                             Time step with each frame.
-        T       (float)                             Final time. The GIF will have int(T/dt) frames
-        mesh    (dolfin.cpp.mesh.Mesh)              Underlying mesh.
-        obj     (str)                               Type of functional objects (cf. dlroms.fespaces.space).
-        deg     (int)                               Polynomial degree at the mesh elements.
-        axis    (obj)                               Axis specifics (cf. matplotlib.pyplot.axis). Defaults to "off", thus hiding the axis.
-        figsize (tuple)                             Sizes of the window where to plot, width = figsize[0], height = figsize[1].
-                                                    See matplotlib.pyplot.plot.
+        name    (str)                                               Path where to save the GIF file.
+        U       (numpy.ndarray or torch.Tensor)                     Array of shape (N,n). Each U[j] should contain the
+                                                                    values of a functional object at its degrees of freedom.
+        dt      (float)                                             Time step with each frame.
+        T       (float)                                             Final time. The GIF will have int(T/dt) frames
+        space   (dolfin.function.functionspace.FunctionSpace).      Functional space where the U[i]'s belong.
+        axis    (obj)                                               Axis specifics (cf. matplotlib.pyplot.axis). Defaults to "off", thus hiding the axis.
+        figsize (tuple)                                             Sizes of the window where to plot, width = figsize[0], height = figsize[1].
+                                                                    See matplotlib.pyplot.plot.
     """
     frames = int(T/dt)
     N = len(U)
