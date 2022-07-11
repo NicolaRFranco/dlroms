@@ -4,6 +4,7 @@ from dlroms import dnns
 import numpy as np
 import torch
 import dolfin
+from fenics import FunctionSpace
 
 class Local(dnns.Sparse):
     def __init__(self, coordinates1, coordinates2, support, activation = dnns.leakyReLU):
@@ -75,6 +76,20 @@ class L1(Integral):
         return super(L1, self).forward(x.abs())
     
     
+class Divergence(Operator):
+    def __init__(self, space):
+        fSpace = FunctionSpace(mesh, 'DG', 0)
+        vSpace = space
+        a, b, c = TrialFunction(vSpace), TestFunction(fSpace), TrialFunction(fSpace)
+        A = assemble(b*div(a)*dx).array()
+        M = assemble(b*c*dx).array()
+        lumped = np.diag(1.0/np.sum(M, axis = 0))
+        D = np.dot(lumped, A)
+        super(Divergence, self).__init__(D.T)
+    
+    def forward(self, x):
+        X = x.transpose(dim0 = 1, dim1 = 2).reshape(len(x), -1)
+        return X.mm(self.W())
     
     
     
