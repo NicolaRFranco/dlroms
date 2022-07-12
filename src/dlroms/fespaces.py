@@ -215,7 +215,8 @@ def asvector(u, space):
         
     """
     uv = Function(space)
-    uv.vector()[:] = u
+    udata = u if(not isinstance(u, torch.Tensor)) else u.detach().cpu().numpy()
+    uv.vector()[:] = udata
     return uv
     
 def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "off", shrink = 0.8):
