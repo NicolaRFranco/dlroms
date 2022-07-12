@@ -79,14 +79,12 @@ class L1(Integral):
     
     
 class Divergence(Operator):
-    def __init__(self, spacein, spaceout, bcs = []):
+    def __init__(self, spacein, spaceout):
         fSpace = spaceout
         vSpace = spacein
         a, b, c = dolfin.function.argument.TrialFunction(vSpace), dolfin.function.argument.TestFunction(fSpace), dolfin.function.argument.TrialFunction(fSpace)
         A = dolfin.fem.assembling.assemble(dolfin.div(a)*b*dolfin.dx)
-        for bc in bcs:
-            bc.apply(A)
-        A = A.array()
+        A = A.array().T
         M = dolfin.fem.assembling.assemble(b*c*dolfin.dx).array()
         lumped = np.diag(1.0/np.sum(M, axis = 0))
         D = np.dot(A, lumped)
