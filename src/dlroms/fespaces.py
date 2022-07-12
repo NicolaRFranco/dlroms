@@ -13,6 +13,7 @@ dx = dolfin.dx
 ds = dolfin.ds
 grad = dolfin.grad
 inner = dolfin.inner
+div = dolfin.div
 
 def space(mesh, obj, deg, scalar = True, bubble = False):
     """Returns the Finite Element (FE) space of specified type (e.g. continuous/discontinuous galerkin) and degree.
@@ -269,3 +270,8 @@ def gif(name, U, dt, T, space, axis = "off", figsize = (4,4)):
         plt.figure(figsize = figsize)
         plot(U[i*step], space, axis = axis)
     gifs.save(drawframe, frames, name)
+   
+
+def dbc(expression, where, space, degree = 1):
+    from fenics import DirichletBC, Expression
+    return DirichletBC(space, Expression(expression, degree = degree), where)
