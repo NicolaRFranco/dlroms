@@ -28,12 +28,14 @@ class Operator(dnns.Sparse):
         self.freeze()
         
 class Bilinear(Operator):
-    def __init__(self, operator, space, vspace = None):
+    def __init__(self, operator, space, vspace = None, bcs = []):
         space1 = space
         space2 = space if(vspace == None) else vspace 
         v1, v2 = dolfin.function.argument.TrialFunction(space1), dolfin.function.argument.TestFunction(space2)
-        M = dolfin.fem.assembling.assemble(operator(v1, v2)).array()
-        super(Bilinear, self).__init__(M)
+        M = dolfin.fem.assembling.assemble(operator(v1, v2))
+        for bc in bcs:
+            bc.apply(M)
+        super(Bilinear, self).__init__(M.array())
         
     def forward(self, x):
         return x[0].mm(self.W().mm(x[1].T))  
@@ -77,14 +79,17 @@ class L1(Integral):
     
     
 class Divergence(Operator):
-    def __init__(self, spacein, spaceout):
+    def __init__(self, spacein, spaceout, bcs = []):
         fSpace = spaceout
         vSpace = spacein
         a, b, c = dolfin.function.argument.TrialFunction(vSpace), dolfin.function.argument.TestFunction(fSpace), dolfin.function.argument.TrialFunction(fSpace)
-        A = dolfin.fem.assembling.assemble(b*dolfin.div(a)*dolfin.dx).array()
+        A = dolfin.fem.assembling.assemble(b*dolfin.div(a)*dolfin.dx)
+        for bc in bcs:
+            bc.apply(A)
+        A = A.array()
         M = dolfin.fem.assembling.assemble(b*c*dolfin.dx).array()
         lumped = np.diag(1.0/np.sum(M, axis = 0))
-        D = np.dot(lumped, A)
+        D = np.dot(lumped, A).T
         super(Divergence, self).__init__(D.T) 
     
     
