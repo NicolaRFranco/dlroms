@@ -83,14 +83,14 @@ class Divergence(Operator):
         fSpace = spaceout
         vSpace = spacein
         a, b, c = dolfin.function.argument.TrialFunction(vSpace), dolfin.function.argument.TestFunction(fSpace), dolfin.function.argument.TrialFunction(fSpace)
-        A = dolfin.fem.assembling.assemble(b*dolfin.div(a)*dolfin.dx)
+        A = dolfin.fem.assembling.assemble(dolfin.div(a)*b*dolfin.dx)
         for bc in bcs:
             bc.apply(A)
         A = A.array()
         M = dolfin.fem.assembling.assemble(b*c*dolfin.dx).array()
         lumped = np.diag(1.0/np.sum(M, axis = 0))
-        D = np.dot(lumped, A).T
-        super(Divergence, self).__init__(D.T) 
+        D = np.dot(A, lumped)
+        super(Divergence, self).__init__(D) 
     
     
     
