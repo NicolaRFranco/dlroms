@@ -2,7 +2,7 @@ import os
 import imageio
 import matplotlib.pyplot as plt
 
-def save(drawframe, frames, name, transparency = False, remove = True):
+def save(drawframe, frames, name, remove = True):
     """Constructs a GIF given a way to plot each frame.
     
     Input
@@ -24,7 +24,7 @@ def save(drawframe, frames, name, transparency = False, remove = True):
         filenames.append(filename)
 
         # save frame
-        plt.savefig(filename, transparency = transparency)
+        plt.savefig(filename)
         plt.close()
     # build gif
     with imageio.get_writer(name + '.gif', mode='I') as writer:
