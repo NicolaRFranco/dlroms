@@ -267,8 +267,8 @@ def gif(name, U, dt, T, space, axis = "off", figsize = (4,4), colorbar = False):
     frames = int(T/dt)
     N = len(U)
     step = N//frames
-    vmin = np.min(U)
-    vmax = np.max(U)
+    vmin = numpy.min(U)
+    vmax = numpy.max(U)
     def drawframe(i):
         plt.figure(figsize = figsize)
         plot(U[i*step], space, axis = axis, vmin = vmin, vmax = vmax, colorbar = colorbar)
