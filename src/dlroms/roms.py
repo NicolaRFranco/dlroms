@@ -40,7 +40,7 @@ def projectup(vbasis, c):
     matrix vector multiplication [Vj.Tcj], i.e. the sequence of expanded vectors."""
     b = c.shape[1]
     n, nb = vbasis.shape[:2]
-    return vbasis.reshape(n, nb, -1).transpose(dim0 = 1, dim1 = 2).matmul(c.reshape(-1,b,1)).reshape(*vbasis[:,0].shape)
+    return vbasis.reshape(n, nb, -1).transpose(dim0 = 1, dim1 = 2).matmul(c.reshape(-1,b,1)).reshape(-1, vbasis.shape[-1])
 
 def project(vbasis, u):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
