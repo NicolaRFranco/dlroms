@@ -219,7 +219,7 @@ def asvector(u, space):
     uv.vector()[:] = udata
     return uv
     
-def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "off", shrink = 0.8):
+def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "off", shrink = 0.8, levels = 200):
     """Plots mesh and functional objects.
     
     Input
@@ -241,7 +241,7 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
         else:
             uv = asvector(obj, space)
             if(space.element().value_dimension(0) == 1):
-                c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax)
+                c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, levels = np.linspace(float(obj.min()), float(obj.max()), levels))
             else:
                 c = dolfin.common.plotting.plot(uv)
             if(colorbar):
