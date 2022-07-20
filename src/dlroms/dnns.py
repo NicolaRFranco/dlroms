@@ -604,6 +604,15 @@ class Consecutive(torch.nn.Sequential):
         N = len(self)
         for i in range(N):
             m = self[i].cpu()
+        
+    def stretch(self):
+        res = []
+        for nn in self:
+            if(isinstance(nn, Consecutive)):
+                res += nn.stretch()
+            else:
+                res += [nn]
+        return res
     
     def dictionary(self, label = ""):
         """Returns a dictionary with all the parameters in the network. An additional label can be passed."""
@@ -617,8 +626,11 @@ class Consecutive(torch.nn.Sequential):
     def save(self, path, label = ""):
         """Stores the whole architecture to the specified path. An additional label can be added (does not influence the name of
         the file, it is only used internally; defaults to '')."""
-        params = self.dictionary(label)
-        numpy.savez(path, **params)
+        if(len(self) == len(self.stretch())):
+            params = self.dictionary(label)
+            numpy.savez(path, **params)
+        else:
+            Consecutive(*self.stretch()).save(path, label)
         
     def load(self, path, label = ""):
         """Loads the architecture parameters from stored data.
@@ -627,20 +639,23 @@ class Consecutive(torch.nn.Sequential):
         path (string): system path where the parameters are stored.
         label (string): additional label required if the stored data had one.
         """
-        try:
-            params = numpy.load(path)
-        except:
-            params = numpy.load(path+".npz")
-        k = 0
-        for nn in self:
-            k += 1
+        if(len(self) == len(self.stretch())):
             try:
-                if(isinstance(nn, Sparse)):
-                    nn.load(w = params['w'+str(k)+label], b = params['b'+str(k)+label], indexes = params['indexes'+str(k)+label])
-                else:
-                    nn.load(params['w'+str(k)+label], params['b'+str(k)+label])
+                params = numpy.load(path)
             except:
-                None
+                params = numpy.load(path+".npz")
+            k = 0
+            for nn in self:
+                k += 1
+                try:
+                    if(isinstance(nn, Sparse)):
+                        nn.load(w = params['w'+str(k)+label], b = params['b'+str(k)+label], indexes = params['indexes'+str(k)+label])
+                    else:
+                        nn.load(params['w'+str(k)+label], params['b'+str(k)+label])
+                except:
+                    None
+        else:
+             Consecutive(*self.stretch()).load(path, label)   
                 
     def __add__(self, other):
         """Augments the current architecture by connecting it with a second one.
