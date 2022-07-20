@@ -32,15 +32,15 @@ def space(mesh, obj, deg, scalar = True, bubble = False):
     """
     if(scalar):
         if(bubble):
-            element = FiniteElement("CG", mesh.ufl_cell(), 1) +  FiniteElement("Bubble", mesh.ufl_cell(), mesh.topology().dim() + 1)
+            element = FiniteElement(obj, mesh.ufl_cell(), deg) +  FiniteElement("Bubble", mesh.ufl_cell(), mesh.topology().dim() + 1)
         else:
-            element = FiniteElement("CG", mesh.ufl_cell(), 1)
+            element = FiniteElement(obj, mesh.ufl_cell(), deg)
     else:
         if(bubble):
-            element = VectorElement(NodalEnrichedElement(FiniteElement("CG",       mesh.ufl_cell(), 1),
+            element = VectorElement(NodalEnrichedElement(FiniteElement(obj,       mesh.ufl_cell(), deg),
                                                          FiniteElement("Bubble",   mesh.ufl_cell(), mesh.topology().dim() + 1)))
         else:
-            element = VectorElement("CG", mesh.ufl_cell(), 1)
+            element = VectorElement(obj, mesh.ufl_cell(), deg)
     
     return FunctionSpace(mesh, element)
 
