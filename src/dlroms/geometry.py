@@ -5,11 +5,13 @@ import os
 
 class Domain(object):
     def __init__(self, main, other, operation = None):
+        """Combines two domains via the specified operation."""
         self.a, self.b, self.op = main, other, operation
         self.index = 0
         self.dim = max(main.dim, other.dim)
   
     def script(self, index = 1):
+        """Writes a gmsh script describing the domain."""
         res, j = self.a.script(index)
         res0, j0 = self.b.script(j)
         self.index = j0
