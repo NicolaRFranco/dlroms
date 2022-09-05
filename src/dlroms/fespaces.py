@@ -2,7 +2,6 @@ import matplotlib.pyplot as plt
 import numpy
 import torch
 import dolfin
-import mshr
 from dlroms import gifs
 from ufl.finiteelement.mixedelement import VectorElement, FiniteElement
 from ufl.finiteelement.enrichedelement import NodalEnrichedElement
