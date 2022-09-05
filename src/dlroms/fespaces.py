@@ -7,6 +7,11 @@ from ufl.finiteelement.mixedelement import VectorElement, FiniteElement
 from ufl.finiteelement.enrichedelement import NodalEnrichedElement
 from fenics import FunctionSpace
 from fenics import Function
+from dlroms.geometry import Rectangle as rectangle
+from dlroms.geometry import Circle as circle
+from dlroms.geometry import Box as box
+from dlroms.geometry import Polygon as polygon
+from dlroms.geometry import mesh
 
 dx = dolfin.dx
 ds = dolfin.ds
@@ -102,102 +107,7 @@ def savemesh(path, mesh):
     if(".xml" not in path):
         raise RuntimeError("Wrong extension. Meshes can only be saved in .xml format")
     dolfin.cpp.io.File(path).write(mesh)
-    
-def point(p):
-    """Creates a dolfin.Point object given its coordinates. Should be regarded as a private method.
-    
-    Input
-        p   (tuple)  Coordinates of the point.
-    
-    Output
-        (dolfin.cpp.geometry.Point).
-    """
-    return dolfin.cpp.geometry.Point(*tuple(p))
-
-def polygon(points):
-    """Creates a polygon given the specified list of points. The first and the last point in the list should coincide.
-    
-    Input
-        points  (tuple)  Collection of points describing the polygon.
-        
-    Output
-        (mshr.cpp.Polygon).
-    """
-    return mshr.cpp.Polygon([point(p) for p in points])
-
-def rectangle(p1, p2):
-    """Creates a rectangle given two opposed vertices.
-    
-    Input
-        p1  (tuple)     Coordinates of the first vertix.
-        p2  (tuple)     Coordinates of the vertix opposed to p1.
-        
-    Output
-        (mshr.cpp.Rectangle)
-    """
-    return mshr.cpp.Rectangle(point(p1), point(p2))
-
-def circle(x0, r):
-    """Creates a circle of given center and radius.
-    
-    Input
-        x0  (tuple)     Coordinates of the center point.
-        r   (float)     Radius.
-        
-    Output
-        (mshr.cpp.Circle)
-    """
-    return mshr.cpp.Circle(point(x0), r)
-
-def mesh(domain, resolution):
-    """Discretizes a given domain using the specified resolution. Note: always results in unstructured triangular meshes.
-    
-    Input
-        domain      (mshr.cpp.CSGGeometry)  Abstract domain. Can be obtained via calls such as fespaces.polygon, fespaces.rectangle, etc.
-                                            Domains can also be defined as union (or difference) of simpler domains (simply by employing
-                                            the + and - operators).
-                        
-        resolution  (int)                   Resolution level. Intuitively, doubling the resolution halfs the mesh stepsize.
-        
-    Output
-        (dolfin.cpp.mesh.Mesh).   
-        
-    Remark: this method relies on the CGAL backend and is NOT deterministic. Running the same command may yields slightly different meshes.
-    For better reproducibility, it is suggested to generate the mesh once and then rely on methods such as fespaces.save and fespaces.load.
-    """
-    return mshr.cpp.generate_mesh(domain, resolution = resolution)
-
-def unitsquaremesh(n, ny = None):
-    """Yields a structured triangular (rectangular) mesh on the unit square [0,1]^2.
-    
-    Input
-        n   (int)   Number of intervals per edge, or along the x-axis if ny != None.
-        ny  (int)   Number of intervals across the y-axis. Defaults to None, in
-                    which case ny = n.
-        
-    Output
-        (dolfin.cpp.mesh.Mesh).
-    """
-    n1 = n if (ny == None) else ny
-    return dolfin.cpp.generation.UnitSquareMesh(n,n1)
-
-def unitcubemesh(n, ny = None, nz = None):
-    """Yields a structured triangular (rectangular) mesh on the unit cube [0,1]^3.
-    
-    Input
-        n   (int)   Number of intervals per edge, or along the x-axis if either
-                    ny!=None or nz!=None.
-        ny  (int)   Number of intervals across the y-axis. Defaults to None, in
-                    which case ny = n.
-        nz  (int)   Number of intervals across the z-axis. Defaults to None, in
-                    which case nz = n.
-        
-    Output
-        (dolfin.cpp.mesh.Mesh).
-    """
-    n1 = n if (ny == None) else ny
-    n2 = n if (nz == None) else nz
-    return dolfin.cpp.generation.UnitCubeMesh(n,n1,n2)
+  
 
 def asvector(u, space):
     """Given a vector of dof values, returns the corresponding object in the functional space.
