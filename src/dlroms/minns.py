@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 from dlroms.cores import CPU, GPU
 from dlroms import fespaces
 from dlroms import dnns
@@ -5,6 +6,13 @@ import numpy as np
 import torch
 import dolfin
 from fenics import FunctionSpace
+from scipy.sparse.csgraph import dijkstra
+
+def area(P, A, B):
+    x1, y1 = P.T.reshape(2,-1,1)
+    x2, y2 = A.T
+    x3, y3 = B.T
+    return np.abs((x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))/2)
 
 class Local(dnns.Sparse):
     def __init__(self, coordinates1, coordinates2, support, activation = dnns.leakyReLU):
@@ -15,6 +23,59 @@ class Local(dnns.Sparse):
             M = M + dj**2
         M = np.sqrt(M) < support
         super(Local, self).__init__(M, activation)
+        
+class Navigator(object):
+    def __init__(self, domain, mesh):        
+        cells = mesh.cells()
+        ne = len(cells)
+
+        adj = np.zeros((ne, ne))
+        A, B, C = cells.T
+        A, B, C = mesh.coordinates()[A], mesh.coordinates()[B], mesh.coordinates()[C]
+        P = (A+B+C)/3.0
+
+        for i in range(ne):
+            for j in range(i+1, ne):
+                if(len( set(cells[i]).intersection(set(cells[j])) )>0):
+                    adj[i,j] = np.linalg.norm(P[i]-P[j])
+        
+        adj = adj + adj.T
+        self.A = A
+        self.B = B
+        self.C = C
+        self.adj = adj
+        self.cells = cells
+        self.nodes = mesh.coordinates()
+        self.D = dijkstra(csgraph = adj, directed = False)
+        
+    def plottri(self, k):
+        v = self.cells[k]
+        p = self.nodes[[v[0], v[1], v[2], v[0]]]
+        plt.fill(p[:,0],p[:,1],'b')
+            
+    def finde(self, P):
+        A, B, C = self.A, self.B, self.C
+        x1, y1 = A.T
+        x2, y2 = B.T
+        x3, y3 = C.T
+        tot = np.abs((x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))/2)
+        diffs = np.abs(tot - area(P,A,B) - area(P,A,C) - area(P,B,C))
+        return diffs.argmin(axis = 1)
+    
+class Geodesic(dnns.Sparse):
+    def __init__(self, domain, coordinates1, coordinates2, support, accuracy = 1, activation = dnns.leakyReLU):
+        navigator = Navigator(domain, fespaces.mesh(domain, resolution = accuracy))
+        
+        E1 = navigator.finde(coordinates1).reshape(-1,1)
+        E2 = navigator.finde(coordinates2).reshape(1,-1)
+        M = navigator.D[E1, E2]
+        
+        super(Geodesic, self).__init__(M <= support, activation)
+        
+    def He(self, seed = None):
+        nw = len(self.weight)
+        with torch.no_grad():
+            self.weight = torch.nn.Parameter(torch.rand(nw)/np.sqrt(nw))
 
 class Operator(dnns.Sparse):
     def __init__(self, matrix):
