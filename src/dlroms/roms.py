@@ -49,19 +49,8 @@ def project(vbasis, u):
     return projectup(vbasis, projectdown(vbasis, u))
 
 def gramschmidt(V):
-    """Orthonormalizes a collection of matrices. V should be in the format batch dimension x space dimension x number of basis."""
-    def norm(v):
-        return v.pow(2).sum(axis = -1).sqrt().unsqueeze(-1)
-    N, n, k = V.size()
-    U = coreof(V).zeros(N, n,k)
-    U[:,:,0] = V[:,:,0]/norm(V[:,:,0])
-    for i in range(1, k):
-        U[:,:,i] = V[:,:,i]
-        for j in range(i):
-            U[:,:,i] = U[:,:,i] - (U[:,:,j]*U[:,:,i]).sum(axis = 1).unsqueeze(-1) * U[:,:,j]
-        
-        U[:,:,i] = U[:,:,i]/norm(U[:,:,i])
-    return U
+    """Orthonormalizes a collection of matrices. V should be a torch tensor in the format batch dimension x space dimension x number of basis."""
+    return torch.linalg.qr(A, mode = 'reduced')[0]
 
 def PAs(V1, V2):
     """List of principal angles between the subspaces in V1 and V2. The Vj's should be in the format 
