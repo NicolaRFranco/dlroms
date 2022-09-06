@@ -50,7 +50,7 @@ def project(vbasis, u):
 
 def gramschmidt(V):
     """Orthonormalizes a collection of matrices. V should be a torch tensor in the format batch dimension x space dimension x number of basis."""
-    return torch.linalg.qr(A, mode = 'reduced')[0]
+    return torch.linalg.qr(V, mode = 'reduced')[0]
 
 def PAs(V1, V2):
     """List of principal angles between the subspaces in V1 and V2. The Vj's should be in the format 
