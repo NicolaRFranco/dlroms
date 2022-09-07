@@ -42,11 +42,14 @@ def projectup(vbasis, c):
     n, nb = vbasis.shape[:2]
     return vbasis.reshape(n, nb, -1).transpose(dim0 = 1, dim1 = 2).matmul(c.reshape(-1,b,1)).reshape(-1, vbasis.shape[-1])
 
-def project(vbasis, u):
+def project(vbasis, u, orth = False):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
     a sequence of vectors u = [u1,...,uk], where uj has length Nh, yields the batched
-    matrix vector multiplication [Vj.TVjuj], i.e. the sequence of reconstructed vectors."""
-    return projectup(vbasis, projectdown(vbasis, u))
+    matrix vector multiplication [Vj'Vjuj], i.e. the sequence of reconstructed vectors."""
+    if(orth):
+        return project(gramschmidt(vbasis), u)
+    else:
+        return projectup(vbasis, projectdown(vbasis, u))
 
 def gramschmidt(V):
     """Orthonormalizes a collection of matrices. V should be a torch tensor in the format batch dimension x space dimension x number of basis."""
