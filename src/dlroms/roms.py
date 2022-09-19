@@ -47,7 +47,7 @@ def project(vbasis, u, orth = True):
     a sequence of vectors u = [u1,...,uk], where uj has length Nh, yields the batched
     matrix vector multiplication [Vj'Vjuj], i.e. the sequence of reconstructed vectors."""
     if(orth):
-        return project(gramschmidt(vbasis.transpose(1,2)).transpose(2,1), u)
+        return project(gramschmidt(vbasis.transpose(1,2)).transpose(2,1), u, orth = False)
     else:
         return projectup(vbasis, projectdown(vbasis, u))
 
