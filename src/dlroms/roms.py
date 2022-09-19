@@ -42,12 +42,12 @@ def projectup(vbasis, c):
     n, nb = vbasis.shape[:2]
     return vbasis.reshape(n, nb, -1).transpose(dim0 = 1, dim1 = 2).matmul(c.reshape(-1,b,1)).reshape(-1, vbasis.shape[-1])
 
-def project(vbasis, u, orth = False):
+def project(vbasis, u, orth = True):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
     a sequence of vectors u = [u1,...,uk], where uj has length Nh, yields the batched
     matrix vector multiplication [Vj'Vjuj], i.e. the sequence of reconstructed vectors."""
     if(orth):
-        return project(gramschmidt(vbasis), u)
+        return project(gramschmidt(vbasis.transpose(1,2)).transpose(2,1), u)
     else:
         return projectup(vbasis, projectdown(vbasis, u))
 
@@ -55,9 +55,12 @@ def gramschmidt(V):
     """Orthonormalizes a collection of matrices. V should be a torch tensor in the format batch dimension x space dimension x number of basis."""
     return torch.linalg.qr(V, mode = 'reduced')[0]
 
-def PAs(V1, V2):
+def PAs(V1, V2, orth = True):
     """List of principal angles between the subspaces in V1 and V2. The Vj's should be in the format 
     batch dimension x space dimension x number of basis."""
-    A1, A2 = gramschmidt(V1), gramschmidt(V2)
+    if(orth):
+        A1, A2 = gramschmidt(V1), gramschmidt(V2)
+    else:
+        A1, A2 = V1, V2
     vals = torch.linalg.svdvals(A1.transpose(dim0 = 1, dim1 = 2).matmul(A2)).clamp(min=0,max=1)
     return vals.arccos()
