@@ -870,7 +870,7 @@ class Clock(object):
         
         
 def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True, until = None, early = False, conv = num2p,
-          best = False, cleanup = True):
+          best = False, cleanup = True, dropout = 0.0):
     optimizer = optim(dnn.parameters(), lr = lr)
     ntest = len(mu)-ntrain
     mutrain, utrain, mutest, utest = mu[:ntrain], u[:ntrain], mu[-ntest:], u[-ntest:]
@@ -886,7 +886,13 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
     tempcode = int(numpy.random.rand(1)*1000)
 
     for e in range(epochs):
-
+        
+        if(dropout>0.0):
+            dnn.unfreeze()
+            for layer in dnn:
+                if(numpy.random.rand()<=dropout):
+                    layer.freeze()      
+        
         def closure():
             optimizer.zero_grad()
             loss = lossf(utrain, dnn(mutrain))
