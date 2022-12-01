@@ -88,7 +88,7 @@ class Layer(torch.nn.Module):
         except:
             None
         
-    def inherit(self, other):
+    def inherit(self, other, azzerate = True):
         """Inherits the weight and bias from another network. Additional entries are left to zero.
         It can be seen as a naive form of transfer learning.
         
@@ -98,7 +98,8 @@ class Layer(torch.nn.Module):
         Output:
         None, but the current network has now updated parameters.
         """
-        self.zeros()
+        if(azzerate):
+            self.zeros()
         with torch.no_grad():
             where = tuple([slice(0,s) for s in other.w().size()])
             self.module().weight[where] = torch.nn.Parameter(self.core.tensor(other.w().detach().cpu().numpy())) 
@@ -741,7 +742,7 @@ class Consecutive(torch.nn.Sequential):
         for f in self:
             f.unfreeze()
             
-    def inherit(self, other):
+    def inherit(self, other, azzerate = True):
         """Inherits the networks parameters from a given architecture (cf. Layer.inherit). 
         The NN 'other' should have a depth less or equal to that of 'self'.
         
@@ -749,7 +750,7 @@ class Consecutive(torch.nn.Sequential):
         other (Consecutive): the architecture from which self shoud learn."""
         for i, nn in enumerate(other):
             if(type(self[i])==type(nn)):
-                self[i].inherit(nn)
+                self[i].inherit(nn, azzerate)
                 
     def files(self, string):
         return [string+".npz"]
