@@ -80,7 +80,7 @@ def KarhunenLoeve(mesh, covariance, nphis):
     
     lambdas, phis, V  = solve_covariance_EVP(lambda r : covariance(r), k = nphis)
     inv = [(nphis-i-1) for i in range(nphis)]
-    basis = phis[dolfin.cpp.fem.vertex_to_dof_map(V), :][:, inv]
+    basis = phis[:, inv]
     lamb = lambdas[inv]
     
     return lamb, basis
