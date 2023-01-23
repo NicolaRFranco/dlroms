@@ -18,14 +18,14 @@ class GaussianRandomField(object):
     """
     
     def __init__(self, mesh, kernel, upto):
-    """Constructs a Gaussian random field object.
-    
-    Input
-        mesh    (dolfin.cpp.mesh.Mesh)      Mesh discretizing the spatial domain.
-        kernel  (function)                  Covariance kernel (cf. dlroms.gp.GaussianRandomField).
-        upto    (int)                       Number of eigenfunctions to compute. Equivalently, rank at which the process is 
-                                            approximated via its Karhunen-Loeve expansion.
-    """
+        """Constructs a Gaussian random field object.
+        
+        Input
+            mesh    (dolfin.cpp.mesh.Mesh)      Mesh discretizing the spatial domain.
+            kernel  (function)                  Covariance kernel (cf. dlroms.gp.GaussianRandomField).
+            upto    (int)                       Number of eigenfunctions to compute. Equivalently, rank at which the process is 
+                                                approximated via its Karhunen-Loeve expansion.
+        """
         self.cov = kernel
         self.n = upto
         self.singvalues, self.eigenfunctions = KarhunenLoeve(mesh, self.cov, self.n)
