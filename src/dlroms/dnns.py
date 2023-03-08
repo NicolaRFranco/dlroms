@@ -278,14 +278,14 @@ class Sparse(Layer):
         #    self.weight = torch.nn.Parameter(torch.rand(nw)/numpy.sqrt(nw))
         c = 1 if linear else 2
         alpha = 0 if linear else a
-        nnz = np.array([np.sum(self.loc[0]==i) for i in self.loc[0]])
+        nnz = numpy.array([numpy.sum(self.loc[0]==i) for i in self.loc[0]])
         with torch.no_grad():
-            self.weight = torch.nn.Parameter(self.core.tensor(np.random.randn(len(self.loc[0]))*np.sqrt(c/(nnz*(1.0+alpha**2)))))
+            self.weight = torch.nn.Parameter(self.core.tensor(numpy.random.randn(len(self.loc[0]))*numpy.sqrt(c/(nnz*(1.0+alpha**2)))))
         
     def Xavier(self):
-        nnz = np.array([np.sum(self.loc[0]==i) for i in self.loc[0]])
+        nnz = numpy.array([numpy.sum(self.loc[0]==i) for i in self.loc[0]])
         with torch.no_grad():
-            self.weight = torch.nn.Parameter(self.core.tensor((2*np.random.rand(len(self.loc[0]))-1)*np.sqrt(3/nnz)))
+            self.weight = torch.nn.Parameter(self.core.tensor((2*numpy.random.rand(len(self.loc[0]))-1)*numpy.sqrt(3/nnz)))
         
             
     def W(self):
