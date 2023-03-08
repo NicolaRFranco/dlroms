@@ -354,7 +354,10 @@ class Weightless(Layer):
     def dof(self):
         return 0
     
-    def He(self, seed):
+    def He(self, linear, a, seed):
+        None
+        
+    def Xavier(self):
         None
         
     def freeze(self, w = True, b = True):
@@ -450,10 +453,10 @@ class Conv2D(Layer):
     def inputdim(self):
         raise RuntimeError("Convolutional2D layers do not have a fixed input dimension.")
         
-    def He(self, seed = None):
-        if(seed != None):
-            torch.manual_seed(seed)
-        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')        
+    #def He(self, seed = None):
+    #    if(seed != None):
+    #        torch.manual_seed(seed)
+    #    torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')        
     
 class Deconv2D(Layer):
     """Layer that performs a transposed 2D convolution (cf. Pytorch documentation, torch.nn.ConvTranspose2d)."""
@@ -472,10 +475,10 @@ class Deconv2D(Layer):
     def inputdim(self):
         raise RuntimeError("Deconvolutional2D layers do not have fixed input dimension.")
         
-    def He(self, seed = None):
-        if(seed != None):
-            torch.manual_seed(seed)
-        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
+    #def He(self, seed = None):
+    #    if(seed != None):
+    #        torch.manual_seed(seed)
+    #    torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
 
 class Conv3D(Layer):
     """Layer that performs 3D convolutions (cf. Pytorch documentation, torch.nn.Conv2d)."""
@@ -503,10 +506,10 @@ class Conv3D(Layer):
     def inputdim(self):
         raise RuntimeError("Convolutional3D layers do not have a fixed input dimension.")
         
-    def He(self, seed = None):
-        if(seed != None):
-            torch.manual_seed(seed)
-        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')        
+    #def He(self, seed = None):
+    #    if(seed != None):
+    #        torch.manual_seed(seed)
+    #    torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')        
     
 class Deconv3D(Layer):
     """Layer that performs a transposed 3D convolution (cf. Pytorch documentation, torch.nn.ConvTranspose3d)."""
@@ -525,10 +528,10 @@ class Deconv3D(Layer):
     def inputdim(self):
         raise RuntimeError("Deconvolutional3D layers do not have fixed input dimension.")
         
-    def He(self, seed = None):
-        if(seed != None):
-            torch.manual_seed(seed)
-        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
+    #def He(self, seed = None):
+    #    if(seed != None):
+    #        torch.manual_seed(seed)
+    #    torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
 
 class Conv1D(Layer):    
     """Analogous to Convolutional2D but considers 1D convolutions."""
@@ -545,10 +548,10 @@ class Conv1D(Layer):
     def inputdim(self):
         raise RuntimeError("Convolutional1D layers do not have fixed input dimension.")
         
-    def He(self, seed = None):
-        if(seed != None):
-            torch.manual_seed(seed)
-        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
+    #def He(self, seed = None):
+    #    if(seed != None):
+    #        torch.manual_seed(seed)
+    #    torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
         
 class Deconv1D(Layer):    
     """Analogous to Deconvolutional2D but considers trasposed 1D convolutions."""
@@ -565,10 +568,10 @@ class Deconv1D(Layer):
     def inputdim(self):
         raise RuntimeError("Deconvolutional1D layers do not have fixed input dimension.")
         
-    def He(self, seed = None):
-        if(seed != None):
-            torch.manual_seed(seed)
-        torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
+    #def He(self, seed = None):
+    #    if(seed != None):
+    #        torch.manual_seed(seed)
+    #    torch.nn.init.kaiming_normal_(self.module().weight, a = 0.1, mode='fan_out', nonlinearity='leaky_relu')
 
         
 class Consecutive(torch.nn.Sequential):
