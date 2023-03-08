@@ -960,7 +960,7 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
             None
     clock.stop()
     if(verbose):
-        print("\n Training complete. Elapsed time: " + clock.elapsedTime() + ".")
+        print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
     if(dropout>0.0):
         dnn.unfreeze()
     return err, clock.elapsed()
