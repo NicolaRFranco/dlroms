@@ -160,11 +160,17 @@ class Layer(torch.nn.Module):
         """Degrees of freedom in the layer, defined as the number of active weights and biases."""
         return numpy.prod(tuple(self.module().weight.size())) + len(self.module().bias)
                      
-    def He(self, seed = None):
+    def He(self, linear = False, a = 0.1, seed = None):
         """He initialization of the weights."""
         if(seed != None):
             torch.manual_seed(seed)
-        torch.nn.init.kaiming_normal_(self.module().weight, mode='fan_out', nonlinearity='leaky_relu', a = 0.1)
+        if(linear):
+            torch.nn.init.xavier_normal_(self.module().weight)
+        else:
+            torch.nn.init.kaiming_normal_(self.module().weight, mode='fan_out', nonlinearity='leaky_relu', a = a)
+        
+    def Xavier(self):
+            torch.nn.init.xavier_uniform_(self.module().weight)
         
     def inputdim(self):
         """Returns the expected input dimension for the layer."""
@@ -713,10 +719,15 @@ class Consecutive(torch.nn.Sequential):
             res += x.dof()
         return res  
     
-    def He(self, seed = None):
+    def He(self, linear = False, a = 0.1, seed = None):
         """Applies the He initialization to all layers in the architecture."""
         for x in self:
-            x.He(seed)
+            x.He(linear = linear, a = a, seed = seed)
+     
+    def Xavier(self):
+        """Applies the (uniform) Xavier initialization to all layers in the architecture."""
+        for x in self:
+            x.Xavier()
     
     def parameters(self):
         """Returns the list of all learnable parameters in the network. Used as argument for torch optimizers."""
