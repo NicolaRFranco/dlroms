@@ -71,11 +71,6 @@ class Geodesic(dnns.Sparse):
         M = navigator.D[E1, E2]
         
         super(Geodesic, self).__init__(M <= support, activation)
-        
-    def He(self, seed = None):
-        nw = len(self.weight)
-        with torch.no_grad():
-            self.weight = torch.nn.Parameter(torch.rand(nw)/np.sqrt(nw))
 
 class Operator(dnns.Sparse):
     def __init__(self, matrix):
