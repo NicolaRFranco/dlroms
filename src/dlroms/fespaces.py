@@ -250,7 +250,7 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
         raise RuntimeError("First argument should be either a dolfin.cpp.mesh.Mesh or a structure containing the dof values of some function (in which case 'space' must be != None).")
     plt.axis(axis)
     
-def gif(name, U, dt, T, space, axis = "off", figsize = (4,4), colorbar = False):
+def gif(name, U, dt, T, space, axis = "off", figsize = (4,4), colorbar = False, cmap = None):
     """Builds a GIF animation given the values of a functional object at multiple time steps.
     
     Input
@@ -271,7 +271,7 @@ def gif(name, U, dt, T, space, axis = "off", figsize = (4,4), colorbar = False):
     vmax = U.max()
     def drawframe(i):
         plt.figure(figsize = figsize)
-        plot(U[i*step], space, axis = axis, vmin = vmin, vmax = vmax, colorbar = colorbar)
+        plot(U[i*step], space, axis = axis, vmin = vmin, vmax = vmax, colorbar = colorbar, cmap = cmap)
     gifs.save(drawframe, frames, name)
    
 
