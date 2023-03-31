@@ -97,8 +97,11 @@ class Bilinear(Operator):
         return x[0].mm(self.W().mm(x[1].T))  
         
 class Norm(Bilinear):
-    def forward(self, x):
-        return (x.mm(self.W())*x).sum(axis = -1).sqrt()   
+    def forward(self, x, squared = False):
+        if(squared):
+            return (x.mm(self.W())*x).sum(axis = -1)   
+        else:
+            return (x.mm(self.W())*x).sum(axis = -1).sqrt()   
         
 class L2(Norm):
     def __init__(self, space):
