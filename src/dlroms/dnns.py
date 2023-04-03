@@ -290,6 +290,11 @@ class Sparse(Layer):
         with torch.no_grad():
             self.weight = torch.nn.Parameter(self.core.tensor(numpy.random.randn(len(self.loc[0]))*numpy.sqrt(c/(nnz*(1.0+alpha**2)))))
         
+    def deprecatedHe(self, linear = False, a = 0.1, seed = None):
+        nw = len(self.weight)
+        with torch.no_grad():
+            self.weight = torch.nn.Parameter(torch.rand(nw)/numpy.sqrt(nw))
+        
     def Xavier(self):
         A = numpy.zeros((self.out_d, self.in_d))
         A[(self.loc[1], self.loc[0])] = 1
