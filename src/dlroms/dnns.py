@@ -321,6 +321,9 @@ class Sparse(Layer):
     def cuda(self):
         self.moveOn(GPU)
         
+    def cpu(self):
+        self.moveOn(CPU)
+        
 class Weightless(Layer):
     """Subclass of Layer that handles the case of weightless layers (no trainable parameters).
     By default, this layers have .w() = None, .b() = None, .rho = None and .dof() = 0, etc.
