@@ -57,10 +57,12 @@ class Layer(torch.nn.Module):
         
     def cuda(self):
         """Transfers the layer to the GPU."""
+        self.core = GPU
         self.module().cuda()
         
     def cpu(self):
         """Transfers the layer to the CPU."""
+        self.core = CPU
         self.module().cpu()
         
     def l2(self):
