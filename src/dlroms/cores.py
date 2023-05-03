@@ -20,16 +20,16 @@ class Core(object):
         else:
             self.device = torch.device("cuda:0")
                         
-    def tensor(self, array):
+    def tensor(self, *arrays):
         """Converts a numpy array into a torch (float) tensor to be stored on the corresponding core.
         
         Input
-            array   (numpy.ndarray)     Array to be converted.
+            *arrays   (numpy.ndarray)     Arrays to be converted.
             
         Output 
             (torch.Tensor).
         """
-        return torch.tensor(array, dtype = self.dtype, device = self.device)
+        return (*[torch.tensor(array, dtype = self.dtype, device = self.device) for array in arrays],)
     
     def zeros(self, *shape):
         """Returns a tensor full of zeros.
