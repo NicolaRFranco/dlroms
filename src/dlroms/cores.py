@@ -29,7 +29,10 @@ class Core(object):
         Output 
             (torch.Tensor).
         """
-        return (*[torch.tensor(array, dtype = self.dtype, device = self.device) for array in arrays],)
+        if(len(arrays)==1):
+            return torch.tensor(arrays[0], dtype = self.dtype, device = self.device)
+        else:    
+            return (*[torch.tensor(array, dtype = self.dtype, device = self.device) for array in arrays],)
     
     def zeros(self, *shape):
         """Returns a tensor full of zeros.
