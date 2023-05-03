@@ -4,6 +4,9 @@ from scipy.linalg import solve as scisolve
 import torch
 from dlroms.cores import coreof, CPU, GPU
 
+mre = lambda norm: lambda utrue, upred: (norm(utrue-upred)/norm(utrue)).mean()
+mse = lambda norm: lambda utrue, upred: norm(utrue-upred, squared = True).mean()
+
 def snapshots(n, sampler, core = GPU):
     """Samples a collection of snapshots for a given FOM solver."""
     mu, u = [], []
@@ -80,5 +83,14 @@ def PAs(V1, V2, orth = True):
         A1, A2 = gramschmidt(V1), gramschmidt(V2)
     else:
         A1, A2 = V1, V2
+        
+def PODerrors(u, upto, ntrain, error):
+    """Projection errors over the test set for an increasing number of modes."""
+    pod, svalues = POD(u[:ntrain], k = upto)
+    errors = []
+    for n in range(1, upto+1):
+        uproj = project(pod[:n], u[ntrain:])
+        errors.append(error(u[ntrain:], uproj))
+    return errors
     vals = torch.linalg.svdvals(A1.transpose(dim0 = 1, dim1 = 2).matmul(A2)).clamp(min=0,max=1)
     return vals.arccos()
