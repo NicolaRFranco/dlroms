@@ -7,9 +7,6 @@ class GaussianRandomField(object):
     """Class for managing isotropic Gaussian random fields over general domains. Objects of this class have the following attributes,
     
     Attributes
-        cov             (function)          A function describing the covariance kernel. Such function should only accept a single argument, the
-                                            latter being the distance between two points. Namely, if G is the random field, then cov(|x_i - x_j|)
-                                            should return the covariance between G(x_i) and G(x_j). Clearly, this only allows for isotropic fields.
         n               (int)               Rank at which the field is approximated.
         singvalues      (numpy.ndarray)     Square roots of the covariance kernel eigenvalues.
         eigenfunctions  (numpy.ndarray)     Eigenfunctions of the covariance kernel. This are stored in a k x n matrix, where k is the spatial
@@ -22,23 +19,26 @@ class GaussianRandomField(object):
         
         Input
             mesh    (dolfin.cpp.mesh.Mesh)      Mesh discretizing the spatial domain.
-            kernel  (function)                  Covariance kernel (cf. dlroms.gp.GaussianRandomField).
+            kernel  (function)                  A function describing the covariance kernel. Such function should only accept a single argument, the
+                                                latter being the distance between two points. Namely, if G is the random field, then cov(|x_i - x_j|)
+                                                should return the covariance between G(x_i) and G(x_j). Clearly, this only allows for isotropic fields.
+            n               (int)               Rank at which the field is approximated.
             upto    (int)                       Number of eigenfunctions to compute. Equivalently, rank at which the process is 
                                                 approximated via its Karhunen-Loeve expansion.
         """
-        self.cov = kernel
         self.n = upto
-        self.singvalues, self.eigenfunctions = KarhunenLoeve(mesh, self.cov, self.n)
-        self.singvalues = np.sqrt(self.singvalues)       
+        self.svalues, self.eigenfunctions = KarhunenLoeve(mesh, kernel, self.n)
+        self.svalues = np.sqrt(self.svalues)       
         
     def sample(self, seed, coeff = False):
         np.random.seed(seed)
         c = np.random.randn(self.n)
-        v = np.dot(self.eigenfunctions, self.singvalues*c)
+        v = np.dot(self.eigenfunctions, self.svalues*c)
         if(coeff):
             return v, c
         else:
-            return v
+            return v      
+    
         
 def KarhunenLoeve(mesh, covariance, nphis):
     """Solves the eigenvalue problem for a given covariance operator.
