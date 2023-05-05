@@ -909,11 +909,12 @@ class Clock(object):
             return ("%.2f s" % s)
         
         
-def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True, until = None, early = False, conv = num2p,
+def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True, until = None, nvalid = 0, conv = num2p,
           best = False, cleanup = True, dropout = 0.0):
     optimizer = optim(dnn.parameters(), lr = lr)
     ntest = len(mu)-ntrain
-    mutrain, utrain, mutest, utest = mu[:ntrain], u[:ntrain], mu[-ntest:], u[-ntest:]
+    mutrain, utrain, mutest, utest = mu[:(ntrain-nvalid)], u[:(ntrain-nvalid)], mu[-ntest:], u[-ntest:]
+    muvalid, uvalid = mu[(ntrain-nvalid):ntrain], u[(ntrain-nvalid):ntrain]
     
     if(error == None):
         def error(a, b):
@@ -924,6 +925,8 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
     clock.start()
     bestv = numpy.inf
     tempcode = int(numpy.random.rand(1)*1000)
+        
+    validerr = lambda _: numpy.nan if nvalid == 0 else lambda _: error(uvalid, dnn(muvalid))
 
     for e in range(epochs):
         
@@ -944,15 +947,19 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
             if(dnn.l2().isnan().item()):
                 break
             err.append([error(utrain, dnn(mutrain)),
-                        error(utest, dnn(mutest))])
+                        error(utest, dnn(mutest)),
+                        validerr(),
+                       ])
             if(verbose):
                 if(cleanup):
                         clear_output(wait = True)
-                print("\t\tTrain\tTest")
-                print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + "\t" + conv(err[-1][1]) + ".")
-            if(early and e > 0):
-                if((err[-1][1] > err[-2][1]) and (err[-1][0] < err[-2][0])):
-                        break
+                
+                print("\t\tTrain%s\tTest" % ("\tValid" if nvalid > 0 else ""))
+                print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + ("" if nvalid == 0 else ("\t" + conv(err[-1][2]))) + "\t" + conv(err[-1][1]) + ".")
+            if(nvalid > 0 and e > 3):
+                if((err[-1][2] > err[-2][2]) and (err[-1][0] < err[-2][0])):
+                        if((err[-2][2] > err[-3][2]) and (err[-2][0] < err[-3][0])):
+                                break
             if(until!=None):
                 if(err[-1][0] < until):
                         break
