@@ -926,7 +926,7 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
     bestv = numpy.inf
     tempcode = int(numpy.random.rand(1)*1000)
         
-    validerr = lambda : numpy.nan if nvalid == 0 else lambda : error(uvalid, dnn(muvalid))
+    validerr = (lambda : numpy.nan) if nvalid == 0 else (lambda : error(uvalid, dnn(muvalid)))
 
     for e in range(epochs):
         
