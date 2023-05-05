@@ -918,7 +918,7 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
     
     if(error == None):
         def error(a, b):
-            return lossf(a,b).item()
+            return lossf(a, b)
 
     err = []
     clock = Clock()
@@ -926,7 +926,7 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
     bestv = numpy.inf
     tempcode = int(numpy.random.rand(1)*1000)
         
-    validerr = (lambda : numpy.nan) if nvalid == 0 else (lambda : error(uvalid, dnn(muvalid)))
+    validerr = (lambda : numpy.nan) if nvalid == 0 else (lambda : error(uvalid, dnn(muvalid)).item())
 
     for e in range(epochs):
         
@@ -946,8 +946,8 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
         with torch.no_grad():
             if(dnn.l2().isnan().item()):
                 break
-            err.append([error(utrain, dnn(mutrain)),
-                        error(utest, dnn(mutest)),
+            err.append([error(utrain, dnn(mutrain)).item(),
+                        error(utest, dnn(mutest)).item(),
                         validerr(),
                        ])
             if(verbose):
@@ -980,6 +980,7 @@ def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf =
         print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
     if(dropout>0.0):
         dnn.unfreeze()
+    err = numpy.stack(err)
     return err, clock.elapsed()
 
 def to01(T):
