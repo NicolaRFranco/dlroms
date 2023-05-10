@@ -170,3 +170,6 @@ class ROM(Consecutive):
         err = np.stack(err)
         self.training_time = clock.elapsed()
         self.errors['Train'], self.errors['Test'], self.errors['Validation'] = err.T
+
+    def eval(self):
+        self.freeze()
