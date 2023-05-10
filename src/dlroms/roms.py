@@ -123,7 +123,7 @@ class ROM(Consecutive):
         Mtest, Utest = tuple([m[-ntest:] for m in M]), tuple([um[-ntest:]for um in U])
 
         getout = (lambda y: y[0]) if len(U)==1 else (lambda y: y)
-        errorf = (lambda a, b: error(a, b)) if error != None else (lambda a, b: loss(a, b).item())
+        errorf = (lambda a, b: error(a, b)) if error != None else (lambda a, b: loss(a, b))
         validerr = (lambda : numpy.nan) if nvalid == 0 else (lambda : errorf(getout(Uvalid), self(*Mvalid)))                                                          
 
         err = []
@@ -144,7 +144,7 @@ class ROM(Consecutive):
                     break
                 err.append([errorf(getout(Utrain), self(*Mtrain)).item(),
                             errorf(getout(Utest), self(*Mtest)).item(),
-                            validerr(),
+                            validerr().item(),
                            ])
                 if(verbose):
                     if(refresh):
