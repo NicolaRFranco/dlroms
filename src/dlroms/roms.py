@@ -3,6 +3,7 @@ from scipy.linalg import eigh
 from scipy.linalg import solve as scisolve
 import torch
 from dlroms.cores import coreof, CPU, GPU
+from dlroms.dnns import Consecutive, Clock
 
 mre = lambda norm: lambda utrue, upred: (norm(utrue-upred)/norm(utrue)).mean()
 mse = lambda norm: lambda utrue, upred: norm(utrue-upred, squared = True).mean()
@@ -94,3 +95,78 @@ def PODerrors(u, upto, ntrain, error):
     return errors
     vals = torch.linalg.svdvals(A1.transpose(dim0 = 1, dim1 = 2).matmul(A2)).clamp(min=0,max=1)
     return vals.arccos()
+
+
+class ROM(Consecutive):
+    """Abstract class for handling Reduced Order Models as Python objects."""
+    def __init__(self, *args, **kwargs):
+        super(ROM, self).__init__(*args)
+        self.__dict__.update(kwargs)  
+        
+    def forward(self, *args):
+        raise RuntimeError("No forward method specified!")
+           
+    def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0, 
+              verbose = True, refresh = True, notation = 'e'):
+
+        conv = (lambda x: num2p(x)) if notation == '%' else (lambda z: ("%.2"+notation) % z)
+        optimizer = optim(self.parameters(), lr = lr)
+
+        M = (mu,) if(isinstance(mu, torch.Tensor)) else (mu if (isinstance(mu, tuple)) else None)
+        U = (u,) if(isinstance(u, torch.Tensor)) else (u if (isinstance(u, tuple)) else None)
+
+        if(M == None):
+             raise RuntimeError("Input data should be either a torch.Tensor or a tuple of torch.Tensors.")
+        if(U == None):
+             raise RuntimeError("Output data should be either a torch.Tensor or a tuple of torch.Tensors.")
+
+        ntest = len(U[0])-ntrain
+        Mtrain, Utrain = tuple([m[:(ntrain-nvalid)] for m in M]), tuple([um[:(ntrain-nvalid)] for um in U])
+        Mvalid, Uvalid = tuple([m[(ntrain-nvalid):ntrain] for m in M]), tuple([um[(ntrain-nvalid):ntrain] for um in U])
+        Mtest, Utest = tuple([m[-ntest:] for m in M]), tuple([um[-ntest:]for um in U])
+
+        getout = (lambda y: y[0]) if len(U)==1 else (lambda y: y)
+        errorf = (lambda a, b: error(a, b)) if error != None else (lambda a, b: loss(a, b).item())
+        validerr = (lambda : numpy.nan) if nvalid == 0 else (lambda : errorf(getout(Uvalid), self(*Mvalid)))                                                          
+
+        err = []
+        clock = Clock()
+        clock.start()      
+
+        for e in range(epochs):   
+
+            def closure():
+                optimizer.zero_grad()
+                lossf = loss(getout(Utrain), self(*Mtrain))
+                lossf.backward()
+                return lossf
+            optimizer.step(closure)
+
+            with torch.no_grad():
+                if(self.l2().isnan().item()):
+                    break
+                err.append([errorf(getout(Utrain), self(*Mtrain)).item(),
+                            errorf(getout(Utest), self(*Mtest)).item(),
+                            validerr(),
+                           ])
+                if(verbose):
+                    if(refresh):
+                            clear_output(wait = True)
+
+                    string = "\t\tTrain%s\txTest" % ("\txValid" if nvalid > 0 else "")
+                    if(notation == 'e'):
+                        string = string.replace("x", "\t")
+                    else:
+                        string = string.replace("x","")
+                    print(string)
+                    print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + ("" if nvalid == 0 else ("\t" + conv(err[-1][2]))) + "\t" + conv(err[-1][1]) + ".")
+                if(nvalid > 0 and e > 3):
+                    if((err[-1][2] > err[-2][2]) and (err[-1][0] < err[-2][0])):
+                            if((err[-2][2] > err[-3][2]) and (err[-2][0] < err[-3][0])):
+                                    break
+
+        clock.stop()
+        if(verbose):
+            print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
+        err = numpy.stack(err)
+        return err, clock.elapsed()        
