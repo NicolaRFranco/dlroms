@@ -99,6 +99,7 @@ class ROM(Consecutive):
     def __init__(self, *args, **kwargs):
         super(ROM, self).__init__(*args)
         self.__dict__.update(kwargs)  
+        self.__dict__.update({'errors':{'Train':[], 'Test':[], 'Validation':[]}, 'training_time':0})
         
     def forward(self, *args):
         raise RuntimeError("No forward method specified!")
@@ -124,7 +125,7 @@ class ROM(Consecutive):
 
         getout = (lambda y: y[0]) if len(U)==1 else (lambda y: y)
         errorf = (lambda a, b: error(a, b)) if error != None else (lambda a, b: loss(a, b))
-        validerr = (lambda : numpy.nan) if nvalid == 0 else (lambda : errorf(getout(Uvalid), self(*Mvalid)))                                                          
+        validerr = (lambda : np.nan) if nvalid == 0 else (lambda : errorf(getout(Uvalid), self(*Mvalid)))                                                          
 
         err = []
         clock = Clock()
@@ -167,4 +168,5 @@ class ROM(Consecutive):
         if(verbose):
             print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
         err = np.stack(err)
-        return err, clock.elapsed()        
+        self.training_time = clock.elapsed()
+        self.errors['Train'], self.errors['Test'], self.errors['Validation'] = err.T
