@@ -36,10 +36,6 @@ def POD(U, k):
     else:
         return basis, eigenvalues
 
-def num2p(prob):
-    """Converts a number to percentage format."""
-    return ("%.2f" % (100*prob)) + "%"
-
 def projectdown(vbasis, u):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
     a sequence of vectors u = [u1,...,uk], where uj has length Nh, yields the batched
