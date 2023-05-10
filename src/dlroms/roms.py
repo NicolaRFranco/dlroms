@@ -4,6 +4,7 @@ from scipy.linalg import solve as scisolve
 import torch
 from dlroms.cores import coreof, CPU, GPU
 from dlroms.dnns import Consecutive, Clock
+from IPython.display import clear_output
 
 mre = lambda norm: lambda utrue, upred: (norm(utrue-upred)/norm(utrue)).mean()
 mse = lambda norm: lambda utrue, upred: norm(utrue-upred, squared = True).mean()
