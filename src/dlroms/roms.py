@@ -166,5 +166,5 @@ class ROM(Consecutive):
         clock.stop()
         if(verbose):
             print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
-        err = numpy.stack(err)
+        err = np.stack(err)
         return err, clock.elapsed()        
