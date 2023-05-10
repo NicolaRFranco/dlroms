@@ -188,12 +188,14 @@ class Layer(torch.nn.Module):
             self.module().weight.requires_grad_(False)
         elif(b):
             self.module().bias.requires_grad_(False)
+        self.training = False
         
     def unfreeze(self):
         """Makes all the layer parameters learnable."""
         self.module().bias.requires_grad_(True)
         self.module().weight.requires_grad_(True)
         self.module().requires_grad_(True)
+        self.training = True
         
     def dictionary(self, label = ""):
         """Returns a dictionary with the layer parameters. An additional label can be added."""
@@ -332,6 +334,7 @@ class Weightless(Layer):
         super(Weightless, self).__init__(None)
         self.rho = None
         self.core = CPU
+        self.training = False
         
     def inherit(self, other):
         None
@@ -774,11 +777,13 @@ class Consecutive(torch.nn.Sequential):
         """Freezes all layers in the network (see Layer.freeze)."""
         for f in self:
             f.freeze(w, b)
+        self.training = False
         
     def unfreeze(self):
         """Makes all layers learnable (see Layer.unfreeze)."""
         for f in self:
             f.unfreeze()
+        self.training = True
             
     def inherit(self, other, azzerate = True):
         """Inherits the networks parameters from a given architecture (cf. Layer.inherit). 
