@@ -108,7 +108,7 @@ class ROM(Consecutive):
         raise RuntimeError("No forward method specified!")
            
     def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0, 
-              verbose = True, refresh = True, notation = 'e'):
+              verbose = True, refresh = True, notation = 'e', title = None):
 
         conv = (lambda x: num2p(x)) if notation == '%' else (lambda z: ("%.2"+notation) % z)
         optimizer = optim(self.parameters(), lr = lr)
@@ -153,8 +153,9 @@ class ROM(Consecutive):
                 if(verbose):
                     if(refresh):
                             clear_output(wait = True)
-
-                    string = "\t\tTrain%s\txTest" % ("\txValid" if nvalid > 0 else "")
+                    
+                    string = "" if title == None else (title+"\n")
+                    string += "\t\tTrain%s\txTest" % ("\txValid" if nvalid > 0 else "")
                     if(notation == 'e'):
                         string = string.replace("x", "\t")
                     else:
