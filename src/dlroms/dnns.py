@@ -3,13 +3,12 @@ import torch
 import matplotlib.pyplot as plt
 from time import perf_counter     
 from dlroms.cores import CPU, GPU
-from dlroms.roms import num2p
 from IPython.display import clear_output
 import os
 
 ReLU = torch.nn.ReLU()
 leakyReLU = torch.nn.LeakyReLU(0.1) 
-        
+num2p = lambda prob : ("%.2f" % (100*prob)) + "%"
         
 class Layer(torch.nn.Module):
     """Layer of a neural network. It is implemented as a subclass of 'torch.nn.Module'. Acts as an abstract class.
