@@ -125,7 +125,7 @@ class ROM(Consecutive):
 
         getout = (lambda y: y[0]) if len(U)==1 else (lambda y: y)
         errorf = (lambda a, b: error(a, b)) if error != None else (lambda a, b: loss(a, b))
-        validerr = (lambda : np.nan) if nvalid == 0 else (lambda : errorf(getout(Uvalid), self(*Mvalid)))                                                          
+        validerr = (lambda : np.nan) if nvalid == 0 else (lambda : errorf(getout(Uvalid), self(*Mvalid)).item())                                                          
 
         err = []
         clock = Clock()
@@ -145,7 +145,7 @@ class ROM(Consecutive):
                     break
                 err.append([errorf(getout(Utrain), self(*Mtrain)).item(),
                             errorf(getout(Utest), self(*Mtest)).item(),
-                            validerr().item(),
+                            validerr(),
                            ])
                 if(verbose):
                     if(refresh):
