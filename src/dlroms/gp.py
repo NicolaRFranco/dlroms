@@ -30,10 +30,11 @@ class GaussianRandomField(object):
         self.svalues, self.eigenfunctions = KarhunenLoeve(mesh, kernel, self.n)
         self.svalues = np.sqrt(self.svalues)       
         
-    def sample(self, seed, coeff = False):
+    def sample(self, seed, coeff = False, upto = None):
         np.random.seed(seed)
+        till = upto if upto!= None else len(self.svalues)
         c = np.random.randn(self.n)
-        v = np.dot(self.eigenfunctions, self.svalues*c)
+        v = np.dot(self.eigenfunctions[:,:till], self.svalues[:till]*c[:till])
         if(coeff):
             return v, c
         else:
