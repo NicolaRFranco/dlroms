@@ -19,13 +19,12 @@ def snapshots(n, sampler, core = GPU):
     mu, u = np.stack(mu), np.stack(u)
     return core.tensor(mu, u)
 
-def POD(U, k):
+def POD(U, k, norm = None):
     """Principal Orthogonal Decomposition of the snapshots matrix U into k modes."""
-    if(isinstance(U, torch.Tensor)):
-        U0 = U.cpu().numpy()
-    else:
-        U0 = U
-    M = np.dot(U0, U0.T)
+    m = norm.W().detach().cpu().numpy() if norm!=None else np.eye(U.shape[-1])
+    U0 = U.cpu().numpy() if isinstance(U, torch.Tensor) else U
+    
+    M = np.dot(np.dot(U0, m), U0.T)
     N = U.shape[0]
     w, v = eigh(M, eigvals = (N-k, N-1))
     basis, eigenvalues = np.dot((v/np.sqrt(w)).T, U0), w
