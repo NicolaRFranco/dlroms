@@ -146,7 +146,7 @@ class ROM(Consecutive):
                     return lossf
                 optimizer.step(closure)
             else:
-                indexes = np.random.permutation(ntrain)
+                indexes = np.random.permutation(ntrain-nvalid)
                 nbatch = ntrain//batchsize
                 for j in range(nbatch):
                     ubatch = tuple([um[indexes[(j*batchsize):((j+1)*batchsize)]] for um in Utrain])
