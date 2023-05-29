@@ -9,7 +9,7 @@ from IPython.display import clear_output
 mre = lambda norm: lambda utrue, upred: (norm(utrue-upred)/norm(utrue)).mean()
 mse = lambda norm: lambda utrue, upred: norm(utrue-upred, squared = True).mean()
 
-def Euclidean(v, squared = False):
+def euclidean(v, squared = False):
     e2norm = v.pow(2).sum(axis = -1)
     return e2norm if squared else e2norm.sqrt()
 
