@@ -86,17 +86,17 @@ def PAs(V1, V2, orth = True):
         A1, A2 = gramschmidt(V1), gramschmidt(V2)
     else:
         A1, A2 = V1, V2
-        
-def PODerrors(u, upto, ntrain, error):
-    """Projection errors over the test set for an increasing number of modes."""
-    pod, svalues = POD(u[:ntrain], k = upto)
-    errors = []
-    for n in range(1, upto+1):
-        uproj = project(pod[:n], u[ntrain:])
-        errors.append(error(u[ntrain:], uproj))
-    return errors
     vals = torch.linalg.svdvals(A1.transpose(dim0 = 1, dim1 = 2).matmul(A2)).clamp(min=0,max=1)
     return vals.arccos()
+        
+def PODerrors(u, upto, ntrain, error, norm = None):
+    """Projection errors over the test set for an increasing number of modes."""
+    pod, svalues = POD(u[:ntrain], k = upto, norm = norm)
+    errors = []
+    for n in range(1, upto+1):
+        uproj = project(pod[:n], u[ntrain:], norm = norm)
+        errors.append(error(u[ntrain:], uproj))
+    return errors
 
 
 class ROM(Consecutive):
