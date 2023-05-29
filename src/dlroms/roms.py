@@ -35,16 +35,19 @@ def POD(U, k, norm = None):
     else:
         return basis, eigenvalues
 
-def projectdown(vbasis, u):
+def projectdown(vbasis, u, inner = None):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
     a sequence of vectors u = [u1,...,uk], where uj has length Nh, yields the batched
     matrix vector multiplication [Vjuj], i.e. the sequence of basis coefficients."""
     if(len(vbasis.shape)<3):
-      return projectdown(vbasis.unsqueeze(0), u)
+      return projectdown(vbasis.unsqueeze(0), u, inner = inner)
     else:
-      nh = np.prod(u[0].shape)
-      n, nb = vbasis.shape[:2]
-      return vbasis.reshape(n, nb, -1).matmul(u.reshape(-1,nh,1))
+      if(inner!=None):
+        return projectdown(vbasis, u.mm(inner.W()))
+      else:
+        nh = np.prod(u[0].shape)
+        n, nb = vbasis.shape[:2]
+        return vbasis.reshape(n, nb, -1).matmul(u.reshape(-1,nh,1))
 
 def projectup(vbasis, c):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
@@ -57,17 +60,20 @@ def projectup(vbasis, c):
       n, nb = vbasis.shape[:2]
       return vbasis.reshape(n, nb, -1).transpose(dim0 = 1, dim1 = 2).matmul(c.reshape(-1,b,1)).reshape(-1, vbasis.shape[-1])
 
-def project(vbasis, u, orth = True):
+def project(vbasis, u, orth = True, inner = None):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
     a sequence of vectors u = [u1,...,uk], where uj has length Nh, yields the batched
     matrix vector multiplication [Vj'Vjuj], i.e. the sequence of reconstructed vectors."""
     if(len(vbasis.shape)<3):
-        return project(vbasis.unsqueeze(0), u, orth)
+        return project(vbasis.unsqueeze(0), u, orth, inner)
     else:
-        if(orth):
-            return project(gramschmidt(vbasis.transpose(1,2)).transpose(2,1), u, orth = False)
+        if(inner!=None):
+            return projectup(vbasis, projectdown(vbasis, u, inner = inner))
         else:
-            return projectup(vbasis, projectdown(vbasis, u))
+            if(orth):
+                return project(gramschmidt(vbasis.transpose(1,2)).transpose(2,1), u, orth = False)
+            else:
+                return projectup(vbasis, projectdown(vbasis, u))
 
 def gramschmidt(V):
     """Orthonormalizes a collection of matrices. V should be a torch tensor in the format batch dimension x space dimension x number of basis."""
