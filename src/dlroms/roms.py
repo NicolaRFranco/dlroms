@@ -110,7 +110,7 @@ class ROM(Consecutive):
         raise RuntimeError("No forward method specified!")
            
     def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0, 
-              verbose = True, refresh = True, notation = 'e', title = None):
+              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None):
 
         conv = (lambda x: num2p(x)) if notation == '%' else (lambda z: ("%.2"+notation) % z)
         optimizer = optim(self.parameters(), lr = lr)
@@ -138,12 +138,25 @@ class ROM(Consecutive):
 
         for e in range(epochs):   
 
-            def closure():
-                optimizer.zero_grad()
-                lossf = loss(getout(Utrain), self(*Mtrain))
-                lossf.backward()
-                return lossf
-            optimizer.step(closure)
+            if(batchsize == None):
+                def closure():
+                    optimizer.zero_grad()
+                    lossf = loss(getout(Utrain), self(*Mtrain))
+                    lossf.backward()
+                    return lossf
+                optimizer.step(closure)
+            else:
+                indexes = np.random.permutation(ntrain)
+                nbatch = ntrain//batchsize
+                for j in range(nbatch):
+                    ubatch = tuple([um[indexes[(j*batchsize):((j+1)*batchsize)]] for um in Utrain])
+                    mubatch = tuple([m[indexes[(j*batchsize):((j+1)*batchsize)]] for m in  Mtrain])
+                    def closure():
+                        optimizer.zero_grad()
+                        lossf = loss(getout(ubatch), self(*mubatch))
+                        lossf.backward()
+                        return lossf
+                    optimizer.step(closure)
 
             with torch.no_grad():
                 if(self.l2().isnan().item()):
