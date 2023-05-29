@@ -19,9 +19,9 @@ def snapshots(n, sampler, core = GPU):
     mu, u = np.stack(mu), np.stack(u)
     return core.tensor(mu, u)
 
-def POD(U, k, norm = None):
+def POD(U, k, inner = None):
     """Principal Orthogonal Decomposition of the snapshots matrix U into k modes."""
-    m = norm.W().detach().cpu().numpy() if norm!=None else np.eye(U.shape[-1])
+    m = inner.W().detach().cpu().numpy() if inner!=None else np.eye(U.shape[-1])
     U0 = U.cpu().numpy() if isinstance(U, torch.Tensor) else U
     
     M = np.dot(np.dot(U0, m), U0.T)
@@ -89,12 +89,12 @@ def PAs(V1, V2, orth = True):
     vals = torch.linalg.svdvals(A1.transpose(dim0 = 1, dim1 = 2).matmul(A2)).clamp(min=0,max=1)
     return vals.arccos()
         
-def PODerrors(u, upto, ntrain, error, norm = None):
+def PODerrors(u, upto, ntrain, error, inner = None):
     """Projection errors over the test set for an increasing number of modes."""
-    pod, svalues = POD(u[:ntrain], k = upto, norm = norm)
+    pod, svalues = POD(u[:ntrain], k = upto, inner = inner)
     errors = []
     for n in range(1, upto+1):
-        uproj = project(pod[:n], u[ntrain:], norm = norm)
+        uproj = project(pod[:n], u[ntrain:], inner = inner)
         errors.append(error(u[ntrain:], uproj))
     return errors
 
