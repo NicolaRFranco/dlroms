@@ -82,6 +82,9 @@ class Operator(dnns.Sparse):
     def moveOn(self, core):
         super(Operator, self).moveOn(core)
         self.freeze()
+    
+    def He(self, linear = False, a = 0.1, seed = None):
+        None
         
 class Bilinear(Operator):
     def __init__(self, operator, space, vspace = None, bcs = []):
