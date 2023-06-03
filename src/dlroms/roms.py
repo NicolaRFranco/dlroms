@@ -5,6 +5,7 @@ import torch
 from dlroms.cores import coreof, CPU, GPU
 from dlroms.dnns import Consecutive, Clock, num2p
 from IPython.display import clear_output
+import matplotlib.pyplot as plt
 
 mre = lambda norm: lambda utrue, upred: (norm(utrue-upred)/norm(utrue)).mean()
 mse = lambda norm: lambda utrue, upred: norm(utrue-upred, squared = True).mean()
@@ -195,3 +196,23 @@ class ROM(Consecutive):
 
     def eval(self):
         self.freeze()
+
+        
+def boxplot(dictionary, colors, outliers = True):
+    keys = dictionary.keys()
+    data = tuple([dictionary[key] for key in keys])
+    bplot = plt.boxplot(data, patch_artist = True, showfliers = outliers)
+    for patch, color in zip(bplot['boxes'], colors):
+        patch.set_facecolor(color)       
+    for patch in bplot['medians']:
+        patch.set_color('w')
+    plt.xticks(np.arange(1, len(keys)+1), [key.replace(" ", "\n").replace(";"," ") for key in keys])
+    
+def regcoeff(x, y):
+    x0 = x.cpu().numpy() if isinstance(x, torch.Tensor) else x
+    y0 = y.cpu().numpy() if isinstance(y, torch.Tensor) else y
+    xmean, ymean  = np.mean(x0), np.mean(y0)
+    sxx, sxy = ((x0-xmean)**2).sum(), ((x0-xmean)*(y0-ymean)).sum() 
+    b1 = sxy/sxx
+    b0 = ymean - b1*xmean
+    return b0, b1
