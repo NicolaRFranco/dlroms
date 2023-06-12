@@ -14,13 +14,22 @@ def euclidean(v, squared = False):
     e2norm = v.pow(2).sum(axis = -1)
     return e2norm if squared else e2norm.sqrt()
 
-def snapshots(n, sampler, core = GPU):
+def snapshots(n, sampler, core = GPU, verbose = False):
     """Samples a collection of snapshots for a given FOM solver."""
+    clock = Clock()    
+    clock.start()
     mu, u = [], []
     for seed in range(n):
+        if(verbose):
+            print("Generating snapshot n.%d..." % (seed+1))
+            clear_output(wait = True)
         mu0, u0 = sampler(seed)
         mu.append(mu0)
         u.append(u0)
+    if(verbose):
+        clear_output()
+        clock.stop()
+        print("Snapshots generated. Elapsed time: %s." % clock.elapsedTime())
     mu, u = np.stack(mu), np.stack(u)
     return core.tensor(mu, u)
 
