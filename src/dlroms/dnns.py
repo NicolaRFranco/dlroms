@@ -217,7 +217,9 @@ class Dense(Layer):
     def __init__(self, input_dim, output_dim, activation = leakyReLU, bias = True):
         """Creates a Dense Layer with given input dimension, output dimension and activation function."""
         super(Dense, self).__init__(activation)
-        self.lin = torch.nn.Linear(input_dim, output_dim, bias = bias)
+        in_d = input_dim if(isinstance(input_dim, int)) else input_dim.dim()            
+        out_d = output_dim if(isinstance(output_dim, int)) else output_dim.dim()
+        self.lin = torch.nn.Linear(in_d, out_d, bias = bias)
         
     def module(self):
         return self.lin
