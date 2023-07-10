@@ -16,8 +16,8 @@ def area(P, A, B):
 
 class Local(dnns.Sparse):
     def __init__(self, x1, x2, support, activation = dnns.leakyReLU):
-        coordinates1 = x1 if(isinstance(x1, np.ndarray) else fespaces.coordinates(x1))
-        coordinates2 = x2 if(isinstance(x2, np.ndarray) else fespaces.coordinates(x2))
+        coordinates1 = x1 if(isinstance(x1, np.ndarray)) else fespaces.coordinates(x1)
+        coordinates2 = x2 if(isinstance(x2, np.ndarray)) else fespaces.coordinates(x2)
         M = 0
         dim = len(coordinates1[0])
         for j in range(dim):
@@ -66,8 +66,8 @@ class Navigator(object):
     
 class Geodesic(dnns.Sparse):
     def __init__(self, domain, x1, x2, support, accuracy = 1, activation = dnns.leakyReLU):
-        coordinates1 = x1 if(isinstance(x1, np.ndarray) else fespaces.coordinates(x1))
-        coordinates2 = x2 if(isinstance(x2, np.ndarray) else fespaces.coordinates(x2))
+        coordinates1 = x1 if(isinstance(x1, np.ndarray)) else fespaces.coordinates(x1)
+        coordinates2 = x2 if(isinstance(x2, np.ndarray)) else fespaces.coordinates(x2)
         navigator = Navigator(domain, fespaces.mesh(domain, resolution = accuracy))
         
         E1 = navigator.finde(coordinates1).reshape(-1,1)
