@@ -2,7 +2,7 @@ import numpy
 import torch
 
 class Core(object):
-    """Class for managing CPU and GPU tensors. Objects of this class have the following attributes.
+    """Class for managing CPU and GPU Pytorch tensors. Objects of this class have the following attributes.
     
     Attributes
        device   (torch.device)  Underlying core. Equals either torch.device('cpu') or torch.device('cuda:0').
@@ -21,13 +21,13 @@ class Core(object):
             self.device = torch.device("cuda:0")
                         
     def tensor(self, *arrays):
-        """Converts a numpy array into a torch (float) tensor to be stored on the corresponding core.
+        """Transfers a collection of arrays to the corresponding core and turns them into a torch (float) tensors.
         
         Input
-            *arrays   (numpy.ndarray)     Arrays to be converted.
+            *arrays   (numpy.ndarray, lists)     Arrays to be converted.
             
         Output 
-            (torch.Tensor).
+            tuple of torch.Tensor objects.
         """
         if(len(arrays)==1):
             return torch.tensor(arrays[0], dtype = self.dtype, device = self.device)
@@ -35,10 +35,10 @@ class Core(object):
             return (*[torch.tensor(array, dtype = self.dtype, device = self.device) for array in arrays],)
     
     def zeros(self, *shape):
-        """Returns a tensor full of zeros.
+        """Returns a tensor with all entries equal to zero.
         
         Input
-            *shape  (tuple of int)     Shape of the tensor. E.g., self.zeros(2,3) creates a 2x3 tensor full of zeros.
+            *shape  (tuple of ints)     Shape of the tensor. E.g., self.zeros(2,3) creates a 2x3 tensor full of zeros.
             
         Output
             (torch.Tensor).
@@ -60,7 +60,7 @@ class Core(object):
         return torch.cat(tuple(res))
     
     def rand(self, *dims):
-        """Returns a tensor with randomly filled values. The latter are sampled uniformely from [0,1].
+        """Returns a tensor with random entries sampled uniformely from [0,1].
         
         Input
             *dims   (tuple of int)  Shape of the tensor.
@@ -70,7 +70,7 @@ class Core(object):
         return self.tensor(numpy.random.rand(*dims))
     
     def randn(self, *dims):
-        """Returns a tensor with randomly filled values. The latter are sampled independently from the normal distribution N(0,1).
+        """Returns a tensor with random entries sampled independently from the normal distribution N(0,1).
         
         Input
             *dims   (tuple of int)  Shape of the tensor.
@@ -93,7 +93,7 @@ CPU = Core("CPU")
 GPU = Core("GPU")
 
 def coreof(u):
-    """Returns the core over with a tensor is stored.
+    """Returns the core where the given tensor is stored.
     
     Input
         u   (torch.Tensor)
