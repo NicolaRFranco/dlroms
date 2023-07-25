@@ -9,6 +9,8 @@ import matplotlib.pyplot as plt
 
 mre = lambda norm: lambda utrue, upred: (norm(utrue-upred)/norm(utrue)).mean()
 mse = lambda norm: lambda utrue, upred: norm(utrue-upred, squared = True).mean()
+mrei = lambda norm: lambda utrue, upred: (norm(utrue-upred)/norm(utrue)).mean().item()
+msei = lambda norm: lambda utrue, upred: norm(utrue-upred, squared = True).mean().item()
 
 def euclidean(v, squared = False):
     e2norm = v.pow(2).sum(axis = -1)
