@@ -225,3 +225,57 @@ def regcoeff(x, y):
     b1 = sxy/sxx
     b0 = ymean - b1*xmean
     return b0, b1
+
+class DFNN(ROM):
+    def forward(self, x):
+        return super(ROM, self).forward(x)
+
+class PODNN(ROM):
+    def __init__(self, *args, **kwargs):
+        kwargs.update({'trainable':True})
+        if('V' not in kwargs.keys()):
+            raise RuntimeError("POD matrix V unspecified. Please provide the POD matrix as a keyword argument (key = 'V').")
+        super(PODNN, self).__init__(*args, **kwargs)
+
+    def encode(self, u):
+        return projectdown(self.V, u)
+
+    def decode(self, c):
+        return projectup(self.V, c)
+
+    def redmap(self, mu):
+        return self[0](mu)
+    
+    def forward(self, x):
+        b = self.redmap(x)
+        return b if(self.trainable) else self.decode(b)
+
+    def freeze(self):
+        super(PODNN, self).freeze()
+        self.trainable = False
+
+class DLROM(ROM):
+    def __init__(self, *args, **kwargs):
+        kwargs.update({'trainable':True})
+        super(DLROM, self).__init__(*args, **kwargs)
+
+    def encode(self, u):
+        return self[2](u)
+
+    def decode(self, c):
+        return self[1](c)
+
+    def redmap(self, mu):
+        return self[0](mu)
+
+    def forward(self, *args):
+        if (self.trainable):
+            mu, u = args
+            newmu, nu = self.redmap(mu), self.encode(u)
+            return self.decode(newmu), (newmu-nu), self.decode(nu) 
+        else:
+            return self.decode(self.redmap(args[0]))
+        
+    def freeze(self):
+        super(DLROM, self).freeze()
+        self.trainable = False
