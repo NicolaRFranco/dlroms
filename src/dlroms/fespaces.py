@@ -4,10 +4,13 @@ import torch
 import dolfin
 import mshr
 from dlroms import gifs
+from cores import coreof
 from ufl.finiteelement.mixedelement import VectorElement, FiniteElement
 from ufl.finiteelement.enrichedelement import NodalEnrichedElement
 from fenics import FunctionSpace
 from fenics import Function
+from fenics import set_log_active
+set_log_active(False)
 
 dx = dolfin.dx
 ds = dolfin.ds
@@ -43,6 +46,23 @@ def space(mesh, obj, deg, scalar = True, bubble = False):
             element = VectorElement(obj, mesh.ufl_cell(), deg)
     
     return FunctionSpace(mesh, element)
+
+def embedd(u, oldspace, newspace):
+    """Returns a new dof representation of a given functional object (NB: works only for FE spaces written in terms of a nodal basis)
+    
+    Input
+        u          (numpy.ndarray or torch.Tensor)                     Vector containing the dofs of the functional object (w.r.t. the nodal basis of "oldspace")
+        oldspace   (dolfin.function.functionspace.FunctionSpace).      Functional space of reference
+        newspace   (dolfin.function.functionspace.FunctionSpace).      New functional space where to embedd u
+        
+    Output
+        (numpy.ndarray) dofs of u in the new ambient space.
+    """
+    uu = fe.asvector(u, oldspace)
+    uu.set_allow_extrapolation(True)
+    unew = [uu(z) for z in fe.coordinates(newspace)]
+    
+    return numpy.array(unew) if(not isinstance(u, torch.Tensor)) else coreof(u).tensor(unew)
 
 def coordinates(space):
     """Returns the coordinates of the degrees of freedom for the given functional space.
