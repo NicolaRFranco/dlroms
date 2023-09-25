@@ -4,7 +4,7 @@ import torch
 import dolfin
 import mshr
 from dlroms import gifs
-from cores import coreof
+from dlroms.cores import coreof
 from ufl.finiteelement.mixedelement import VectorElement, FiniteElement
 from ufl.finiteelement.enrichedelement import NodalEnrichedElement
 from fenics import FunctionSpace
