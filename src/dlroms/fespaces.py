@@ -51,18 +51,22 @@ def embedd(u, oldspace, newspace):
     """Returns a new dof representation of a given functional object (NB: works only for FE spaces written in terms of a nodal basis)
     
     Input
-        u          (numpy.ndarray or torch.Tensor)                     Vector containing the dofs of the functional object (w.r.t. the nodal basis of "oldspace")
+        u          (numpy.ndarray or torch.Tensor)                     Vector containing the dofs of the functional object (w.r.t. the nodal basis of "oldspace").
+                                                                       If u is 2-dimensional, the algorithm is applied batchwise.
         oldspace   (dolfin.function.functionspace.FunctionSpace).      Functional space of reference
         newspace   (dolfin.function.functionspace.FunctionSpace).      New functional space where to embedd u
         
     Output
         (numpy.ndarray) dofs of u in the new ambient space.
     """
-    uu = asvector(u, oldspace)
-    uu.set_allow_extrapolation(True)
-    unew = [uu(z) for z in coordinates(newspace)]
-    
-    return numpy.array(unew) if(not isinstance(u, torch.Tensor)) else coreof(u).tensor(unew)
+    if(len(u.shape)==1):
+        uu = asvector(u, oldspace)
+        uu.set_allow_extrapolation(True)
+        unew = [uu(z) for z in coordinates(newspace)]
+        return numpy.array(unew) if(not isinstance(u, torch.Tensor)) else coreof(u).tensor(unew)
+    else:
+        unew = [embedd(a, V1, V2) for a in u]
+        return numpy.stack(unew) if(not isinstance(u, torch.Tensor)) else torch.stack(unew)
 
 def coordinates(space):
     """Returns the coordinates of the degrees of freedom for the given functional space.
