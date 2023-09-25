@@ -60,7 +60,7 @@ def embedd(u, oldspace, newspace):
     """
     uu = asvector(u, oldspace)
     uu.set_allow_extrapolation(True)
-    unew = [uu(z) for z in fe.coordinates(newspace)]
+    unew = [uu(z) for z in coordinates(newspace)]
     
     return numpy.array(unew) if(not isinstance(u, torch.Tensor)) else coreof(u).tensor(unew)
 
