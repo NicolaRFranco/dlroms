@@ -58,7 +58,7 @@ def embedd(u, oldspace, newspace):
     Output
         (numpy.ndarray) dofs of u in the new ambient space.
     """
-    uu = fe.asvector(u, oldspace)
+    uu = asvector(u, oldspace)
     uu.set_allow_extrapolation(True)
     unew = [uu(z) for z in fe.coordinates(newspace)]
     
