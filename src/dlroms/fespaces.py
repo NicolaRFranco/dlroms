@@ -65,7 +65,7 @@ def embedd(u, oldspace, newspace):
         unew = [uu(z) for z in coordinates(newspace)]
         return numpy.array(unew) if(not isinstance(u, torch.Tensor)) else coreof(u).tensor(unew)
     else:
-        unew = [embedd(a, V1, V2) for a in u]
+        unew = [embedd(a, oldspace, newspace) for a in u]
         return numpy.stack(unew) if(not isinstance(u, torch.Tensor)) else torch.stack(unew)
 
 def coordinates(space):
