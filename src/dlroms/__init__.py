@@ -6,5 +6,6 @@ import dlroms.fespaces as fe
 import matplotlib.pyplot as plt
 
 def plot(*args, **kwargs):
+  from torch import Tensor
   newargs = [(a if not isinstance(a, Tensor) else a.cpu().numpy())  for a in args]
   plt.plot(*newargs, **kwargs)
