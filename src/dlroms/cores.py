@@ -1,6 +1,6 @@
 from numpy import load as npload
 from numpy.random import rand as nprand, randn as nprandn
-from torch import device, Tensor, cat, zeros as tzeros, float as tfloat, tensor as ttensor
+from torch import device as dev, Tensor, cat, zeros as tzeros, float as tfloat, tensor as ttensor
 
 class Core(object):
     """Class for managing CPU and GPU Pytorch tensors. Objects of this class have the following attributes.
@@ -17,9 +17,9 @@ class Core(object):
         
         self.dtype = tfloat
         if(device.lower() == "cpu"):
-            self.device = device("cpu")
+            self.device = dev("cpu")
         else:
-            self.device = device("cuda:0")
+            self.device = dev("cuda:0")
                         
     def tensor(self, *arrays):
         """Transfers a collection of arrays to the corresponding core and turns them into a torch (float) tensors.
