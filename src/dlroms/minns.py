@@ -4,7 +4,6 @@ from dlroms import dnns
 import numpy as np
 import torch
 import dolfin
-from fenics import FunctionSpace
 from scipy.sparse.csgraph import dijkstra
 
 def area(P, A, B):
