@@ -1,5 +1,6 @@
-import numpy
-import torch
+from numpy import load as npload
+from numpy.random import rand as nprand, randn as nprandn
+from torch import device, Tensor, cat, zeros as tzeros, float as tfloat, tensor as ttensor
 
 class Core(object):
     """Class for managing CPU and GPU Pytorch tensors. Objects of this class have the following attributes.
@@ -14,11 +15,11 @@ class Core(object):
         Input
             device  (str)   Device to be used (not case-sensitive). Accepted strings are 'CPU' and 'GPU'."""
         
-        self.dtype = torch.float
+        self.dtype = tfloat
         if(device.lower() == "cpu"):
-            self.device = torch.device("cpu")
+            self.device = device("cpu")
         else:
-            self.device = torch.device("cuda:0")
+            self.device = device("cuda:0")
                         
     def tensor(self, *arrays):
         """Transfers a collection of arrays to the corresponding core and turns them into a torch (float) tensors.
@@ -30,9 +31,9 @@ class Core(object):
             tuple of torch.Tensor objects.
         """
         if(len(arrays)==1):
-            return torch.tensor(arrays[0], dtype = self.dtype, device = self.device)
+            return ttensor(arrays[0], dtype = self.dtype, device = self.device)
         else:    
-            return (*[torch.tensor(array, dtype = self.dtype, device = self.device) for array in arrays],)
+            return (*[ttensor(array, dtype = self.dtype, device = self.device) for array in arrays],)
     
     def zeros(self, *shape):
         """Returns a tensor with all entries equal to zero.
@@ -43,7 +44,7 @@ class Core(object):
         Output
             (torch.Tensor).
         """
-        return torch.zeros(*shape, dtype = self.dtype, device = self.device)
+        return tzeros(*shape, dtype = self.dtype, device = self.device)
             
     def load(self, *paths):
         """Loads a list of arrays into a single tensor.
@@ -56,8 +57,8 @@ class Core(object):
             (torch.Tensor)."""
         res = []
         for path in paths:
-            res.append(self.tensor(numpy.load(path)))
-        return torch.cat(tuple(res))
+            res.append(self.tensor(npload(path)))
+        return cat(tuple(res))
     
     def rand(self, *dims):
         """Returns a tensor with random entries sampled uniformely from [0,1].
@@ -67,7 +68,7 @@ class Core(object):
             
         Output
             (torch.Tensor)."""
-        return self.tensor(numpy.random.rand(*dims))
+        return self.tensor(nprand(*dims))
     
     def randn(self, *dims):
         """Returns a tensor with random entries sampled independently from the normal distribution N(0,1).
@@ -77,7 +78,7 @@ class Core(object):
             
         Output
             (torch.Tensor)."""
-        return self.tensor(numpy.random.randn(*dims))
+        return self.tensor(nprandn(*dims))
         
     def __eq__(self, other):
         """Compares two cores.
@@ -101,7 +102,7 @@ def coreof(u):
     Output
         (dlroms.cores.Core)."""
     
-    if(isinstance(u, torch.Tensor)):
+    if(isinstance(u, Tensor)):
         if(u.device == CPU.device):
             return CPU
         elif(u.device == GPU.device):
