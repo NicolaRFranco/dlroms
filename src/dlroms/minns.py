@@ -1,6 +1,5 @@
 import matplotlib.pyplot as plt
 from dlroms.cores import CPU, GPU
-from dlroms import fespaces
 from dlroms import dnns
 import numpy as np
 import torch
@@ -16,8 +15,9 @@ def area(P, A, B):
 
 class Local(dnns.Sparse):
     def __init__(self, x1, x2, support, activation = dnns.leakyReLU):
-        coordinates1 = x1 if(isinstance(x1, np.ndarray)) else fespaces.coordinates(x1)
-        coordinates2 = x2 if(isinstance(x2, np.ndarray)) else fespaces.coordinates(x2)
+        from dlroms.fespaces import coordinates
+        coordinates1 = x1 if(isinstance(x1, np.ndarray)) else coordinates(x1)
+        coordinates2 = x2 if(isinstance(x2, np.ndarray)) else coordinates(x2)
         M = 0
         dim = len(coordinates1[0])
         for j in range(dim):
@@ -66,9 +66,10 @@ class Navigator(object):
     
 class Geodesic(dnns.Sparse):
     def __init__(self, domain, x1, x2, support, accuracy = 1, activation = dnns.leakyReLU):
-        coordinates1 = x1 if(isinstance(x1, np.ndarray)) else fespaces.coordinates(x1)
-        coordinates2 = x2 if(isinstance(x2, np.ndarray)) else fespaces.coordinates(x2)
-        navigator = Navigator(domain, fespaces.mesh(domain, resolution = accuracy))
+        from dlroms.fespaces import coordinates, mesh
+        coordinates1 = x1 if(isinstance(x1, np.ndarray)) else coordinates(x1)
+        coordinates2 = x2 if(isinstance(x2, np.ndarray)) else coordinates(x2)
+        navigator = Navigator(domain, mesh(domain, resolution = accuracy))
         
         E1 = navigator.finde(coordinates1).reshape(-1,1)
         E2 = navigator.finde(coordinates2).reshape(1,-1)
