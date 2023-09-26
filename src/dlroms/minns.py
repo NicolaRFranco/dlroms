@@ -3,7 +3,6 @@ from dlroms.cores import CPU, GPU
 from dlroms import dnns
 import numpy as np
 import torch
-import dolfin
 from scipy.sparse.csgraph import dijkstra
 
 def area(P, A, B):
@@ -92,10 +91,12 @@ class Operator(dnns.Sparse):
         
 class Bilinear(Operator):
     def __init__(self, operator, space, vspace = None, bcs = []):
+        from dolfin.function.argument import TrialFunction, TestFunction
+        from dolfin.fem.assembling import assemble
         space1 = space
         space2 = space if(vspace == None) else vspace 
-        v1, v2 = dolfin.function.argument.TrialFunction(space1), dolfin.function.argument.TestFunction(space2)
-        M = dolfin.fem.assembling.assemble(operator(v1, v2))
+        v1, v2 = TrialFunction(space1), TestFunction(space2)
+        M = assemble(operator(v1, v2))
         for bc in bcs:
             bc.apply(M)
         super(Bilinear, self).__init__(M.array())
@@ -113,13 +114,15 @@ class Norm(Bilinear):
 class L2(Norm):
     def __init__(self, space):
         def operator(u,v):
-            return dolfin.inner(u, v)*dolfin.dx
+            from dolfin import inner, dx
+            return inner(u, v)*dx
         super(L2, self).__init__(operator, space)
     
 class H1(Norm):
     def __init__(self, space):
         def operator(u,v):
-            return dolfin.inner(u, v)*dolfin.dx + dolfin.inner(dolfin.grad(u), dolfin.grad(v))*dolfin.dx
+            from dolfin import inner, dx, grad
+            return inner(u, v)*dx + inner(grad(u), grad(v))*dx
         super(H1, self).__init__(operator, space)
         
 class Linf(dnns.Weightless):
@@ -128,8 +131,11 @@ class Linf(dnns.Weightless):
     
 class Integral(dnns.Dense):
     def __init__(self, space):
-        v1, v2 = dolfin.function.argument.TrialFunction(space), dolfin.function.argument.TestFunction(space)
-        M = dolfin.fem.assembling.assemble(dolfin.inner(v1,v2)*dolfin.dx).array()
+        from dolfin.function.argument import TrialFunction, TestFunction
+        from dolfin.fem.assembling import assemble
+        from dolfin import inner, dx
+        v1, v2 = TrialFunction(space), TestFunction(space)
+        M = assemble(inner(v1,v2)*dx).array()
         super(Integral, self).__init__(M.shape[0], 1, activation = None)
         self.zeros()
         self.load(np.sum(M, axis = 1).reshape(1,-1))
@@ -147,11 +153,14 @@ class L1(Integral):
 class Divergence(Operator):
     def __init__(self, spacein, spaceout):
         fSpace = spaceout
-        vSpace = spacein
-        a, b, c = dolfin.function.argument.TrialFunction(vSpace), dolfin.function.argument.TestFunction(fSpace), dolfin.function.argument.TrialFunction(fSpace)
-        A = dolfin.fem.assembling.assemble(dolfin.div(a)*b*dolfin.dx)
+        vSpace = spacein        
+        from dolfin.function.argument import TrialFunction, TestFunction
+        from dolfin.fem.assembling import assemble
+        from dolfin import div, dx
+        a, b, c = TrialFunction(vSpace), TestFunction(fSpace), TrialFunction(fSpace)
+        A = assemble(div(a)*b*dx)
         A = A.array().T
-        M = dolfin.fem.assembling.assemble(b*c*dolfin.dx).array()
+        M = assemble(b*c*dx).array()
         lumped = np.diag(1.0/np.sum(M, axis = 0))
         D = np.dot(A, lumped)
         super(Divergence, self).__init__(D) 
