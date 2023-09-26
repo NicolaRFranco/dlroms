@@ -1,22 +1,27 @@
 import matplotlib.pyplot as plt
 import numpy
 import torch
-import dolfin
-import mshr
+import warnings
 from dlroms import gifs
 from dlroms.cores import coreof
-from ufl.finiteelement.mixedelement import VectorElement, FiniteElement
-from ufl.finiteelement.enrichedelement import NodalEnrichedElement
-from fenics import FunctionSpace
-from fenics import Function
-from fenics import set_log_active
-set_log_active(False)
+try:
+    import dolfin
+    from ufl.finiteelement.mixedelement import VectorElement, FiniteElement
+    from ufl.finiteelement.enrichedelement import NodalEnrichedElement
+    from fenics import FunctionSpace
+    from fenics import Function
+    from fenics import set_log_active    
+    set_log_active(False)
 
-dx = dolfin.dx
-ds = dolfin.ds
-grad = dolfin.grad
-inner = dolfin.inner
-div = dolfin.div
+    dx = dolfin.dx
+    ds = dolfin.ds
+    grad = dolfin.grad
+    inner = dolfin.inner
+    div = dolfin.div
+except:
+    warnings.warn("Either dolfin or fenics are not available. Some functions might not be available or work as expected")
+
+
 
 def space(mesh, obj, deg, scalar = True, bubble = False):
     """Returns the Finite Element (FE) space of specified type (e.g. continuous/discontinuous galerkin) and degree.
@@ -148,7 +153,8 @@ def polygon(points):
     Output
         (mshr.cpp.Polygon).
     """
-    return mshr.cpp.Polygon([point(p) for p in points])
+    from mshr.cpp import Polygon
+    return Polygon([point(p) for p in points])
 
 def rectangle(p1, p2):
     """Creates a rectangle given two opposed vertices.
@@ -160,7 +166,8 @@ def rectangle(p1, p2):
     Output
         (mshr.cpp.Rectangle)
     """
-    return mshr.cpp.Rectangle(point(p1), point(p2))
+    from mshr.cpp import Rectangle
+    return Rectangle(point(p1), point(p2))
 
 def circle(x0, r):
     """Creates a circle of given center and radius.
@@ -172,7 +179,8 @@ def circle(x0, r):
     Output
         (mshr.cpp.Circle)
     """
-    return mshr.cpp.Circle(point(x0), r)
+    from mshr.cpp import Circle
+    return Circle(point(x0), r)
 
 def mesh(domain, resolution):
     """Discretizes a given domain using the specified resolution. Note: always results in unstructured triangular meshes.
@@ -190,7 +198,8 @@ def mesh(domain, resolution):
     Remark: this method relies on the CGAL backend and is NOT deterministic. Running the same command may yields slightly different meshes.
     For better reproducibility, it is suggested to generate the mesh once and then rely on methods such as fespaces.save and fespaces.load.
     """
-    return mshr.cpp.generate_mesh(domain, resolution = resolution)
+    from mshr.cpp import generate_mesh
+    return generate_mesh(domain, resolution = resolution)
 
 def unitsquaremesh(n, ny = None):
     """Yields a structured triangular (rectangular) mesh on the unit square [0,1]^2.
