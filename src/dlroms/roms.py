@@ -16,6 +16,10 @@ def euclidean(v, squared = False):
     e2norm = v.pow(2).sum(axis = -1)
     return e2norm if squared else e2norm.sqrt()
 
+def neuclidean(v, squared = False):
+    e2norm = v.pow(2).mean(axis = -1)
+    return e2norm if squared else e2norm.sqrt()
+
 def snapshots(n, sampler, core = GPU, verbose = False):
     """Samples a collection of snapshots for a given FOM solver."""
     clock = Clock()    
