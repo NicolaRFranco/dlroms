@@ -17,6 +17,7 @@ from time import perf_counter
 from dlroms.cores import CPU, GPU
 from IPython.display import clear_output
 import os
+import warnings
 
 ReLU = torch.nn.ReLU()
 leakyReLU = torch.nn.LeakyReLU(0.1) 
@@ -929,6 +930,7 @@ class Clock(object):
         
 def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True, until = None, nvalid = 0, conv = num2p,
           best = False, cleanup = True, dropout = 0.0):
+    warnings.warn("This function is deprecated. Consider using the DFNN wrapper in dlroms.roms, and then calling the class method 'train': e.g., new_dnn = DFNN(dnn), new_dnn.train(...).")
     optimizer = optim(dnn.parameters(), lr = lr)
     ntest = len(mu)-ntrain
     mutrain, utrain, mutest, utest = mu[:(ntrain-nvalid)], u[:(ntrain-nvalid)], mu[-ntest:], u[-ntest:]
