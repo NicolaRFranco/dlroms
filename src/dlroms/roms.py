@@ -191,7 +191,11 @@ class ROM(Consecutive):
                     optimizer.step(closure)
 
             with torch.no_grad():
-                if(self.l2().isnan().item()):
+                try:
+                    broken = self.l2().isnan().item()
+                except:
+                    broken = False
+                if(broken):
                     break
                 err.append([errorf(getout(Utrain), self(*Mtrain)).item(),
                             errorf(getout(Utest), self(*Mtest)).item(),
