@@ -41,6 +41,9 @@ class Layer(torch.nn.Module):
         if(activation == None):
             self.rho = torch.nn.Identity()
         self.core = CPU
+
+    def coretype(self):
+        return self.core
         
     def w(self):
         """Returns the weights of the layer."""
@@ -607,7 +610,10 @@ class Consecutive(torch.nn.Sequential):
     
     Objects of this class support indexing, so that self[k] returns the kth Layer in the architecture.
     """
-    
+
+    def coretype(self):
+        return self[0].coretype()
+        
     def scale(self, factor):
         """Scales all layers in the architecture (see Layer.scale)."""
         for nn in self:
