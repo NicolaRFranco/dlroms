@@ -140,6 +140,20 @@ class ROM(Consecutive):
         
     def forward(self, *args):
         raise RuntimeError("No forward method specified!")
+
+    def solve(self, *args):
+        newargs = []
+        for arg in args:
+            datum = arg if isinstance(arg, torch.Tensor) else self.core.tensor(arg)
+            newargs.append(datum.unsqueeze(0))
+        output = self.forward(*newargs)
+        if(isinstance(output, torch.Tensor)):
+            return output[0]
+        else:
+            return tuple([out[0] for out in output])
+
+    def predict(self, *args):
+        return self.solve(*args)
            
     def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0, 
               verbose = True, refresh = True, notation = 'e', title = None, batchsize = None):
