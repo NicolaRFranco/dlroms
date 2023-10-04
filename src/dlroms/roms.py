@@ -144,7 +144,7 @@ class ROM(Consecutive):
     def solve(self, *args):
         newargs = []
         for arg in args:
-            datum = arg if isinstance(arg, torch.Tensor) else self.core.tensor(arg)
+            datum = arg if isinstance(arg, torch.Tensor) else self.coretype().tensor(arg)
             newargs.append(datum.unsqueeze(0))
         output = self.forward(*newargs)
         if(isinstance(output, torch.Tensor)):
