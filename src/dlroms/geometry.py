@@ -74,12 +74,12 @@ class Circle(Domain):
         return 'Disk(%d) = {%f, %f, 0.0, %f};\n' % (index,self.p[0], self.p[1], self.r), index+1
 
 class Polygon(Domain):
-      def __init__(self, *points):
-            self.p = points
-            if(numpy.linalg.norm(numpy.array(points[0])- numpy.array(points[-1]))>1e-15):
-                raise RuntimeError("First and last point should coincide.")
-            self.index = 0
-            self.dim = 2
+    def __init__(self, *points):
+        self.p = points
+        if(numpy.linalg.norm(numpy.array(points[0])- numpy.array(points[-1]))>1e-15):
+            raise RuntimeError("First and last point should coincide.")
+        self.index = 0
+        self.dim = 2
 
     def script(self, index = 1):
         res = ""
