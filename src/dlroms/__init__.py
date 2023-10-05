@@ -10,20 +10,8 @@
 #
 # Please cite the Author if you use this code for your work/research.
 
-from dlroms.minns import L2, H1, Local, Geodesic
-from dlroms.dnns import Dense, train, Clock, num2p
-from dlroms.roms import POD, project, snapshots, PODerrors, mre, mse, ROM, euclidean, boxplot, regcoeff, PODNN, DLROM, DFNN, mrei, msei, projectdown, projectup
-from dlroms.cores import CPU, GPU
-import dlroms.fespaces as fe
-import matplotlib.pyplot as plt
-
 from IPython.display import clear_output
 import os
-
-def plot(*args, **kwargs):
-  from torch import Tensor
-  newargs = [(a if not isinstance(a, Tensor) else a.cpu().numpy())  for a in args]
-  plt.plot(*newargs, **kwargs)
 
 def setcolab():
   try:
@@ -41,3 +29,14 @@ def setcolab():
   clear_output(wait = True)
   print("Both fenics and gmsh are installed.")
   
+from dlroms.minns import L2, H1, Local, Geodesic
+from dlroms.dnns import Dense, train, Clock, num2p
+from dlroms.roms import POD, project, snapshots, PODerrors, mre, mse, ROM, euclidean, boxplot, regcoeff, PODNN, DLROM, DFNN, mrei, msei, projectdown, projectup
+from dlroms.cores import CPU, GPU
+import dlroms.fespaces as fe
+import matplotlib.pyplot as plt
+
+def plot(*args, **kwargs):
+  from torch import Tensor
+  newargs = [(a if not isinstance(a, Tensor) else a.cpu().numpy())  for a in args]
+  plt.plot(*newargs, **kwargs)
