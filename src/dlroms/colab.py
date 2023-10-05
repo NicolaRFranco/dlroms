@@ -27,4 +27,4 @@ def setcolab():
     os.system('wget "https://fem-on-colab.github.io/releases/gmsh-install.sh" -O "/tmp/gmsh-install.sh" && bash "/tmp/gmsh-install.sh"')
 
   clear_output(wait = True)
-  print("Both fenics and gmsh are installed.")
+  print("Both fenics and gmsh are installed. Please restart Runtime in order to operate.")
