@@ -163,10 +163,14 @@ def polygon(points):
         points  (tuple)  Collection of points describing the polygon.
         
     Output
-        (mshr.cpp.Polygon).
+        (mshr.cpp.Polygon or dlroms.geometry.Polygon, depending on the package available).
     """
-    from mshr.cpp import Polygon
-    return Polygon([point(p) for p in points])
+    try:
+        from mshr.cpp import Polygon
+        return Polygon([point(p) for p in points])
+    except:
+        from dlroms.geometry import Polygon
+        return Polygon(*points)
 
 def rectangle(p1, p2):
     """Creates a rectangle given two opposed vertices.
@@ -176,10 +180,14 @@ def rectangle(p1, p2):
         p2  (tuple)     Coordinates of the vertix opposed to p1.
         
     Output
-        (mshr.cpp.Rectangle)
+        (mshr.cpp.Rectangle or dlroms.geometry.Rectangle, depending on the package available).
     """
-    from mshr.cpp import Rectangle
-    return Rectangle(point(p1), point(p2))
+    try:
+        from mshr.cpp import Rectangle
+        return Rectangle(point(p1), point(p2))
+    except:
+        from dlroms.geometry import Rectangle
+        return Rectangle(p1, p2)
 
 def circle(x0, r):
     """Creates a circle of given center and radius.
@@ -189,20 +197,31 @@ def circle(x0, r):
         r   (float)     Radius.
         
     Output
-        (mshr.cpp.Circle)
+        (mshr.cpp.Circle or dlroms.geometry.Circle, depending on the package available).
     """
-    from mshr.cpp import Circle
-    return Circle(point(x0), r)
+    try:
+        from mshr.cpp import Circle
+        return Circle(point(x0), r)
+    except:
+        from dlroms.geometry import Circle
+        return Circle(x0, r)
 
-def mesh(domain, resolution):
+def mesh(domain, **kwargs):
     """Discretizes a given domain using the specified resolution. Note: always results in unstructured triangular meshes.
     
     Input
-        domain      (mshr.cpp.CSGGeometry)  Abstract domain. Can be obtained via calls such as fespaces.polygon, fespaces.rectangle, etc.
-                                            Domains can also be defined as union (or difference) of simpler domains (simply by employing
-                                            the + and - operators).
-                        
-        resolution  (int)                   Resolution level. Intuitively, doubling the resolution halfs the mesh stepsize.
+        domain      (mshr.cpp.CSGGeometry or dlroms.geometry.Domain)  Abstract domain. Can be obtained via calls such as fespaces.polygon,
+                                                                      fespaces.rectangle, etc. Domains can also be defined as union (or 
+                                                                      difference) of simpler domains (simply by employing the + and -
+                                                                      operators).
+        Available keyword argument:                
+        resolution  (int)                                             Resolution level. Intuitively, doubling the resolution halfs the
+                                                                      mesh stepsize. Only works if mshr is installed.
+                                                                      
+        stepsize    (float)                                           Mesh stepsize. Only used if mshr is not available but gmsh is.
+
+        structured  (bool)                                            Whether to build a structured mesh or not (if possible).
+                                                                      Only used if mshr is not available but gmsh is.        
         
     Output
         (dolfin.cpp.mesh.Mesh).   
@@ -210,8 +229,16 @@ def mesh(domain, resolution):
     Remark: this method relies on the CGAL backend and is NOT deterministic. Running the same command may yields slightly different meshes.
     For better reproducibility, it is suggested to generate the mesh once and then rely on methods such as fespaces.save and fespaces.load.
     """
-    from mshr.cpp import generate_mesh
-    return generate_mesh(domain, resolution = resolution)
+    try;
+        from mshr.cpp import generate_mesh
+        return generate_mesh(domain, resolution = kwargs['resolution'])
+    except:
+        from dlroms.geometry import mesh as generate_mesh
+        structured = True
+        if('structured' in kwargs.keys()):
+            structured = kwargs['structured']
+        return generate_mesh(domain, stepsize = kwargs['stepsize'], structured = structured)
+        
 
 def unitsquaremesh(n, ny = None):
     """Yields a structured triangular (rectangular) mesh on the unit square [0,1]^2.
