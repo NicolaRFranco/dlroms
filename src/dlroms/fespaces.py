@@ -229,7 +229,7 @@ def mesh(domain, **kwargs):
     Remark: this method relies on the CGAL backend and is NOT deterministic. Running the same command may yields slightly different meshes.
     For better reproducibility, it is suggested to generate the mesh once and then rely on methods such as fespaces.save and fespaces.load.
     """
-    try;
+    try:
         from mshr.cpp import generate_mesh
         return generate_mesh(domain, resolution = kwargs['resolution'])
     except ImportError:
