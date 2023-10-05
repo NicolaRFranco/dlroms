@@ -9,26 +9,7 @@
 #     DOI: https://doi.org/10.1007/s10915-023-02331-1
 #
 # Please cite the Author if you use this code for your work/research.
-
-from IPython.display import clear_output
-import os
-
-def setcolab():
-  try:
-    import dolfin
-  except ImportError:
-    print("Installing fenics... this should take about 30-60 seconds.")
-    os.system('wget "https://fem-on-colab.github.io/releases/fenics-install.sh" -O "/tmp/fenics-install.sh" && bash "/tmp/fenics-install.sh"')
-
-  try:
-    import gmsh
-  except ImportError:
-    print("Installing gmsh... this should take about 30-60 seconds.")
-    os.system('wget "https://fem-on-colab.github.io/releases/gmsh-install.sh" -O "/tmp/gmsh-install.sh" && bash "/tmp/gmsh-install.sh"')
-
-  clear_output(wait = True)
-  print("Both fenics and gmsh are installed.")
-  
+ 
 from dlroms.minns import L2, H1, Local, Geodesic
 from dlroms.dnns import Dense, train, Clock, num2p
 from dlroms.roms import POD, project, snapshots, PODerrors, mre, mse, ROM, euclidean, boxplot, regcoeff, PODNN, DLROM, DFNN, mrei, msei, projectdown, projectup
