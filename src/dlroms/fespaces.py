@@ -168,7 +168,7 @@ def polygon(points):
     try:
         from mshr.cpp import Polygon
         return Polygon([point(p) for p in points])
-    except:
+    except ImportError:
         from dlroms.geometry import Polygon
         return Polygon(*points)
 
@@ -185,7 +185,7 @@ def rectangle(p1, p2):
     try:
         from mshr.cpp import Rectangle
         return Rectangle(point(p1), point(p2))
-    except:
+    except ImportError:
         from dlroms.geometry import Rectangle
         return Rectangle(p1, p2)
 
@@ -202,7 +202,7 @@ def circle(x0, r):
     try:
         from mshr.cpp import Circle
         return Circle(point(x0), r)
-    except:
+    except ImportError:
         from dlroms.geometry import Circle
         return Circle(x0, r)
 
@@ -232,7 +232,7 @@ def mesh(domain, **kwargs):
     try;
         from mshr.cpp import generate_mesh
         return generate_mesh(domain, resolution = kwargs['resolution'])
-    except:
+    except ImportError:
         from dlroms.geometry import mesh as generate_mesh
         structured = True
         if('structured' in kwargs.keys()):
