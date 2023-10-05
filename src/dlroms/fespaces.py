@@ -18,8 +18,12 @@ from dlroms import gifs
 from dlroms.cores import coreof
 try:
     import dolfin
-    from ufl.finiteelement.mixedelement import VectorElement, FiniteElement
-    from ufl.finiteelement.enrichedelement import NodalEnrichedElement
+    try:
+        from ufl.finiteelement.mixedelement import VectorElement, FiniteElement
+        from ufl.finiteelement.enrichedelement import NodalEnrichedElement
+    except:
+        from ufl_legacy.finiteelement.mixedelement import VectorElement, FiniteElement
+        from ufl_legacy.finiteelement.enrichedelement import NodalEnrichedElement
     from fenics import FunctionSpace
     from fenics import Function
     from fenics import set_log_active    
