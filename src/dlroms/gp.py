@@ -57,7 +57,7 @@ class GaussianRandomField(object):
         
     def sample(self, seed, coeff = False, upto = None):
         np.random.seed(seed)
-        till = upto if upto!= None else len(self.svalues)
+        till = upto if upto!= None else sum(1-np.isnan(self.svalues))
         c = np.random.randn(self.n)
         v = np.dot(self.eigenfunctions[:,:till], self.svalues[:till]*c[:till])
         if(coeff):
