@@ -44,7 +44,7 @@ class GaussianRandomField(object):
         """
         self.cov = kernel
         self.n = upto
-        if(domain == None and geodesic_accuracy == None):
+        if(domain is None and geodesic_accuracy is None):
             distances = None
         else:
             space = fespaces.space(mesh, 'CG', 1)
@@ -96,7 +96,7 @@ def KarhunenLoeve(mesh, covariance, nphis, distances = None):
         M = dolfin.fem.assembling.assemble(u*v*dolfin.dx)
         M = M.array()
 
-        if(distances == None):
+        if(distances is None):
             L = coords.shape[0]
             c0 = np.repeat(coords, L, axis=0)
             c1 = np.tile(coords, [L,1])
