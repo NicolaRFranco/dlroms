@@ -14,6 +14,7 @@ from dlroms import fespaces
 import dolfin
 import numpy as np
 import scipy.sparse.linalg as spla
+from dlroms.minns import Navigator
 
 class GaussianRandomField(object):
     """Class for managing isotropic Gaussian random fields over general domains. Objects of this class have the following attributes,
