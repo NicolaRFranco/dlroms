@@ -35,7 +35,8 @@ try:
     inner = dolfin.inner
     div = dolfin.div
 except:
-    warnings.warn("Either dolfin or fenics are not available. Some functions might not be available or work as expected")
+    warnings.warn("Either dolfin or fenics are not available. Some functions might not be available or work as expected. " +
+                  "If you are workin on Colab, consider running dlroms.colab.setup()")
 
 
 
