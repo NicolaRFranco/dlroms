@@ -26,21 +26,33 @@ class GaussianRandomField(object):
                                             eigenfunctions (which equals self.n).                                
     """
     
-    def __init__(self, mesh, kernel, upto):
+    def __init__(self, mesh, kernel, upto, domain = None, geodesic_accuracy = None):
         """Constructs a Gaussian random field object.
         
         Input
-            mesh    (dolfin.cpp.mesh.Mesh)      Mesh discretizing the spatial domain.
-            kernel  (function)                  A function describing the covariance kernel. Such function should only accept a single argument, the
-                                                latter being the distance between two points. Namely, if G is the random field, then cov(|x_i - x_j|)
-                                                should return the covariance between G(x_i) and G(x_j). Clearly, this only allows for isotropic fields.
-            n               (int)               Rank at which the field is approximated.
-            upto    (int)                       Number of eigenfunctions to compute. Equivalently, rank at which the process is 
-                                                approximated via its Karhunen-Loeve expansion.
+            mesh                (dolfin.cpp.mesh.Mesh)      Mesh discretizing the spatial domain.
+            kernel              (function)                  A function describing the covariance kernel. Such function should only accept a single argument, the
+                                                            latter being the distance between two points. Namely, if G is the random field, then cov(|x_i - x_j|)
+                                                            should return the covariance between G(x_i) and G(x_j). Clearly, this only allows for isotropic fields.
+            upto                (int)                       Number of eigenfunctions to compute. Equivalently, rank at which the process is 
+                                                            approximated via its Karhunen-Loeve expansion.
+            Optional:
+            domain              (mshr.cpp.Geometry)         Domain of reference (optional). Only used for kernels described in terms of geodesic distances.
+            geodesic_accuracy   (int)                       Accuracy of the geodesic distance (optional). Only used for kernels described in terms of geodesic
+                                                            distances.
         """
+        self.cov = kernel
         self.n = upto
-        self.svalues, self.eigenfunctions = KarhunenLoeve(mesh, kernel, self.n)
-        self.svalues = np.sqrt(self.svalues)       
+        if(domain == None and geodesic_accuracy == None):
+            distances = None
+        else:
+            space = fespaces.space(mesh, 'CG', 1)
+            navigator = Navigator(domain, fespaces.mesh(domain, resolution = geoaccuracy))
+            E1 = navigator.finde(fespaces.coordinates(space)).reshape(-1,1)
+            E2 = navigator.finde(fespaces.coordinates(space)).reshape(1,-1)
+            distances = navigator.D[E1, E2]            
+        self.svalues, self.eigenfunctions = KarhunenLoeve(mesh, self.cov, self.n, distances = distances)
+        self.svalues = np.sqrt(self.svalues) 
         
     def sample(self, seed, coeff = False, upto = None):
         np.random.seed(seed)
@@ -53,13 +65,16 @@ class GaussianRandomField(object):
             return v      
     
         
-def KarhunenLoeve(mesh, covariance, nphis):
+def KarhunenLoeve(mesh, covariance, nphis, distances = None):
     """Solves the eigenvalue problem for a given covariance operator.
     
     Input
         mesh        (dolfin.cpp.mesh.Mesh)      Mesh discretizing the spatial domain.
         covariance  (function)                  Covariance kernel (isotropic case). See dlroms.gp.GaussianRandomFields.
         nphis       (int)                       Number of eigenfunctions to compute.
+
+        Optional:
+        distances   (numpy.ndarray)             Pairwise distances between x_i and x_j. If None, Euclidean distances are used.
         
     Output
         (tuple of numpy.ndarray). Returns eigenvalues and the eigenfunctions. The former are stored in a vector of length nphis,
@@ -80,10 +95,13 @@ def KarhunenLoeve(mesh, covariance, nphis):
         M = dolfin.fem.assembling.assemble(u*v*dolfin.dx)
         M = M.array()
 
-        L = coords.shape[0]
-        c0 = np.repeat(coords, L, axis=0)
-        c1 = np.tile(coords, [L,1])
-        r = np.abs(np.linalg.norm(c0-c1, axis=1))
+        if(distances == None):
+            L = coords.shape[0]
+            c0 = np.repeat(coords, L, axis=0)
+            c1 = np.tile(coords, [L,1])
+            r = np.abs(np.linalg.norm(c0-c1, axis=1))
+        else:
+            r = distances
         C = cov(r)
         C.shape = [L,L]
 
