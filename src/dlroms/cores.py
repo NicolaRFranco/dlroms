@@ -120,6 +120,6 @@ def coreof(u):
         elif(u.device == GPU.device):
             return GPU
         else:
-            raise RuntimeError("Tensor is stored on an unknown core.")
+            raise RuntimeError("Unknown core.")
     else:
         raise RuntimeError("Can only retrieve the core of a torch tensor.")
