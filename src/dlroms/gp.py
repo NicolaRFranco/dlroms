@@ -95,9 +95,9 @@ def KarhunenLoeve(mesh, covariance, nphis, distances = None):
         coords = coords[dof2vert]
         M = dolfin.fem.assembling.assemble(u*v*dolfin.dx)
         M = M.array()
-
-        if(distances is None):
-            L = coords.shape[0]
+        L = coords.shape[0]
+        
+        if(distances is None):            
             c0 = np.repeat(coords, L, axis=0)
             c1 = np.tile(coords, [L,1])
             r = np.abs(np.linalg.norm(c0-c1, axis=1))
