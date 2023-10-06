@@ -51,7 +51,10 @@ class GaussianRandomField(object):
             navigator = Navigator(domain, fespaces.mesh(domain, resolution = geodesic_accuracy))
             E1 = navigator.finde(fespaces.coordinates(space)).reshape(-1,1)
             E2 = navigator.finde(fespaces.coordinates(space)).reshape(1,-1)
-            distances = navigator.D[E1, E2]            
+            distances = navigator.D[E1, E2]   
+            d = navigator.A.shape[-1]
+            extras = np.linalg.norm(((navigator.A+navigator.B+navigator.C)/3.0)[E1].reshape(-1, d) - fespaces.coordinates(space), axis = -1)
+            distances = distances + extras.reshape(-1,1) + extras.reshape(1,-1)
         self.svalues, self.eigenfunctions = KarhunenLoeve(mesh, self.cov, self.n, distances = distances)
         self.svalues = np.sqrt(self.svalues) 
         
