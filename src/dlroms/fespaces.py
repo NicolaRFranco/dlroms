@@ -35,8 +35,7 @@ try:
     inner = dolfin.inner
     div = dolfin.div
 except:
-    warnings.warn("Either dolfin or fenics are not available. Some functions might not be available or work as expected. If you are working on Colab, consider running dlroms.colab.setup()")
-
+    warnings.warn("Either dolfin or fenics are not available. Some functions might not be available or work as expected.")
 
 
 def space(mesh, obj, deg, scalar = True, bubble = False):
