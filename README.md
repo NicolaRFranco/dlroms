@@ -44,7 +44,7 @@ Note: if you are using **conda**, make sure that **pip** is available. If not, y
     conda install pip
 
 ### Advanced version
-The advanced version integrates the basic on with additional tools coming from the FEniCS library, and it is particularly suited for handling mesh-based functional data, allowing users to: compute integral and Sobolev norms, produce norm-aware POD projections, visualize mesh-based data and more. Installation is recommended on Linux and MacOS. To install (and enable) the advanced version run
+The advanced version integrates the basic one with additional tools coming from the FEniCS library, allowing users to: compute integral and Sobolev norms, produce norm-aware POD projections, visualize mesh-based data and more. Installation is recommended on Linux and MacOS. To install (and enable) the advanced version run
 
     pip install git+https://github.com/NicolaRFranco/dlroms.git
 
