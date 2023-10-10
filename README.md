@@ -2,8 +2,12 @@
 
 A suitable documentation will be available soon.
 
-How it works
-^^^^^^^^^^^^
+##### Table of Contents  
+[Headers](#headers)  
+[Emphasis](#emphasis)  
+...snip...    
+<a name="headers"/>
+## Headers
 
     X' = Theta(X) * Xi.
 
