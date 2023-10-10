@@ -2,6 +2,7 @@
 
 A suitable documentation will be available soon.
 
-.. code-block:: text
-
     X' = Theta(X) * Xi.
+
+    aa
+AA
