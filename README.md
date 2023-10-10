@@ -2,6 +2,9 @@
 
 A suitable documentation will be available soon.
 
+How it works
+^^^^^^^^^^^^
+
     X' = Theta(X) * Xi.
 
     aa
