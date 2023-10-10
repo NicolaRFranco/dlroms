@@ -11,7 +11,7 @@
 [3] Franco et al. (2023). Mesh-Informed Neural Networks for Operator Learning in Finite Element Spaces, *Journal of Scientific Computing*, 97(2), 35.
     DOI: https://doi.org/10.1007/s10915-023-02331-1
 
-This library was written, and is currently maintained, by **Nicola Rares Franco**, **Ph.D.**, MOX, Politecnico di Milano. For a tensorflow alternative, we recommend the repositories by Stefania Fresca, Ph.D. (link: https://github.com/stefaniafresca).
+This library was written, and is currently maintained, by **Nicola Rares Franco**, **Ph.D.**, MOX, Politecnico di Milano. For a tensorflow alternative, we recommend the repositories by [Stefania Fresca, Ph.D](https://github.com/stefaniafresca).
 
 
 ##### Table of Contents  
@@ -52,7 +52,7 @@ and integrate the installation manually by installing [FEniCS](https://fenicspro
 Note: as before, make sure that pip is available if you are using conda.
 
 ### Colab installation
-You can also install the advanced version on Colab by running the following instructions in your Colab notebook
+You can also install the advanced version on Colab by running the following instructions
 
     try:
       from dlroms import*
@@ -61,7 +61,7 @@ You can also install the advanced version on Colab by running the following inst
       from dlroms.colab import setup
       setup()
 
-Once all the dependencies have been installed, **make sure to restart the notebook Runtime.** If the kernel is not restarted, you will only have access to the basic version.
+Once all the dependencies have been installed, **make sure to restart your notebook.** If the runtime is not restarted, you will only have access to the basic version.
 
 <a name="overview"/>
 
