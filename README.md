@@ -21,9 +21,9 @@ This library was written, and is currently maintained, by **Nicola Rares Franco*
 
 ## 1. DL-ROMs in a nutshell
 
-    Work in progress.
+    Work in progress. This documentation is currently under construction.
 
-Work in progress.
+Work in progress. This documentation is currently under construction.
 
 
 
