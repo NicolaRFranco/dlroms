@@ -90,6 +90,6 @@ The DLROMs library consists of several modules, which we may synthesize as follo
   
 * **dlroms.roms**</br> Core library that allows users to construct data-driven Reduced Order Models. Includes basic algorithms, such as POD, and abstract classes for incorporating and training neural network models. It can be used to implement ROM strategies such as [POD-NN](https://doi.org/10.1016/j.jcp.2018.02.037), autoencoder based [DL-ROMs](https://doi.org/10.1090/mcom/3781), and more.
 
-We rekarm that the main algorithms, classes and routines are also included in the **\_\_init\_\_.py** module. Thus, instead of navigating the whole library, users can easily import the main features of the DLROMs package by simply running
+We remark that the main algorithms, classes and routines are also included in the **\_\_init\_\_.py** module. Thus, instead of navigating the whole library, users can easily import the main features of the DLROMs package by simply running
 
     from dlroms import*
