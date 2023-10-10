@@ -63,7 +63,7 @@ You can also install the advanced version on Colab by running the following inst
       from dlroms.colab import setup
       setup()
 
-Once all the dependencies have been installed, **make sure to restart your notebook.** If the runtime is not restarted, you will only have access to the basic version.
+Once all the dependencies have been installed, **make sure you restart your notebook.** If the runtime is not restarted, you will only have access to the basic version.
 
 
 </br>
