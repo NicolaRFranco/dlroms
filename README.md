@@ -9,14 +9,18 @@
 [3] Franco et al. (2023). [Mesh-Informed Neural Networks for Operator Learning in Finite Element Spaces](https://doi.org/10.1007/s10915-023-02331-1), *Journal of Scientific Computing*, 97(2), 35.
 
 This library was written, and is currently maintained, by **Nicola Rares Franco**, **Ph.D.**, MOX, Politecnico di Milano. For a tensorflow alternative, we recommend the repositories by [Stefania Fresca, Ph.D](https://github.com/stefaniafresca).
+</br>
+</br>
 
 
-##### Table of Contents  
+## Table of Contents  
 [1. DL-ROMs in a nutshell](#dlroms)  
+
 [2. Installation](#installation)  
+
 [3. Modules overview](#overview) 
 
-
+</br>
 <a name="dlroms"/>
 
 ## 1. DL-ROMs in a nutshell
@@ -27,6 +31,7 @@ Work in progress. This documentation is currently under construction.
 
 
 
+</br>
 <a name="installation"/>
 
 ## 2. Installation
@@ -60,6 +65,8 @@ You can also install the advanced version on Colab by running the following inst
 
 Once all the dependencies have been installed, **make sure to restart your notebook.** If the runtime is not restarted, you will only have access to the basic version.
 
+
+</br>
 <a name="overview"/>
 
 ## 3. Modules overview
