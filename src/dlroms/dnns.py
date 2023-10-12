@@ -807,7 +807,7 @@ class Consecutive(torch.nn.Sequential):
         self.training = True
             
     def inherit(self, other, azzerate = True):
-        """Inherits the networks parameters from a given architecture (cf. Layer.inherit). 
+        """Inherits the networks parameters from a given architecture (cf. dlroms.dnns.Layer.inherit). 
         The NN 'other' should have a depth less or equal to that of 'self'.
         
         Input:
@@ -820,17 +820,13 @@ class Consecutive(torch.nn.Sequential):
         return [string+".npz"]
         
 class Parallel(Consecutive):
-    """Architecture with multiple layers that work in parallel but channel-wise. Implemented as a subclass of Consecutive.
+    """Architecture with multiple layers that work in parallel but channel-wise. Implemented as a subclass of dlroms.dnns.Consecutive.
     If f1,...,fk is the collection of layers, then Parallel(f1,..,fk)(x) = [f1(x1),..., fk(xk)], where x = [x1,...,xk] is
     structured in k channels."""
-    
-    def __init__(self, *args):
-        super(Parallel, self).__init__(*args)
         
     def forward(self, x):
         res = [self[k](x[:,k]) for k in range(len(self))]
-        return torch.stack(res, axis = 1)
-    
+        return torch.stack(res, axis = 1)    
                     
     def __add__(self, other):
         """Augments the current architecture by connecting it with a second one.
@@ -854,13 +850,9 @@ class Parallel(Consecutive):
                 return Consecutive(self, other) 
     
 class Channelled(Consecutive):
-    """Architecture with multiple layers that work in parallel but channel-wise. Implemented as a subclass of Consecutive.
-    If f1,...,fk is the collection of layers, then Channelled(f1,..,fk)(x) = fk(xk)+...+f1(x1), where x = [x1,...,xk] is
-    structured in k channels."""
-    
-    def __init__(self, *args):
-        super(Channelled, self).__init__(*args)
-        
+    """Architecture with multiple layers that work in parallel but channel-wise. Implemented as a subclass of dlroms.dnns.Consecutive.
+    If f1,...,fk is the collection of layers, then Channelled(f1,..,fk)(x) = f1(x1)+...+fk(xk), where x = [x1,...,xk] is
+    structured in k channels."""        
     def forward(self, x):
         res = 0.0
         k = 0
@@ -869,6 +861,12 @@ class Channelled(Consecutive):
             k += 1
         return res
 
+class Branched(Parallel):
+        """Architecture with multiple layers that work in parallel but have a common root. Implemented as a subclass of dlroms.dnns.Parallel.
+    If f1,...,fk is the collection of layers, then Parallel(f1,..,fk)(x) = [f1(x),..., fk(x)]."""
+    def forward(self, x):
+        res = [self[k](x) for k in range(len(self))]
+        return torch.stack(res, axis = 1)
 
 class Clock(object):
     """Class for measuring (computational) time intervals. Objects of this class have the following attributes:
