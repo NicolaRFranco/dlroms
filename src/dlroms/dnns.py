@@ -862,7 +862,7 @@ class Channelled(Consecutive):
         return res
 
 class Branched(Parallel):
-        """Architecture with multiple layers that work in parallel but have a common root. Implemented as a subclass of dlroms.dnns.Parallel.
+    """Architecture with multiple layers that work in parallel but have a common root. Implemented as a subclass of dlroms.dnns.Parallel.
     If f1,...,fk is the collection of layers, then Parallel(f1,..,fk)(x) = [f1(x),..., fk(x)]."""
     def forward(self, x):
         res = [self[k](x) for k in range(len(self))]
