@@ -53,10 +53,16 @@ def snapshots(n, sampler, core = GPU, verbose = False):
 
 def POD(U, k, inner = None):
     """Principal Orthogonal Decomposition of the snapshots matrix U into k modes."""
-    m = inner.W().detach().cpu().numpy() if inner!=None else np.eye(U.shape[-1])
-    U0 = U.cpu().numpy() if isinstance(U, torch.Tensor) else U
-    
-    M = np.dot(np.dot(U0, m), U0.T)
+
+    if(isinstance(U, torch.tensor)):
+        U0 = U.cpu().numpy()
+        M = inner.dualize(U).mm(U.T).cpu().numpy()
+    else:
+        U0 = U
+        if(inner is None):
+            M = np.dot(U0, U0.T)
+        else: 
+            raise RuntimeError("Non Euclidean inner products are only supported for torch.Tensors. Please convert U to a torch.Tensor (see, e.g., dlroms.cores).")
     N = U.shape[0]
     w, v = eigh(M, eigvals = (N-k, N-1))
     basis, eigenvalues = np.dot((v/np.sqrt(w)).T, U0), w
@@ -104,11 +110,10 @@ def project(vbasis, u, orth = True, inner = None):
          else:
             return projectup(vbasis, projectdown(vbasis, u, inner = inner))
 
-def QRgramschmidt(V, inner = None):
-    """Orthonormalizes a collection of matrices. V should be a torch tensor in the format batch dimension x space dimension x number of basis."""
-    vbasis = torch.linalg.qr(V, mode = 'reduced')[0]
-    return vbasis if(inner is None) else vbasis/inner.W().sum(axis = 0).reshape(1,-1,1).sqrt()
-
+def QRgramschmidt(V):
+    """Orthonormalizes a collection of matrices. V should be a torch tensor in the format batch dimension x space dimension x number of basis. Only supports Euclidean inner product."""
+    return torch.linalg.qr(V, mode = 'reduced')[0]
+    
 def gramschmidt(W, inner = None):
     V = W.transpose(2,1)
     norm  = lambda v: v.pow(2).sum(axis = -1).sqrt() if (inner is None) else inner(v)
