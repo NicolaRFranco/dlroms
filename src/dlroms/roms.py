@@ -85,7 +85,7 @@ def projectdown(vbasis, u, inner = None):
         n, nb = vbasis.shape[:2]
         return vbasis.reshape(n, nb, -1).matmul(u.reshape(-1,nh,1))
       else:          
-        return projectdown(vbasis, u.mm(inner.W()))
+        return projectdown(vbasis, inner.dualize(u))
 
 def projectup(vbasis, c):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
@@ -120,14 +120,13 @@ def gramschmidt(W, inner = None):
     U = 0*V
     U[:, :, 0] = V[:, :, 0] / norm(V[:, :, 0]).reshape(-1,1)
     k = V.shape[-1]
-    M = None if (inner is None) else inner.W()
     for i in range(1, k):
         U[:,:,i] = V[:,:,i]
         for j in range(i):
             if(inner is None):
                 U[:,:,i] = U[:,:,i] - (U[:,:,j]*U[:,:,i]).sum(axis = -1).reshape(-1,1)*U[:,:,j]
             else:
-                U[:,:,i] = U[:,:,i] - ((U[:,:,j].mm(M))*U[:,:,i]).sum(axis = -1).reshape(-1,1)*U[:,:,j]
+                U[:,:,i] = U[:,:,i] - (inner.dualize(U[:,:,j])*U[:,:,i]).sum(axis = -1).reshape(-1,1)*U[:,:,j]
         U[:,:,i] = U[:,:,i] / norm(U[:,:,i]).reshape(-1,1)
     return U.transpose(1,2)
 
