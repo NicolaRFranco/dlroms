@@ -121,13 +121,13 @@ def gramschmidt(W, inner = None):
     U[:, :, 0] = V[:, :, 0] / norm(V[:, :, 0]).reshape(-1,1)
     k = V.shape[-1]
     for i in range(1, k):
-        U[:,:,i] = V[:,:,i]
+        ui = V[:,:,i]
         for j in range(i):
             if(inner is None):
-                U[:,:,i] = U[:,:,i] - (U[:,:,j]*U[:,:,i]).sum(axis = -1).reshape(-1,1)*U[:,:,j]
+                ui = ui - (U[:,:,j]*ui).sum(axis = -1).reshape(-1,1)*U[:,:,j]
             else:
-                U[:,:,i] = U[:,:,i] - (inner.dualize(U[:,:,j])*U[:,:,i]).sum(axis = -1).reshape(-1,1)*U[:,:,j]
-        U[:,:,i] = U[:,:,i] / norm(U[:,:,i]).reshape(-1,1)
+                ui = ui - (inner.dualize(U[:,:,j])*ui).sum(axis = -1).reshape(-1,1)*U[:,:,j]
+        U[:,:,i] = ui / norm(ui).reshape(-1,1)
     return U.transpose(1,2)
 
 def PAs(V1, V2, orth = True):
