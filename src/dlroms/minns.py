@@ -111,17 +111,25 @@ class Bilinear(Operator):
         M = assemble(operator(v1, v2))
         for bc in bcs:
             bc.apply(M)
-        super(Bilinear, self).__init__(M.array())
+        super(Bilinear, self).__init__(M.array())        
+        self.M = torch.sparse_coo_tensor(self.loc, self.weight, (self.in_d, self.in_d))
         
-    def forward(self, x):
-        return x[0].mm(self.W().mm(x[1].T))  
+    def W(self):
+        return self.M
+        
+    def dualize(self, x):
+        return torch.sparse.mm(self.M, x.T).T
+    
+    def cuda(self):
+        self.M = self.M.cuda()
+
+    def forward(self, x1, x2):
+        return self.dualize(x1).mm(x2.T)
         
 class Norm(Bilinear):
     def forward(self, x, squared = False):
-        if(squared):
-            return (x.mm(self.W())*x).sum(axis = -1)   
-        else:
-            return (x.mm(self.W())*x).sum(axis = -1).sqrt()   
+        y = (self.dualize(x)*x).sum(axis = -1)
+        return y if squared else y.sqrt() 
         
 class L2(Norm):
     def __init__(self, space):
