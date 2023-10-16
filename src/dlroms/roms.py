@@ -121,7 +121,7 @@ def gramschmidt(W, inner = None):
     U[:, :, 0] = V[:, :, 0] / norm(V[:, :, 0]).reshape(-1,1)
     k = V.shape[-1]
     for i in range(1, k):
-        uis = [V[:,:,i]]
+        uis = [V[:,:,i]+0.0]
         for j in range(i):
             ui = uis[-1]
             if(inner is None):
