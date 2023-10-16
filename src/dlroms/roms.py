@@ -54,7 +54,7 @@ def snapshots(n, sampler, core = GPU, verbose = False):
 def POD(U, k, inner = None):
     """Principal Orthogonal Decomposition of the snapshots matrix U into k modes."""
 
-    if(isinstance(U, torch.tensor)):
+    if(isinstance(U, torch.Tensor)):
         U0 = U.cpu().numpy()
         M = inner.dualize(U).mm(U.T).cpu().numpy()
     else:
