@@ -74,12 +74,12 @@ def projectdown(vbasis, u, inner = None):
     if(len(vbasis.shape)<3):
       return projectdown(vbasis.unsqueeze(0), u, inner = inner)
     else:
-      if(inner!=None):
-        return projectdown(vbasis, u.mm(inner.W()))
-      else:
+      if(inner is None):
         nh = np.prod(u[0].shape)
         n, nb = vbasis.shape[:2]
         return vbasis.reshape(n, nb, -1).matmul(u.reshape(-1,nh,1))
+      else:          
+        return projectdown(vbasis, u.mm(inner.W()))
 
 def projectup(vbasis, c):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
@@ -99,17 +99,15 @@ def project(vbasis, u, orth = True, inner = None):
     if(len(vbasis.shape)<3):
         return project(vbasis.unsqueeze(0), u, orth, inner)
     else:
-        if(inner!=None):
+         if(orth):
+            return project(gramschmidt(vbasis.transpose(1,2), inner = inner).transpose(2,1), u, orth = False, inner = inner)
+         else:
             return projectup(vbasis, projectdown(vbasis, u, inner = inner))
-        else:
-            if(orth):
-                return project(gramschmidt(vbasis.transpose(1,2)).transpose(2,1), u, orth = False)
-            else:
-                return projectup(vbasis, projectdown(vbasis, u))
 
-def gramschmidt(V):
+def gramschmidt(V, inner = None):
     """Orthonormalizes a collection of matrices. V should be a torch tensor in the format batch dimension x space dimension x number of basis."""
-    return torch.linalg.qr(V, mode = 'reduced')[0]
+    vbasis = torch.linalg.qr(V, mode = 'reduced')[0]
+    return vbasis if(inner is None) else vbasis/inner.W().sum(axis = 0).reshape(*tuple((len(V.shape)-1)*[1] + [-1])).sqrt()
 
 def PAs(V1, V2, orth = True):
     """List of principal angles between the subspaces in V1 and V2. The Vj's should be in the format
@@ -121,12 +119,12 @@ def PAs(V1, V2, orth = True):
     vals = torch.linalg.svdvals(A1.transpose(dim0 = 1, dim1 = 2).matmul(A2)).clamp(min=0,max=1)
     return vals.arccos()
         
-def PODerrors(u, upto, ntrain, error, inner = None):
+def PODerrors(u, upto, ntrain, error, inner = None, orth = False):
     """Projection errors over the test set for an increasing number of modes."""
     pod, svalues = POD(u[:ntrain], k = upto, inner = inner)
     errors = []
     for n in range(1, upto+1):
-        uproj = project(pod[:n], u[ntrain:], inner = inner)
+        uproj = project(pod[:n], u[ntrain:], inner = inner, orth = orth)
         errors.append(error(u[ntrain:], uproj))
     return errors
 
