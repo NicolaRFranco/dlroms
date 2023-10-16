@@ -248,6 +248,7 @@ class ROM(Consecutive):
                                     break
 
         clock.stop()
+        optimizer.zero_grad()
         if(verbose):
             print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
         err = np.stack(err)
