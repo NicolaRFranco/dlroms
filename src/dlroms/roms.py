@@ -100,14 +100,31 @@ def project(vbasis, u, orth = True, inner = None):
         return project(vbasis.unsqueeze(0), u, orth, inner)
     else:
          if(orth):
-            return project(gramschmidt(vbasis.transpose(1,2), inner = inner).transpose(2,1), u, orth = False, inner = inner)
+            return project(gramschmidt(vbasis, inner = inner), u, orth = False, inner = inner)
          else:
             return projectup(vbasis, projectdown(vbasis, u, inner = inner))
 
-def gramschmidt(V, inner = None):
+def QRgramschmidt(V, inner = None):
     """Orthonormalizes a collection of matrices. V should be a torch tensor in the format batch dimension x space dimension x number of basis."""
     vbasis = torch.linalg.qr(V, mode = 'reduced')[0]
     return vbasis if(inner is None) else vbasis/inner.W().sum(axis = 0).reshape(1,-1,1).sqrt()
+
+def gramschmidt(W, inner = None):
+    V = W.transpose(2,1)
+    norm  = lambda v: v.pow(2).sum(axis = -1).sqrt() if (inner is None) else inner(v)
+    U = 0*V
+    U[:, :, 0] = V[:, :, 0] / norm(V[:, :, 0]).reshape(-1,1)
+    k = V.shape[-1]
+    M = None if (inner is None) else inner.W()
+    for i in range(1, k):
+        U[:,:,i] = V[:,:,i]
+        for j in range(i):
+            if(inner is None):
+                U[:,:,i] = U[:,:,i] - (U[:,:,j]*U[:,:,i]).sum(axis = -1).reshape(-1,1)*U[:,:,j]
+            else:
+                U[:,:,i] = U[:,:,i] - (U[:,:,j].mm(M).mm(U[:,:,i].T)).diag().reshape(-1,1)*U[:,:,j]
+        U[:,:,i] = U[:,:,i] / norm(U[:,:,i]).reshape(-1,1)
+    return U.transpose(1,2)
 
 def PAs(V1, V2, orth = True):
     """List of principal angles between the subspaces in V1 and V2. The Vj's should be in the format
