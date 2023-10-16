@@ -122,7 +122,7 @@ def gramschmidt(W, inner = None):
             if(inner is None):
                 U[:,:,i] = U[:,:,i] - (U[:,:,j]*U[:,:,i]).sum(axis = -1).reshape(-1,1)*U[:,:,j]
             else:
-                U[:,:,i] = U[:,:,i] - (U[:,:,j].mm(M).mm(U[:,:,i].T)).diag().reshape(-1,1)*U[:,:,j]
+                U[:,:,i] = U[:,:,i] - ((U[:,:,j].mm(M))*U[:,:,i]).sum(axis = -1).reshape(-1,1)*U[:,:,j]
         U[:,:,i] = U[:,:,i] / norm(U[:,:,i]).reshape(-1,1)
     return U.transpose(1,2)
 
