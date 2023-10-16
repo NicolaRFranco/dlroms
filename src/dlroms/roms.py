@@ -117,18 +117,17 @@ def QRgramschmidt(V):
 def gramschmidt(W, inner = None):
     V = W.transpose(2,1)
     norm  = lambda v: v.pow(2).sum(axis = -1).sqrt() if (inner is None) else inner(v)
-    U = 0.0*V
-    U[:, :, 0] = V[:, :, 0] / norm(V[:, :, 0]).reshape(-1,1)
+    U = [V[:, :, 0] / norm(V[:, :, 0]).reshape(-1, 1)]
     k = V.shape[-1]
     for i in range(1, k):
-        ui = V[:,:,i] + 0.0
+        ui = V[:, :, i] + 0.0
         for j in range(i):
             if(inner is None):
-                ui = ui - (U[:,:,j]*ui).sum(axis = -1).reshape(-1,1)*U[:,:,j]
+                ui = ui - (U[j]*ui).sum(axis = -1).reshape(-1,1)*U[j]
             else:
-                ui = ui - (inner.dualize(U[:,:,j])*ui).sum(axis = -1).reshape(-1,1)*U[:,:,j]
-        U[:,:,i] = ui / norm(ui).reshape(-1,1)
-    return U.transpose(1,2)
+                ui = ui - (inner.dualize(U[j])*ui).sum(axis = -1).reshape(-1,1)*U[j]
+        U.append(ui / norm(ui).reshape(-1,1))
+    return torch.stack(U, axis = -1).transpose(1,2)
 
 def PAs(V1, V2, orth = True):
     """List of principal angles between the subspaces in V1 and V2. The Vj's should be in the format
