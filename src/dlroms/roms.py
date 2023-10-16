@@ -107,7 +107,7 @@ def project(vbasis, u, orth = True, inner = None):
 def gramschmidt(V, inner = None):
     """Orthonormalizes a collection of matrices. V should be a torch tensor in the format batch dimension x space dimension x number of basis."""
     vbasis = torch.linalg.qr(V, mode = 'reduced')[0]
-    return vbasis if(inner is None) else vbasis/inner.W().sum(axis = 0).reshape(*tuple((len(V.shape)-1)*[1] + [-1])).sqrt()
+    return vbasis if(inner is None) else vbasis/inner.W().sum(axis = 0).reshape(1,-1,1).sqrt()
 
 def PAs(V1, V2, orth = True):
     """List of principal angles between the subspaces in V1 and V2. The Vj's should be in the format
