@@ -34,7 +34,8 @@ The code below shows a simple example in which a naive DNN model is used as a DL
     p, Nh = 2, 501
 
     # Toy example of a FOM solver: given mu = [m0, m1], it returns u(x) = (m1-m0)x+m0, 
-    # i.e. the solution to: -u''=0 in (0,1), u(0)=m0, u(1)=m1. The solution u=u(x) is discretized over a uniform grid with 501 nodes.
+    # i.e. the solution to: -u''=0 in (0,1), u(0)=m0, u(1)=m1. 
+    # The solution u=u(x) is discretized over a uniform grid with 501 nodes.
     import numpy as np
     def FOMsolver(mu):
          x = np.linspace(0, 1, Nh)
