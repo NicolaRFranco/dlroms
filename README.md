@@ -1,5 +1,6 @@
 # DLROMs: a Python package for Deep Learning based Reduced Order Models
 
+
 **DLROMs** is a deep learning library for model order reduction that leverages on packages such as Pytorch and FEniCS. It comes with a basic version (no FEniCS required) and an advanced one. The techniques made available within this library are reminiscent of the following scientific articles: 
 
 [1] Franco et al. (2023). [A deep learning approach to reduced order modelling of parameter dependent partial differential equations](https://doi.org/10.1090/mcom/3781), *Mathematics of Computation*, 92 (340), 483-524.
@@ -9,9 +10,13 @@
 [3] Franco et al. (2023). [Mesh-Informed Neural Networks for Operator Learning in Finite Element Spaces](https://doi.org/10.1007/s10915-023-02331-1), *Journal of Scientific Computing*, 97(2), 35.
 
 This library was written, and is currently maintained, by **Nicola Rares Franco**, **Ph.D.**, MOX, Politecnico di Milano. For a tensorflow alternative, we recommend the repositories by [Stefania Fresca, Ph.D](https://github.com/stefaniafresca).
-</br>
-</br>
 
+```math
+\begin{align*}
+  y_1, \dots, y_n &\sim \int k\left(\cdot \mid \theta\right) P\left(\text{d}\theta\right) \\[3pt]
+  P &\sim \Pi
+\end{align*}
+```
 
 ## Table of Contents  
 [1. DL-ROMs in a nutshell](#dlroms)  
@@ -20,23 +25,18 @@ This library was written, and is currently maintained, by **Nicola Rares Franco*
 
 [3. Modules overview](#overview) 
 
-</br>
-<a name="dlroms"/>
 
-## 1. DL-ROMs in a nutshell
+## 1. DL-ROMs in a nutshell {#dlroms}
 
-Deep learning based reduced order models are efficient model surrogates that can emulate the accuracy of classical numerical solvers (hereby referred to as FOM: Full Order Models) by learning from high-quality simulations. The idea goes as follows. Let $`\boldsymbol{\mu}\to \mathbf{u}_{\boldsymbol{\mu}}`$ represent the action of a FOM solver, which, given a parameter instance $`\boldsymbol{\mu}\in\mathbb{R}^{p}`$ returns the corresponding PDE solution $`\mathbf{u}_{\boldsymbol{\mu}}\in\mathbb{R}^{N_{h}}`$, here represented by means of a suitable dof vector.
+Deep learning based reduced order models are efficient model surrogates that can emulate the accuracy of classical numerical solvers (hereby referred to as FOM: Full Order Models) by learning from high-quality simulations. The idea goes as follows. Let $\boldsymbol{\mu}\to \mathbf{u}_{\boldsymbol{\mu}}$ represent the action of a FOM solver, which, given a parameter instance $\boldsymbol{\mu}\in\mathbb{R}^{p}$ returns the corresponding PDE solution $\mathbf{u}_{\boldsymbol{\mu}}\in\mathbb{R}^{N_{h}}$, here represented by means of a suitable dof vector.
 
     Work in progress. This documentation is currently under construction.
 
-Work in progress. This documentation is currently under construction.
+Work in progress. This documentation is currently under construction. 
 
 
 
-</br>
-<a name="installation"/>
-
-## 2. Installation
+## 2. Installation {#installation}
 ### Basic version
 The basic version of the DLROMs package allows users to create and train sophisticated neural network models, while also granting access to classical ROM techniques such as Principal Orthogonal Decomposition (POD). This version can be easily installed on Linux, Windows and MacOS. To install it, simply run
 
@@ -68,10 +68,8 @@ You can also install the advanced version on Colab by running the following inst
 Once all the dependencies have been installed, **make sure you restart your notebook.** If the runtime is not restarted, you will only have access to the basic version of the DLROMs package.
 
 
-</br>
-<a name="overview"/>
 
-## 3. Modules overview
+## 3. Modules overview {#overview}
 The DLROMs library consists of several modules, which we may synthesize as follows.
 
 * **dlroms.colab**</br> Integrative module for the installation in Colab.
