@@ -25,6 +25,8 @@ This library was written, and is currently maintained, by **Nicola Rares Franco*
 
 ## 1. DL-ROMs in a nutshell
 
+Deep learning based reduced order models are efficient model surrogates that can emulate the accuracy of classical numerical solvers (hereby referred to as FOM: Full Order Models) by learning from high-quality simulations. The idea goes as follows. Let $\boldsymbol{\mu}\to \mathbf{u}_{\boldsymbol{\mu}}$ represent the action of a FOM solver, which, given a parameter instance $\boldsymbol{\mu}\in\mathbb{R}^{p}$ returns the corresponding PDE solution $\mathbf{u}_{\boldsymbol{\mu}}\in\mathbb{R}^{N_{h}}$, here represented by means of a suitable dof vector.
+
     Work in progress. This documentation is currently under construction.
 
 Work in progress. This documentation is currently under construction.
