@@ -11,13 +11,6 @@
 
 This library was written, and is currently maintained, by **Nicola Rares Franco**, **Ph.D.**, MOX, Politecnico di Milano. For a tensorflow alternative, we recommend the repositories by [Stefania Fresca, Ph.D](https://github.com/stefaniafresca).
 
-```math
-\begin{align*}
-  y_1, \dots, y_n &\sim \int k\left(\cdot \mid \theta\right) P\left(\text{d}\theta\right) \\[3pt]
-  P &\sim \Pi
-\end{align*}
-```
-
 ## Table of Contents  
 [1. DL-ROMs in a nutshell](#dlroms)  
 
@@ -28,13 +21,62 @@ This library was written, and is currently maintained, by **Nicola Rares Franco*
 
 ## 1. DL-ROMs in a nutshell {#dlroms}
 
-Deep learning based reduced order models are efficient model surrogates that can emulate the accuracy of classical numerical solvers (hereby referred to as FOM: Full Order Models) by learning from high-quality simulations. The idea goes as follows. Let $\boldsymbol{\mu}\to \mathbf{u}_{\boldsymbol{\mu}}$ represent the action of a FOM solver, which, given a parameter instance $\boldsymbol{\mu}\in\mathbb{R}^{p}$ returns the corresponding PDE solution $\mathbf{u}_{\boldsymbol{\mu}}\in\mathbb{R}^{N_{h}}$, here represented by means of a suitable dof vector.
+Deep learning based reduced order models are efficient model surrogates that can emulate the accuracy of classical numerical solvers (hereby referred to as FOM: Full Order Models) by learning from high-quality simulations. The idea goes as follows. Let $\boldsymbol{\mu}\to u$ represent the action of a FOM solver, which, given a parameter instance $\boldsymbol{\mu}\in\mathbb{R}^{p}$ returns the corresponding PDE solution $u\in\mathbb{R}^{N_{h}}$, here represented by means of a suitable dof vector. Then, the construction of a DL-ROM can be sketched as:
 
-    Work in progress. This documentation is currently under construction.
+1. Collect and store high-fidelity data, $`M=[\boldsymbol{\mu}_{1};\dots;\boldsymbol{\mu}_{N}]\in\mathbb{R}^{N\times p}`$ and $`U=[u_{1};\dots;u_{N}]\in\mathbb{R}^{N\times N_{h}}`$, using the FOM solver.
+2. Initialize a DL-ROM module with trainable architectures $\psi_{1},\dots,\psi_{k}$.
+3. Train the DL-ROM components to learn the FOM data.
+4. Freeze the DL-ROM and use it whenever you like to: the computational cost is now negligible!
 
-Work in progress. This documentation is currently under construction. 
+The code below shows a simple example in which a naive DNN model is used as a DLROM. For more advanced approaches, such as POD-NN or autoencoder-enhanced DL-ROMs, we refer to the *dlroms.roms* module.
 
+    # Problem data
+    p, Nh = 2, 501
 
+    # Toy example of a FOM solver: given mu = [m0, m1], it returns u(x) = (m1-m0)x+m0, 
+    # i.e. the solution to: -u''=0 in (0,1), u(0)=m0, u(1)=m1. The solution u=u(x) is discretized over a uniform grid with 501 nodes.
+    import numpy as np
+    def FOMsolver(mu):
+         x = np.linspace(0, 1, Nh)
+         return (mu[1]-mu[0])*x + mu[0]
+
+    # Data generation
+    def sampler(seed):
+         np.random.seed(seed)
+         mu = np.random.rand(p)
+         return mu, FOMsolver(mu)
+
+    from dlroms.roms import snapshots, GPU # note: if GPU is note available, simply switch to CPU!
+    n = 100
+    M, U =  snapshots(n, sampler, core = GPU) 
+
+    # DNN design and initialization
+    from dlroms.dnns import Dense
+    from dlroms.roms import DFNN
+    network = Dense(p, 10) + Dense(10, 10) + Dense(10, Nh, activation = None)
+    model = DFNN(network) # build a ROM with "network" as a trainable object
+    model.He()   # random initialization
+    model.cuda() # trasfer to GPU
+
+    # Model training
+    from dlroms.roms import euclidean, mse
+    ntrain = int(0.5*n) # snapshots for training: the remaining ones are used for testing
+    model.train(M, U, ntrain = ntrain, loss = mse(euclidean), epochs = 50)
+    model.freeze()
+
+    # Use it online!
+    newmu = [0.25, 0.4]
+    model.solve(newmu) # single evaluation
+
+    newmus = GPU.tensor([[0.25, 0.4], [0.7, 0.1]])
+    model(newmus)      # multiple evaluations (faster than iterating)
+
+    # Plot
+    from dlroms import plot
+    plot(FOMsolver(newmu))
+    plot(model.solve(newmu), '--')
+
+Starting from this simple pipeline, the DL-ROM package then allows plenty of generalizations: complex customizable models based on multiple architecture that cooperate with each other, mesh-informed architectures, integral norms for Lebesgue/Sobolev like loss functions, and more! Furthermore, it naturally interacts with other powerful libraries such as numpy, scipy and fenics.
 
 ## 2. Installation {#installation}
 ### Basic version
