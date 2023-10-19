@@ -11,15 +11,8 @@
 
 This library was written, and is currently maintained, by **Nicola Rares Franco**, **Ph.D.**, MOX, Politecnico di Milano. For a tensorflow alternative, we recommend the repositories by [Stefania Fresca, Ph.D](https://github.com/stefaniafresca).
 
-## Table of Contents  
-[1. DL-ROMs in a nutshell](#dlroms)  
 
-[2. Installation](#installation)  
-
-[3. Modules overview](#overview) 
-
-
-## 1. DL-ROMs in a nutshell
+## DL-ROMs in a nutshell
 
 Deep learning based reduced order models are efficient model surrogates that can emulate the accuracy of classical numerical solvers (hereby referred to as FOM: Full Order Models) by learning from high-quality simulations. The idea goes as follows. Let $\boldsymbol{\mu}\to u$ represent the action of a FOM solver, which, given a parameter instance $\boldsymbol{\mu}\in\mathbb{R}^{p}$ returns the corresponding PDE solution $u\in\mathbb{R}^{N_{h}}$, here represented by means of a suitable dof vector. Then, the construction of a DL-ROM can be sketched as:
 
@@ -79,7 +72,7 @@ The code below shows a simple example in which a naive DNN model is used as a DL
 
 Starting from this simple pipeline, the DL-ROM package then allows plenty of generalizations: complex customizable models based on multiple architecture that cooperate with each other, mesh-informed architectures, integral norms for Lebesgue/Sobolev like loss functions, and more! Furthermore, it naturally interacts with other powerful libraries such as numpy, torch and fenics.
 
-## 2. Installation
+## Installation
 ### Basic version
 The basic version of the DLROMs package allows users to create and train sophisticated neural network models, while also granting access to classical ROM techniques such as Principal Orthogonal Decomposition (POD). This version can be easily installed on Linux, Windows and MacOS. To install it, simply run
 
@@ -112,7 +105,7 @@ Once all the dependencies have been installed, **make sure you restart your note
 
 
 
-## 3. Modules overview
+## Modules overview
 The DLROMs library consists of several modules, which we may synthesize as follows.
 
 * **dlroms.colab**</br> Integrative module for the installation in Colab.
