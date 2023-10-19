@@ -72,6 +72,12 @@ The code below shows a simple example in which a naive DNN model is used as a DL
 
 Starting from this simple pipeline, the DL-ROM package then allows plenty of generalizations: complex customizable models based on multiple architecture that cooperate with each other, mesh-informed architectures, integral norms for Lebesgue/Sobolev like loss functions, and more! Furthermore, it naturally interacts with other powerful libraries such as numpy, torch and fenics.
 
+The whole library is documented using native Python syntax and can be directly inspected using the *help* command. E.g.,
+
+     from dlroms.roms import POD
+     help(POD)
+
+
 ## Installation
 ### Basic version
 The basic version of the DLROMs package allows users to create and train sophisticated neural network models, while also granting access to classical ROM techniques such as Principal Orthogonal Decomposition (POD). This version can be easily installed on Linux, Windows and MacOS. To install it, simply run
@@ -114,7 +120,7 @@ The DLROMs library consists of several modules, which we may synthesize as follo
   
 * **dlroms.dnns**</br> For constructing, saving and loading basic neural network architectures.
   
-* **dlroms.minns**</br> An integrative module that allows users to create neural network architectures specifically tailored for mesh-based functional data, such as signals discretized via Finite Elements. It includes trainable models, such as [Mesh-Informed Neural Networks (MINNs)](https://doi.org/10.1007/s10915-023-02331-1), and nonlearnable architectures for computing integral norms, geodesic distances and more.
+* **dlroms.minns**</br> An integrative module that allows users to create neural network architectures specifically tailored for mesh-based functional data, such as signals discretized via Finite Elements. It includes trainable models, such as, for instance, [Mesh-Informed Neural Networks (MINNs)](https://doi.org/10.1007/s10915-023-02331-1), and nonlearnable architectures for computing integral norms, geodesic distances and more.
   
 * **dlroms.fespaces**</br> FEniCS based library for handling meshes and discretized functional data (visualization, dof-to-function conversion etc.).
   
