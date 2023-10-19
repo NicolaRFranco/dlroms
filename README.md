@@ -53,8 +53,8 @@ The code below shows a simple example in which a naive DNN model is used as a DL
     # DNN design and initialization
     from dlroms.dnns import Dense
     from dlroms.roms import DFNN
-    network = Dense(p, 10) + Dense(10, 10) + Dense(10, Nh, activation = None)
-    model = DFNN(network) # build a ROM with "network" as a trainable object
+    psi = Dense(p, 10) + Dense(10, 10) + Dense(10, Nh, activation = None)
+    model = DFNN(psi) # build a ROM with "psi" as a trainable object
     model.He()   # random initialization
     model.cuda() # trasfer to GPU
 
@@ -76,7 +76,7 @@ The code below shows a simple example in which a naive DNN model is used as a DL
     plot(FOMsolver(newmu))
     plot(model.solve(newmu), '--')
 
-Starting from this simple pipeline, the DL-ROM package then allows plenty of generalizations: complex customizable models based on multiple architecture that cooperate with each other, mesh-informed architectures, integral norms for Lebesgue/Sobolev like loss functions, and more! Furthermore, it naturally interacts with other powerful libraries such as numpy, scipy and fenics.
+Starting from this simple pipeline, the DL-ROM package then allows plenty of generalizations: complex customizable models based on multiple architecture that cooperate with each other, mesh-informed architectures, integral norms for Lebesgue/Sobolev like loss functions, and more! Furthermore, it naturally interacts with other powerful libraries such as numpy, torch and fenics.
 
 ## 2. Installation {#installation}
 ### Basic version
