@@ -56,7 +56,10 @@ def POD(U, k, inner = None):
 
     if(isinstance(U, torch.Tensor)):
         U0 = U.cpu().numpy()
-        M = inner.dualize(U).mm(U.T).cpu().numpy()
+        if(inner is None):
+            M = np.dot(U0, U0.T)
+        else:
+            M = inner.dualize(U).mm(U.T).cpu().numpy()
     else:
         U0 = U
         if(inner is None):
