@@ -160,12 +160,12 @@ class Layer(torch.nn.Module):
     def __mul__(self, number):
         """Creates a deep neural network by pasting 'number' copies of the same layer."""
         if(number > 1):
-            x = self + self
+            x = self.copy() + self.copy()
             for i in range(number-2):
-                x = x+self
+                x = x+self.copy()
             return x
         elif(number == 1):
-            return self
+            return self.copy()
         else:
             return 0.0
     
@@ -223,9 +223,7 @@ class Layer(torch.nn.Module):
         for p in ps:
             if(p.requires_grad):
                 res.append(p)
-                
         return res
-    
 
 class Dense(Layer):
     """Fully connected Layer."""
@@ -322,8 +320,7 @@ class Sparse(Layer):
         nnz = numpy.sum(A>0, axis = 1)[self.loc[1]]
         with torch.no_grad():
             self.weight = torch.nn.Parameter(self.core.tensor((2*numpy.random.rand(len(self.loc[0]))-1)*numpy.sqrt(3/nnz)))
-        
-            
+                 
     def W(self):
         W = self.core.zeros(self.in_d, self.out_d)
         W[self.loc] = self.weight
