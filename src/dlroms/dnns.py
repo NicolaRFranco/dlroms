@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 from time import perf_counter     
 from dlroms.cores import CPU, GPU
 from IPython.display import clear_output
+from copy import deepcopy
 import os
 import warnings
 
@@ -145,29 +146,13 @@ class Layer(torch.nn.Module):
             else:
                 return Consecutive(self, other)    
             
-    def __pow__(self, number):
-        """Creates a Parallel architecture by pasting 'number' copies of the same layer next to each other."""
-        if(number > 1):
-            l = [self]
-            for i in range(number-1):
-                l.append(self.copy())
-            return Parallel(*tuple(l))
-        elif(number == 1):
-            return self
-        else:
-            return 0.0
+    def __pow__(self, n):
+        """Creates a branched architecture by stacking n copies of the same layer."""
+        return Branched(*[deepcopy(self) for i in range(n)])
     
-    def __mul__(self, number):
-        """Creates a deep neural network by pasting 'number' copies of the same layer."""
-        if(number > 1):
-            x = self.copy() + self.copy()
-            for i in range(number-2):
-                x = x+self.copy()
-            return x
-        elif(number == 1):
-            return self.copy()
-        else:
-            return 0.0
+    def __mul__(self, n):
+        """Creates a deep neural network by connecting n consecutive copies of the same layer."""
+        return Consecutive(*[deepcopy(self) for i in range(n)])
     
     def __rmul__(self, number):
         """See self.__mul__."""
@@ -744,7 +729,11 @@ class Consecutive(torch.nn.Sequential):
                 layers = [self[i] for i in range(n1)]
                 layers.append(other)
                 return Consecutive(*tuple(layers))      
-        
+
+    def __pow__(self, n):
+        """Creates a branched architecture by stacking n copies of the same layer."""
+        return Branched(*[deepcopy(self) for i in range(n)])
+            
     def dof(self):
         """Total number of (learnable) weights and biases in the network."""
         res = 0
