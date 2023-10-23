@@ -133,17 +133,24 @@ class Norm(Bilinear):
         
 class L2(Norm):
     def __init__(self, space):
-        def operator(u,v):
+        def operator(u, v):
             from dolfin import inner, dx
             return inner(u, v)*dx
         super(L2, self).__init__(operator, space)
     
 class H1(Norm):
     def __init__(self, space):
-        def operator(u,v):
+        def operator(u, v):
             from dolfin import inner, dx, grad
             return inner(u, v)*dx + inner(grad(u), grad(v))*dx
         super(H1, self).__init__(operator, space)
+
+class H1_0(Norm):
+    def __init__(self, space):
+        def operator(u, v):
+            from dolfin import inner, dx, grad
+            return inner(grad(u), grad(v))*dx
+        super(H1_0, self).__init__(operator, space)
         
 class Linf(dnns.Weightless):
     def forward(self, x):
