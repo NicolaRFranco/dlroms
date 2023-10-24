@@ -16,6 +16,7 @@ import dolfin
 import numpy
 import gmsh
 import os
+from IPython.display import clear_output
 
 class Domain(object):
     def __init__(self, main, other, operation = None):
