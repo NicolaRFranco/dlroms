@@ -139,5 +139,5 @@ def mesh(domain, stepsize, structured = False):
         os.remove("%d_physical_region.xml" % idf)
     except:
         None
-    os.remove("%d.geo" % id)
+    os.remove("%d.geo" % idf)
     return mesh
