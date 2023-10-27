@@ -169,11 +169,11 @@ def polygon(points):
         (mshr.cpp.Polygon or dlroms.geometry.Polygon, depending on the package available).
     """
     try:
-        from mshr.cpp import Polygon
-        return Polygon([point(p) for p in points])
-    except ImportError:
         from dlroms.geometry import Polygon
         return Polygon(*points)
+    except ImportError:
+        from mshr.cpp import Polygon
+        return Polygon([point(p) for p in points])
 
 def rectangle(p1, p2):
     """Creates a rectangle given two opposed vertices.
@@ -186,11 +186,11 @@ def rectangle(p1, p2):
         (mshr.cpp.Rectangle or dlroms.geometry.Rectangle, depending on the package available).
     """
     try:
-        from mshr.cpp import Rectangle
-        return Rectangle(point(p1), point(p2))
-    except ImportError:
         from dlroms.geometry import Rectangle
         return Rectangle(p1, p2)
+    except ImportError:
+        from mshr.cpp import Rectangle
+        return Rectangle(point(p1), point(p2))
 
 def circle(x0, r):
     """Creates a circle of given center and radius.
@@ -203,11 +203,11 @@ def circle(x0, r):
         (mshr.cpp.Circle or dlroms.geometry.Circle, depending on the package available).
     """
     try:
-        from mshr.cpp import Circle
-        return Circle(point(x0), r)
-    except ImportError:
         from dlroms.geometry import Circle
         return Circle(x0, r)
+    except ImportError:
+        from mshr.cpp import Circle
+        return Circle(point(x0), r)
 
 def mesh(domain, **kwargs):
     """Discretizes a given domain using the specified resolution. Note: always results in unstructured triangular meshes.
@@ -233,15 +233,14 @@ def mesh(domain, **kwargs):
     For better reproducibility, it is suggested to generate the mesh once and then rely on methods such as fespaces.save and fespaces.load.
     """
     try:
-        from mshr.cpp import generate_mesh
-        return generate_mesh(domain, resolution = kwargs['resolution'])
-    except ImportError:
         from dlroms.geometry import mesh as generate_mesh
         structured = True
         if('structured' in kwargs.keys()):
             structured = kwargs['structured']
         return generate_mesh(domain, stepsize = kwargs['stepsize'], structured = structured)
-        
+    except ImportError:
+        from mshr.cpp import generate_mesh
+        return generate_mesh(domain, resolution = kwargs['resolution'])        
 
 def unitsquaremesh(n, ny = None):
     """Yields a structured triangular (rectangular) mesh on the unit square [0,1]^2.
