@@ -210,7 +210,7 @@ def circle(x0, r):
         return Circle(point(x0), r)
 
 def mesh(domain, **kwargs):
-    """Discretizes a given domain using the specified resolution. Note: always results in unstructured triangular meshes.
+    """Discretizes a given domain using the specified resolution. Note: structured meshes are only available if gmsh is installed.
     
     Input
         domain      (mshr.cpp.CSGGeometry or dlroms.geometry.Domain)  Abstract domain. Can be obtained via calls such as fespaces.polygon,
@@ -219,12 +219,12 @@ def mesh(domain, **kwargs):
                                                                       operators).
         Available keyword argument:                
         resolution  (int)                                             Resolution level. Intuitively, doubling the resolution halfs the
-                                                                      mesh stepsize. Only works if mshr is installed.
+                                                                      mesh stepsize. Only used if gmsh is not available but mshr is.
                                                                       
-        stepsize    (float)                                           Mesh stepsize. Only used if mshr is not available but gmsh is.
+        stepsize    (float)                                           Mesh stepsize. Only used gmsh is available.
 
         structured  (bool)                                            Whether to build a structured mesh or not (if possible).
-                                                                      Only used if mshr is not available but gmsh is.        
+                                                                      Only used gmsh is available.        
         
     Output
         (dolfin.cpp.mesh.Mesh).   
