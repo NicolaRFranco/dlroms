@@ -279,10 +279,10 @@ def asvector(u, space):
     
     Input
         u       (numpy.ndarray or torch.Tensor)                     Vector collecting the values of the function at the
-                                                                    degrees of freedom. If u has shape (,n), then
+                                                                    degrees of freedom. If u has shape (n,), then
                                                                     the functional space of interest should have n dof.
                                                                     
-        space   (dolfin.function.functionspace.FunctionSpace).      Functional space where u belongs.
+        space   (dolfin.function.functionspace.FunctionSpace).      Functional space to which u belongs.
     
     Output    
         (dolfin.function.function.Function). 
@@ -292,6 +292,26 @@ def asvector(u, space):
     udata = u if(not isinstance(u, torch.Tensor)) else u.detach().cpu().numpy()
     uv.vector()[:] = udata
     return uv
+
+def vtk(u, space, filename):
+    """Generates a VTK file (.vtu) for a given discretized function.
+    
+    Input
+        u        (numpy.ndarray or torch.Tensor)                     Vector collecting the values of the function at the
+                                                                     degrees of freedom. If u has shape (n,), then
+                                                                     the functional space of interest should have n dof.
+                                                                    
+        space    (dolfin.function.functionspace.FunctionSpace)       Functional space to which u belongs.
+
+        filename (str)                                               Name of the VTK file.
+        
+    """
+    import os
+    from fenics import File
+    vtkfile = File("%s.pvd" % filename)
+    vtkfile << asvector(u, space)
+    os.remove("%s.pvd" % filename)
+    os.rename("%s000000.vtu" % filename, "%s.vtu" % filename)
     
 def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "off", shrink = 0.8, levels = 200, cmap = None):
     """Plots mesh and functional objects.
