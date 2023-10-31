@@ -44,9 +44,9 @@ def snapshots(n, sampler, core = GPU, verbose = False, filename = None):
         mu0, u0 = sampler(seed)
         mu.append(mu0)
         u.append(u0)
+    clock.stop()
     if(verbose):
         clear_output()
-        clock.stop()
         print("Snapshots generated. Elapsed time: %s." % clock.elapsedTime())
     mu, u = np.stack(mu), np.stack(u)
     if(filename is None):
