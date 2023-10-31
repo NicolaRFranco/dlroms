@@ -32,7 +32,7 @@ def neuclidean(v, squared = False):
     e2norm = v.pow(2).mean(axis = -1)
     return e2norm if squared else e2norm.sqrt()
 
-def snapshots(n, sampler, core = GPU, verbose = False):
+def snapshots(n, sampler, core = GPU, verbose = False, filename = None):
     """Samples a collection of snapshots for a given FOM solver."""
     clock = Clock()    
     clock.start()
@@ -49,7 +49,10 @@ def snapshots(n, sampler, core = GPU, verbose = False):
         clock.stop()
         print("Snapshots generated. Elapsed time: %s." % clock.elapsedTime())
     mu, u = np.stack(mu), np.stack(u)
-    return core.tensor(mu, u)
+    if(filename is None):
+        return core.tensor(mu, u)
+    else:
+        np.savez("%s.npz" % filename.replace(".npz",""), mu = mu, u = u, time = clock.elapsed())
 
 def POD(U, k, inner = None):
     """Principal Orthogonal Decomposition of the snapshots matrix U into k modes."""
