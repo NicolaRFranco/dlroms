@@ -54,7 +54,7 @@ def snapshots(n, sampler, core = GPU, verbose = False, filename = None):
     else:
         np.savez("%s.npz" % filename.replace(".npz",""), mu = mu, u = u, time = clock.elapsed())
 
-def POD(U, k, inner = None):
+def POD(U, k, inner = None, svalues = True):
     """Principal Orthogonal Decomposition of the snapshots matrix U into k modes."""
 
     if(isinstance(U, torch.Tensor)):
@@ -75,9 +75,9 @@ def POD(U, k, inner = None):
     basis, eigenvalues = np.flip(basis, axis = 0)+0, np.flip(eigenvalues)+0
     if(isinstance(U, torch.Tensor)):
         core = coreof(U)
-        return core.tensor(basis), core.tensor(eigenvalues)
+        return (core.tensor(basis), core.tensor(eigenvalues)) if svalues else core.tensor(basis)
     else:
-        return basis, eigenvalues
+        return (basis, eigenvalues) if svalues else basis
 
 def projectdown(vbasis, u, inner = None):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
