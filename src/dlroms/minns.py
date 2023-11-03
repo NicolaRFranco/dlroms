@@ -12,6 +12,7 @@
 
 import matplotlib.pyplot as plt
 from dlroms.cores import CPU, GPU
+import dlroms.fespaces as fe
 from dlroms import dnns
 import numpy as np
 import torch
@@ -35,7 +36,7 @@ class Local(dnns.Sparse):
             M = M + dj**2
         M = np.sqrt(M) < support
         super(Local, self).__init__(M, activation)
-        
+
 class Navigator(object):
     def __init__(self, domain, mesh):        
         cells = mesh.cells()
@@ -193,4 +194,51 @@ class Divergence(Operator):
         super(Divergence, self).__init__(D) 
     
     
+class Normal(object):
+    def __init__(self, mesh):        
+        cells = mesh.cells()
+        A, B, C = cells.T
+        A, B, C = mesh.coordinates()[A], mesh.coordinates()[B], mesh.coordinates()[C]
+        P = (A+B+C)/3.0    
+        self.A = A
+        self.B = B
+        self.C = C        
+        self.cells = cells
+        self.nodes = mesh.coordinates()
+                
+    def findes(self, P):
+        A, B, C = self.A, self.B, self.C
+        x1, y1 = A.T
+        x2, y2 = B.T
+        x3, y3 = C.T
+        tot = np.abs((x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))/2)
+        diffs = np.abs(tot - area(P,A,B) - area(P,A,C) - area(P,B,C))
+        return [list(np.nonzero(q<1e-15)[0]) for q in diffs]
     
+    def bfind(self, P):
+        elements = self.findes(P)
+        bd = fe.boundary(mesh)
+        elem = []
+        for es in elements:
+            for e in es:
+                c = self.cells[e]
+                b = [(x in bd) for x in c]
+                if(sum(b)>1):
+                    elem.append((e, np.array(b)))
+                    break
+        return elem
+    
+    def at(self, P):
+        elements = self.bfind(P)
+        ns = []
+        for e in elements:
+            index, mask = e
+            nodes = self.cells[index]
+            bpoints = nodes[mask]
+            innerpoint = nodes[~mask][0]
+            vector = self.nodes[bpoints[0]]-self.nodes[bpoints[1]]
+            n = np.array([vector[1], -vector[0]])
+            n = n/np.linalg.norm(n)
+            xc = 0.5*(self.nodes[bpoints[0]]+self.nodes[bpoints[1]])
+            ns.append(n if np.dot(n, self.nodes[innerpoint]-xc)<0 else -n)            
+        return np.stack(ns, axis = 0)
