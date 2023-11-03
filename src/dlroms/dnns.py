@@ -25,18 +25,25 @@ leakyReLU = torch.nn.LeakyReLU(0.1)
 num2p = lambda prob : ("%.2f" % (100*prob)) + "%"
         
 class Layer(torch.nn.Module):
-    """Layer of a neural network. It is implemented as a subclass of 'torch.nn.Module'. Acts as an abstract class.
-    Objects of class layer have the following attributes:
+    """Abstract class for representing layers of neural network models. It is implemented as a subclass of 'torch.nn.Module'.
     
-    core (Core): specifies wheather the layer is stored on CPU or GPU.
-    rho (function): the activation function of the layer.
+    Attributes:
+            core         (dlroms.cores.Core)        Specifies wheather the layer is stored on CPU or GPU.
+            rho          (function)                 Activation function at output.
     
-    All objects of class layer should implement an abstract method '.module()' that returns the underlying torch.nn.Module.
-    Layers can be applied to tensors using .forward() or simply .(), i.e. following the syntax of function calls.
+    All objects of this class should implement an abstract method '.module()' that returns the underlying torch.nn.Module.
+    Layers can be applied to tensors using .forward() or simply .(), i.e. via the __call__ method.
     """
     
     def __init__(self, activation):
-        """Creates a new layer with a given activation function (activation). By default, the layer is initiated on CPU."""
+        """Creates a new layer with a given activation function (activation). By default, the layer is initiated on CPU.
+
+        Input:
+                activation        (function)        Activation function. Given a torch.tensor, it should output another torch.tensor.
+                                                    Warning: only use basic operations or torch functions to ensure that autodifferentiation
+                                                    is available.
+        
+        """
         super(Layer, self).__init__()
         self.rho = activation
         if(activation == None):
@@ -44,18 +51,23 @@ class Layer(torch.nn.Module):
         self.core = CPU
 
     def coretype(self):
+        """Core where the layer is stored (either CPU or GPU), returned as a dlroms.cores.Core object."""
         return self.core
         
     def w(self):
-        """Returns the weights of the layer."""
+        """Weights of the layer."""
         return self.module().weight
     
     def b(self):
-        """Returns the bias vector of the layer."""
+        """Bias vector of the layer."""
         return self.module().bias
     
     def scale(self, factor):
-        """Sets to zero the bias and scales the weight matrix by 'factor'."""
+        """Sets the bias vector to zero and scales the weight matrix by 'factor'.
+
+        Input:
+                factor        (float)        Value for scaling the weight matrix.
+        """
         self.load(factor*self.w().detach().cpu().numpy(), 0.0*self.b().detach().cpu().numpy())
         
     def zeros(self):
@@ -64,7 +76,11 @@ class Layer(torch.nn.Module):
         self.module().bias = torch.nn.Parameter(0.0*self.module().bias)
         
     def moveOn(self, core):
-        """Transfers the layer structure on the specified core."""
+        """Transfers the layer structure on the specified core.
+        
+        Input:
+                core        (dlroms.cores.Core)        Where to transfer the layer (e.g., core = dlroms.cores.GPU)
+        """
         self.core = core
         if(core != CPU):
             self.cuda()
@@ -82,39 +98,40 @@ class Layer(torch.nn.Module):
         self.module().cpu()
         
     def l2(self):
-        """Returns the square sum of all weights within the layer."""
+        """Squared sum of all weights within the layer. Supports backpropagation."""
         return (self.module().weight**2).sum()
     
     def l1(self):
-        """Returns the absolute sum of all weights within the layer."""
+        """Absolute sum of all weights within the layer. Supports backpropagation."""
         return self.module().weight.abs().sum()
     
     def outdim(self, inputdim):
-        """Given a tuple for the input dimension, returns the corresponding output dimension."""
+        """Output dimension for a given input.
+        
+        Input:
+                inputdim        (tuple)        Tuple specifying the input dimension. E.g., inputdim = (100, 3) corresponds
+                                               to an input of shape 100 x 3. 
+        """
         return tuple(self.forward(self.core.zeros(*inputdim)).size())
         
     def load(self, w, b = None):
-        """Given a pair of weights and biases, it loads them as parameters for the Layer.
+        """Loads a given a pair of weights and biases as model parameters.
         
         Input:
-        w (numpy array): weights
-        b (numpy array): bias vector. Defaults to None (i.e., only loads w).
+                w        (numpy.ndarray)        Weights to be loaded. It should be of the correct shape, depending on the layer at hand.
+                b        (numpy.ndarray)        Bias vector to be loaded. If None, the layer's bias remains unchanged. Defaults to None.
         """
         self.module().weight = torch.nn.Parameter(self.core.tensor(w))
-        try:
+        if(not(b is None)):
             self.module().bias = torch.nn.Parameter(self.core.tensor(b))
-        except:
-            None
         
     def inherit(self, other, azzerate = True):
-        """Inherits the weight and bias from another network. Additional entries are left to zero.
-        It can be seen as a naive form of transfer learning.
+        """Inherits the weights and biases from another network. If needed, additional entries are left to zero.
+        It can be seen as a naive form of transfer learning. NB: acts as an IN PLACE operation.
         
         Input:
-        other (Layer): the layer from which the parameters are learned.
-        
-        Output:
-        None, but the current network has now updated parameters.
+                other        (dlroms.dnns.Layer)        Layer from which the parameters are inherited.
+                azzerate     (bool)                     If True, all noninherited entries are set to zero.
         """
         if(azzerate):
             self.zeros()
@@ -126,15 +143,14 @@ class Layer(torch.nn.Module):
 
         
     def __add__(self, other):
-        """Connects the current layer to another layer (or a sequence of layers), and returns
-        the corresponding nested architecture.
+        """Connects two layers sequentially. Also supports connecting a layer with a more complicate neural network model.
        
         Input:
-        self (Layer): the current layer
-        other (Layer / Consecutive): the architecture to be connected on top.
+                self        (dlroms.dnns.Layer)                                   Current layer
+                other       (dlroms.dnns.Layer or dlroms.dnns.Consecutive)        Architecture to be connected on top of 'self'.
         
         Output:
-        The full architecture, stored as 'Consecutive' object.
+                (dlroms.dnns.Consecutive) Combined architecture.
         """
         if(isinstance(other, Consecutive) and (not isinstance(other, Parallel))):
             n = len(other)
