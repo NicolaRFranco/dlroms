@@ -186,8 +186,8 @@ class ROM(Consecutive):
     def predict(self, *args):
         return self.solve(*args)
            
-    def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0, 
-              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None):
+    def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0
+              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0):
 
         conv = (lambda x: num2p(x)) if notation == '%' else (lambda z: ("%.2"+notation) % z)
         optimizer = optim(self.parameters(), lr = lr)
@@ -218,7 +218,7 @@ class ROM(Consecutive):
             if(batchsize == None):
                 def closure():
                     optimizer.zero_grad()
-                    lossf = loss(getout(Utrain), self(*Mtrain))
+                    lossf = slope*loss(getout(Utrain), self(*Mtrain))
                     lossf.backward()
                     return lossf
                 optimizer.step(closure)
