@@ -135,14 +135,17 @@ def gramschmidt(W, inner = None):
         U.append(ui / norm(ui).reshape(-1,1))
     return torch.stack(U, axis = -1).transpose(1,2)
 
-def PAs(V1, V2, orth = True):
+def PAs(V1, V2, orth = True, inner = None):
     """List of principal angles between the subspaces in V1 and V2. The Vj's should be in the format
     batch dimension x number of basis x space dimension."""
     if(orth):
         A1, A2 = gramschmidt(V1), gramschmidt(V2)
     else:
         A1, A2 = V1, V2
-    vals = torch.linalg.svdvals(A1.matmul(A2.transpose(dim0 = 1, dim1 = 2))).clamp(min=0,max=1)
+    if(inner is None):
+        vals = torch.linalg.svdvals(A1.matmul(A2.transpose(dim0 = 1, dim1 = 2))).clamp(min=0,max=1)
+    else:
+        vals = torch.linalg.svdvals(inner.dualize(A1.reshape(-1, A1.shape[-1)).reshape(A1.shape).matmul(A2.transpose(dim0 = 1, dim1 = 2))).clamp(min=0,max=1)
     return vals.arccos()
         
 def PODerrors(u, upto, ntrain, error, inner = None, orth = False):
