@@ -147,7 +147,11 @@ def PAs(V1, V2, orth = True, inner = None):
     else:
         vals = torch.linalg.svdvals(inner.dualize(A1.reshape(-1, A1.shape[-1)).reshape(A1.shape).matmul(A2.transpose(dim0 = 1, dim1 = 2))).clamp(min=0,max=1)
     return vals.arccos()
-        
+
+def gdist(V1, V2, orth = True, inner = None, squared = False):
+    d2 = PAs(V1, V2, orth = orth, inner = inner).pow(2).sum(axis = -1)
+    return d2 if squared else d2.sqrt()
+    
 def PODerrors(u, upto, ntrain, error, inner = None, orth = False):
     """Projection errors over the test set for an increasing number of modes."""
     pod, svalues = POD(u[:ntrain], k = upto, inner = inner)
