@@ -139,7 +139,7 @@ def PAs(V1, V2, orth = True, inner = None):
     """List of principal angles between the subspaces in V1 and V2. The Vj's should be in the format
     batch dimension x number of basis x space dimension."""
     if(orth):
-        A1, A2 = gramschmidt(V1), gramschmidt(V2)
+        A1, A2 = gramschmidt(V1, inner = inner), gramschmidt(V2, inner = inner)
     else:
         A1, A2 = V1, V2
     if(inner is None):
