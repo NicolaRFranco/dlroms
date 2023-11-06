@@ -145,7 +145,7 @@ def PAs(V1, V2, orth = True, inner = None):
     if(inner is None):
         vals = torch.linalg.svdvals(A1.matmul(A2.transpose(dim0 = 1, dim1 = 2))).clamp(min=0,max=1)
     else:
-        vals = torch.linalg.svdvals(inner.dualize(A1.reshape(-1, A1.shape[-1)).reshape(A1.shape).matmul(A2.transpose(dim0 = 1, dim1 = 2))).clamp(min=0,max=1)
+        vals = torch.linalg.svdvals(inner.dualize(A1.reshape(-1, A1.shape[-1])).reshape(A1.shape).matmul(A2.transpose(dim0 = 1, dim1 = 2))).clamp(min=0,max=1)
     return vals.arccos()
 
 def gdist(V1, V2, orth = True, inner = None, squared = False):
