@@ -163,11 +163,27 @@ class Layer(torch.nn.Module):
                 return Consecutive(self, other)    
             
     def __pow__(self, n):
-        """Creates a branched architecture by stacking n copies of the same layer."""
+        """Creates a branched architecture by stacking n INDEPENDENT copies of the same layer. See dlroms.dnns.Branched.
+        
+        Input:
+                self        (dlroms.dnns.Layer)        Reference layer to be copied.
+                n           (int)                      Number of copies to be stacked (in parallel, with shared input).
+
+        Output:
+                (dlroms.dnns.Branched) Combined architecture.
+        """
         return Branched(*[deepcopy(self) for i in range(n)])
     
     def __mul__(self, n):
-        """Creates a deep neural network by connecting n consecutive copies of the same layer."""
+        """Creates a deep neural network by connecting n (INDEPENDENT) consecutive copies of the same layer.
+                
+        Input:
+                self        (dlroms.dnns.Layer)        Reference layer to be copied.
+                n           (int)                      Number of copies to be stacked (sequentially).
+
+        Output:
+                (dlroms.dnns.Consecutive) Combined architecture.
+        """
         return Consecutive(*[deepcopy(self) for i in range(n)])
     
     def __rmul__(self, number):
@@ -175,12 +191,30 @@ class Layer(torch.nn.Module):
         return self*number
     
     def dof(self):
-        """Degrees of freedom in the layer, defined as the number of active weights and biases."""
+        """Degrees of freedom in the layer, defined as the number of learnable weights and biases.
+
+        Output:
+                (int) Total number of learnable parameters.        
+        """
         return numpy.prod(tuple(self.module().weight.size())) + len(self.module().bias)
                      
     def He(self, linear = False, a = 0.1, seed = None):
-        """He initialization of the weights."""
-        if(seed != None):
+        """He initialization of the weights: see 'He, K., Zhang, X., Ren, S., & Sun, J. (2015). Delving deep into rectifiers:
+        Surpassing human-level performance on imagenet classification. IEEE  Proceedings'.
+        Note: to be used only for layers without activation at output or with leakyReLU activation.
+
+        Input:
+                linear        (bool)        Specifies whether the layer has no activation at output (self.rho = Identity). 
+                                            If False, it assumes that the layer is equipped with the a-leakyReLU. 
+                                            Defaults to False.
+
+                a             (float)       Slope of the leakyReLU activation. Ignored if linear = True. Defaults to 0.1.
+
+                seed          (int)         Random seed for reproducibility. Ignored if seed = None. Defaults to None.
+                    
+        
+        """
+        if(not(seed is None)):
             torch.manual_seed(seed)
         if(linear):
             torch.nn.init.xavier_normal_(self.module().weight)
@@ -188,17 +222,27 @@ class Layer(torch.nn.Module):
             torch.nn.init.kaiming_normal_(self.module().weight, mode='fan_out', nonlinearity='leaky_relu', a = a)
         
     def Xavier(self):
-            torch.nn.init.xavier_uniform_(self.module().weight)
+        """Xavier initialization of the weights: see 'Glorot, X., & Bengio, Y. (2010, March).
+        Understanding the difficulty of training deep feedforward neural networks. JMLR Workshop and Conference Proceedings.'
+        Recommended for layers with tanh activation.
+        """
+        torch.nn.init.xavier_uniform_(self.module().weight)
         
     def inputdim(self):
-        """Returns the expected input dimension for the layer."""
+        """Expected input dimension (if well-defined: see, e.g., the case of convolutional layers, dlroms.dnns.Conv1D).
+
+        Output:
+                (int) dimension at input.
+        """
         return self.module().in_features
     
     def freeze(self, w = True, b = True):
-        """Freezes the layer so that its parameters to not require gradients.
+        """Freezes the layer, fixing its weights and biases (hereon nontrainable). To undo, see dlroms.dnns.Layer.unfreeze.
+        
         Input:
-        w (boolean): wheather to fix or not the weights.
-        b (boolean): wheather to fix or not the bias."""
+                w         (bool)        wheather to fix the weights or not.
+                b         (bool)        wheather to fix the bias or not.
+        """
         if(w and b):
             self.module().requires_grad_(False)
         elif(w):
@@ -208,17 +252,29 @@ class Layer(torch.nn.Module):
         self.training = False
         
     def unfreeze(self):
-        """Makes all the layer parameters learnable."""
+        """Activates the layer, making all its parameters learnable. Acts in opposition to dlroms.dnns.Layer.freeze."""
         self.module().bias.requires_grad_(True)
         self.module().weight.requires_grad_(True)
         self.module().requires_grad_(True)
         self.training = True
         
     def dictionary(self, label = ""):
-        """Returns a dictionary with the layer parameters. An additional label can be added."""
+        """Dictionary listing all layer parameters.
+
+        Input:
+                label        (str)        Optional label to be included within the keys of the dictionary.
+
+        Output:
+                (dict)        Dictionary containing the learnable weights and biases of the layer.        
+        """
         return {('w'+label):self.w().detach().cpu().numpy(), ('b'+label):self.b().detach().cpu().numpy()}
     
     def parameters(self):
+        """List with all the learnable parameters within the layer.
+
+        Output:
+                (list).     
+        """
         ps = list(super(Layer, self).parameters())
         res = []
         for p in ps:
@@ -227,33 +283,92 @@ class Layer(torch.nn.Module):
         return res
 
 class Dense(Layer):
-    """Fully connected Layer."""
+    """Class implementing fully connected layers. Implemented as a subclass of dlroms.dnns.Layer."""
     
     def __init__(self, input_dim, output_dim, activation = leakyReLU, bias = True):
-        """Creates a Dense Layer with given input dimension, output dimension and activation function."""
+        """Creates a Dense Layer with given input dimension, output dimension and activation function.
+
+        Input:
+                input_dim        (int)        Input dimension.
+                output_dim       (int)        Output dimension.
+                activation       (function)   Function (or callable object) to be used as terminal nonlinearity (cf. dlroms.dnns.Layer).
+                                              Defaults to the 0.1-leakyReLU activation.
+                bias             (bool)       Whether to include a bias vector or not. If False, this is equivalent to having a
+                                              nonlearnable bias that is always equal to 0.
+
+        Output:
+                (dlroms.dnns.Dense).
+        """
         super(Dense, self).__init__(activation)
         in_d = input_dim if(isinstance(input_dim, int)) else input_dim.dim()            
         out_d = output_dim if(isinstance(output_dim, int)) else output_dim.dim()
         self.lin = torch.nn.Linear(in_d, out_d, bias = bias)
         
     def module(self):
+        """Underlying torch.nn.Module.
+        
+        Output:
+                (torch.nn.Module).
+        """
         return self.lin
         
     def forward(self, x):
+        """Maps a given input x through the layer. The output is computed as rho(Wx+b), where W and b are
+        the weight matrix and the bias vector, respectively, while rho is the activation function of the layer.
+
+        Note: as all DNN modules, it operates in batches, i.e.: it expects an input of shape (batch_size, input_dim)
+        and it outputs a corresponding tensor of shape (batch_size, output_dim), obtained by applying the layer to 
+        each input (independently).
+
+        Input:
+                x        (torch.Tensor)        Tensor of shape (batch_size, input_dim).
+
+        Output:
+                (torch.Tensor)        Output tensor with shape (batch_size, output_dim).        
+        """
         return self.rho(self.lin(x))
     
 class Residual(Layer):
-    """Residual layer. Differs from a dense layer has x -> x + f(x) instead of x -> f(x)."""
+    """Class implementing residual layers. Differently from dense layers, which act as x -> f(x), these
+    operate as x -> x + f(x). Implemented as a subclass of dlroms.dnns.Layer."""
     
     def __init__(self, dim, activation = leakyReLU):
-        """Creates a Residual layer with input-output dimension 'dim' and activation function 'activation'."""
+        """Creates a Dense Layer with given input dimension, output dimension and activation function.
+
+        Input:
+                input_dim        (int)        Input dimension.
+                output_dim       (int)        Output dimension.
+                activation       (function)   Function (or callable object) to be used as terminal nonlinearity (cf. dlroms.dnns.Layer).
+                                              Defaults to the 0.1-leakyReLU activation.
+
+        Output:
+                (dlroms.dnns.Residual).
+        """
         super(Residual, self).__init__(activation)
         self.lin = torch.nn.Linear(dim, dim)
         
     def module(self):
+        """Underlying torch.nn.Module.
+        
+        Output:
+                (torch.nn.Module).
+        """
         return self.lin
     
     def forward(self, x):
+        """Maps a given input x through the layer. The output is computed as x+rho(Wx+b), where W and b are
+        the weight matrix and the bias vector, respectively, while rho is the activation function of the layer.
+
+        Note: as all DNN modules, it operates in batches, i.e.: it expects an input of shape (batch_size, input_dim)
+        and it outputs a corresponding tensor of shape (batch_size, output_dim), obtained by applying the layer to 
+        each input (independently).
+
+        Input:
+                x        (torch.Tensor)        Tensor of shape (batch_size, input_dim).
+
+        Output:
+                (torch.Tensor)        Output tensor with shape (batch_size, output_dim).        
+        """
         return x + self.rho(self.lin(x))   
 
 class Sparse(Layer):
