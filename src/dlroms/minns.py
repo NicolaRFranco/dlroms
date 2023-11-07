@@ -242,3 +242,32 @@ class Normal(object):
             xc = 0.5*(self.nodes[bpoints[0]]+self.nodes[bpoints[1]])
             ns.append(n if np.dot(n, self.nodes[innerpoint]-xc)<0 else -n)            
         return np.stack(ns, axis = 0)
+
+
+def iVersion(Class):
+    def iconstructor(self, V1, *args, **kwargs):
+        super(type(self), self).__init__(V1, *args, **kwargs)
+        self.inner = L2(V1)
+    
+    def iforward(self, x):
+        return super(type(self), self).forward(self.inner.dualize(x))
+    
+    def icuda(self):
+        super(type(self), self).cuda()
+        self.inner.cuda()
+        
+    def icpu(self):
+        super(type(self), self).cpu()
+        self.inner.cpu()
+        
+    def iHe(self, *args):
+        self.load(w = np.random.randn(*self.w().shape))
+    
+    s = str(Class)[:-2]
+    while "." in s:
+        s = s[(s.find(".")+1):]
+
+    name = "i" + s
+    
+    return type(name, (Class,), {'__init__':iconstructor, 'forward':iforward, 'cuda':icuda,
+                                 'cpu':icpu, 'He':iHe})
