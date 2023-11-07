@@ -10,7 +10,7 @@
 #
 # Please cite the Author if you use this code for your work/research.
  
-from dlroms.minns import L2, H1, Local, Geodesic
+from dlroms.minns import L2, H1, Local, Geodesic, iVersion
 from dlroms.dnns import Dense, train, Clock, num2p
 from dlroms.roms import POD, project, snapshots, PODerrors, mre, mse, ROM, euclidean, boxplot, regcoeff, PODNN, DLROM, DFNN, mrei, msei, projectdown, projectup
 from dlroms.cores import CPU, GPU
