@@ -260,7 +260,7 @@ def iVersion(Class):
         super(type(self), self).cpu()
         self.inner.cpu()
         
-    def iHe(self, *args):
+    def iHe(self, *args, **kwargs):
         self.load(w = np.random.randn(*self.w().shape))
     
     s = str(Class)[:-2]
