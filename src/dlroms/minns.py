@@ -261,7 +261,8 @@ def iVersion(Class):
         self.inner.cpu()
         
     def iHe(self, *args, **kwargs):
-        self.load(w = np.random.randn(*self.w().shape))
+        scale = 1.0/self.inner.M.to_dense().diag().mean().sqrt()
+        self.load(w = np.random.randn(*self.w().shape)*scale)
     
     s = str(Class)[:-2]
     while "." in s:
