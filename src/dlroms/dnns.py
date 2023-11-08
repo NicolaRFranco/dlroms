@@ -281,7 +281,13 @@ class Layer(torch.nn.Module):
         return res
 
 class Dense(Layer):
-    """Class implementing fully connected layers. Implemented as a subclass of dlroms.dnns.Layer."""
+    """Class implementing fully connected layers. Implemented as a subclass of dlroms.dnns.Layer.
+    
+    Attributes:
+            lin         (torch.nn.Module)        Affine part of the layer (i.e., the learnable map x -> Wx + b).
+
+    Other attributes: core, rho (see dlroms.dnns.Layer).
+    """
     
     def __init__(self, input_dim, output_dim, activation = leakyReLU, bias = True):
         """Creates a Dense Layer with given input dimension, output dimension and activation function.
@@ -328,7 +334,14 @@ class Dense(Layer):
     
 class Residual(Layer):
     """Class implementing residual layers. Differently from dense layers, which act as x -> f(x), these
-    operate as x -> x + f(x). Implemented as a subclass of dlroms.dnns.Layer."""
+    operate as x -> x + f(x). Implemented as a subclass of dlroms.dnns.Layer.
+
+    Attributes:
+            lin         (torch.nn.Module)        Affine part of the layer (i.e., the learnable map x -> Wx + b).
+
+    Other attributes: core, rho (see dlroms.dnns.Layer).
+    
+    """
     
     def __init__(self, dim, activation = leakyReLU):
         """Creates a Dense Layer with given input dimension, output dimension and activation function.
@@ -371,7 +384,20 @@ class Residual(Layer):
 
 class Sparse(Layer):
     """Class implementing sparse layers, that is, architectures obtained by pruning dense modules.
-    Implemented as a subclass of dlroms.dnns.Layer."""
+    Implemented as a subclass of dlroms.dnns.Layer.
+    
+    Attributes:
+            loc         (tuple of numpy.ndarray)        Indexes of the active entries of the weight matrix.
+                                                        The kth active entry is located at position j[k], i[k]
+                                                        with j[k] = loc[0][k], i[k] = loc[1][k].
+            in_d        (int)                           Input dimension.
+            out_d       (int)                           Output dimension.
+            weight      (torch.nn.Parameter)            Learnable nonzero entries of the weight matrix, listed sequentially
+                                                        in a tensor of shape (n,).
+            bias        (torch.nn.Parameter)            Learnable bias vector.
+
+    Other attributes: core, rho (see dlroms.dnns.Layer).
+    """
     
     def __init__(self, mask, activation = leakyReLU):
         """Creates a Sparse Layer with given sparsity pattern and a given activation function.
@@ -382,8 +408,8 @@ class Sparse(Layer):
                                                         This matrix defines the sparsity pattern of layer, via the rule
                                                         "if M_ij = 0 then the jth component at output will be 
                                                         uneffected by the ith entry at input." Equivalently, if W is the N x M
-                                                        tensor representing the weight matrix of the layer: "M_ij = 0 implies W_ji=0
-                                                        and W_ji is nonlearnable."
+                                                        tensor representing the weight matrix of the layer: "M_ij = 0 implies 
+                                                        W_ji=0 and W_ji is nonlearnable."
                 activation       (function)             Function (or callable object) to be used as terminal nonlinearity
                                                         (cf. dlroms.dnns.Layer). Defaults to the 0.1-leakyReLU activation.
 
@@ -494,22 +520,48 @@ class Sparse(Layer):
             self.weight = torch.nn.Parameter(self.core.tensor((2*numpy.random.rand(len(self.loc[0]))-1)*numpy.sqrt(3/nnz)))
                  
     def W(self):
+        """Transposed weight matrix of the layer (with both zero and nonzero entries).
+        
+        Output:
+                (torch.Tensor)        Matrix of shape input_dim x output_dim.
+        
+        """
         W = self.core.zeros(self.in_d, self.out_d)
         W[self.loc] = self.weight
         return W
 
     def dictionary(self, label = ""):
+        """Dictionary listing all layer parameters, together with their sparsity pattern.
+
+        Input:
+                label        (str)        Optional label to be included within the keys of the dictionary.
+
+        Output:
+                (dict)        Dictionary containing the learnable weights and biases of the layer, plus the indexes associated
+                              to the active entries of the weight matrix.        
+        """
         return {('w'+label):self.w().detach().cpu().numpy(), ('b'+label):self.b().detach().cpu().numpy(), ('indexes'+label):self.loc}
 
     def load(self, w, b = None, indexes = None):
+        """Loads a given a pair of weights and biases as model parameters. The indexes dictating the sparsity pattern (and thus the
+        collocation of the learnable weight entries) can also be loaded.
+        
+        Input:
+                w        (numpy.ndarray)        Weights to be loaded. It should be of the correct length, depending on the layer at hand.
+                b        (numpy.ndarray)        Bias vector to be loaded. If None, the layer's bias remains unchanged. Defaults to None.
+                indexes  (numpy.ndarray)        2 x n array listing the i,j coordinates of the active entries. Here, n should equal
+                                                the length of w.
+        """
         super(Sparse, self).load(w, b)
         if(isinstance(indexes, numpy.ndarray)):
             self.loc = indexes
         
     def cuda(self):
+     """Transfers the layer to the GPU."""
         self.moveOn(GPU)
         
     def cpu(self):
+     """Transfers the layer to the CPU."""
         self.moveOn(CPU)
         
 class Weightless(Layer):
