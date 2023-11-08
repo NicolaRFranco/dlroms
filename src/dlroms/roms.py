@@ -243,7 +243,7 @@ class ROM(Consecutive):
                 if(broken):
                     break
                 err.append([errorf(getout(Utrain), self(*Mtrain)).item(),
-                            errorf(getout(Utest), self(*Mtest)).item(),
+                            errorf(getout(Utest), self(*Mtest)).item() if ntest > 0 else np.nan,
                             validerr(),
                            ])
                 if(verbose):
