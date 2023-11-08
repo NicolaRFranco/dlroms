@@ -557,11 +557,11 @@ class Sparse(Layer):
             self.loc = indexes
         
     def cuda(self):
-    """Transfers the layer to the GPU."""
+        """Transfers the layer to the GPU."""
         self.moveOn(GPU)
         
     def cpu(self):
-    """Transfers the layer to the CPU."""
+        """Transfers the layer to the CPU."""
         self.moveOn(CPU)
         
 class Weightless(Layer):
