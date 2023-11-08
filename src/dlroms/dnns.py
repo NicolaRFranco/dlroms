@@ -76,7 +76,7 @@ class Layer(torch.nn.Module):
         self.module().bias = torch.nn.Parameter(0.0*self.module().bias)
         
     def moveOn(self, core):
-        """Transfers the layer structure on the specified core.
+        """Transfers the layer structure onto the specified core.
         
         Input:
                 core        (dlroms.cores.Core)        Where to transfer the layer (e.g., core = dlroms.cores.GPU)
@@ -211,8 +211,6 @@ class Layer(torch.nn.Module):
                 a             (float)       Slope of the leakyReLU activation. Ignored if linear = True. Defaults to 0.1.
 
                 seed          (int)         Random seed for reproducibility. Ignored if seed = None. Defaults to None.
-                    
-        
         """
         if(not(seed is None)):
             torch.manual_seed(seed)
@@ -372,15 +370,25 @@ class Residual(Layer):
         return x + self.rho(self.lin(x))   
 
 class Sparse(Layer):
-    """Layer with weights that have a (priorly) fixed sparsity."""
+    """Class implementing sparse layers, that is, architectures obtained by pruning dense modules.
+    Implemented as a subclass of dlroms.dnns.Layer."""
     
     def __init__(self, mask, activation = leakyReLU):
-        """Creates a Sparse layer.
-        
+        """Creates a Sparse Layer with given sparsity pattern and a given activation function.
+
         Input:
-        mask (numpy 2D array): a 2D array that works as sample for the weight matrix. 
-        It should have the same sparsity required to the weight matrix.
-        activation (function): activation function of the layer.
+                mask             (numpy.ndarray)        M x N array with float entries. It should be defined so that M is
+                                                        the input dimension of the layer and N is the output dimension.
+                                                        This matrix defines the sparsity pattern of layer, via the rule
+                                                        "if M_ij = 0 then the jth component at output will be 
+                                                        uneffected by the ith entry at input." Equivalently, if W is the N x M
+                                                        tensor representing the weight matrix of the layer: "M_ij = 0 implies W_ji=0
+                                                        and W_ji is nonlearnable."
+                activation       (function)             Function (or callable object) to be used as terminal nonlinearity
+                                                        (cf. dlroms.dnns.Layer). Defaults to the 0.1-leakyReLU activation.
+
+        Output:
+                (dlroms.dnns.Sparse).
         """
         super(Sparse, self).__init__(activation)
         self.loc = numpy.nonzero(mask)
@@ -389,6 +397,11 @@ class Sparse(Layer):
         self.bias = torch.nn.Parameter(CPU.zeros(self.out_d))
         
     def moveOn(self, core):
+        """Transfers the layer structure onto the specified core.
+        
+        Input:
+                core        (dlroms.cores.Core)        Where to transfer the layer (e.g., core = dlroms.cores.GPU)
+        """
         self.core = core
         with torch.no_grad():
             if(core == GPU):      
@@ -399,14 +412,40 @@ class Sparse(Layer):
                 self.bias = torch.nn.Parameter(self.bias.cpu())
         
     def module(self):
+        """Returns the layer it self. This is done to ensure that calls such as self.module().weight have a result
+        compatible with the one obtained for the other classes.
+        
+        Output:
+                (dlroms.dnns.Sparse).
+        """
         return self
     
     def forward(self, x):
+        """Maps a given input x through the layer. The output is computed as rho(Wx+b), where W and b are
+        the weight matrix and the bias vector, respectively, while rho is the activation function of the layer.
+
+        Note: as all DNN modules, it operates in batches, i.e.: it expects an input of shape (batch_size, input_dim)
+        and it outputs a corresponding tensor of shape (batch_size, output_dim), obtained by applying the layer to 
+        each input (independently).
+
+        Input:
+                x        (torch.Tensor)        Tensor of shape (batch_size, input_dim).
+
+        Output:
+                (torch.Tensor)        Output tensor with shape (batch_size, output_dim).        
+        """
         W = self.core.zeros(self.in_d, self.out_d)
         W[self.loc] = self.weight
         return self.rho(self.bias + x.mm(W))
     
     def inherit(self, other):
+        """Inherits the weights and biases from another Sparse network with comparable input-output dimensions
+        (but possibly different sparsity patterns - typically "smaller"). Additional entries in the weight matrix are left to zero.
+        It can be seen as a naive form of transfer learning. NB: acts as an IN PLACE operation.
+        
+        Input:
+                other        (dlroms.dnns.Sparse)       Sparse Layer from which the parameters are inherited.
+        """
         W = self.core.zeros(self.in_d, self.out_d)
         W[other.loc] = other.weight
         with torch.no_grad():
@@ -414,23 +453,40 @@ class Sparse(Layer):
             self.bias = torch.nn.Parameter(self.core.copy(other.bias))        
 
     def He(self, linear = False, a = 0.1, seed = None):
-        #nw = len(self.weight)
-        #with torch.no_grad():
-        #    self.weight = torch.nn.Parameter(torch.rand(nw)/numpy.sqrt(nw))
+        """Generalization of the He initialization for Sparse Layers, as proposed in 'Franco, N. R., Manzoni, A., & Zunino, P. (2023).
+        Mesh-informed neural networks for operator learning in finite element spaces. Journal of Scientific Computing, 97(2), 35.'
+        Only recommended for layers that use leakyReLU activations (or no activation at all).
+
+        Input:
+                linear        (bool)        Specifies whether the layer has no activation at output (self.rho = Identity). 
+                                            If False, it assumes that the layer is equipped with the a-leakyReLU. 
+                                            Defaults to False.
+
+                a             (float)       Slope of the leakyReLU activation. Ignored if linear = True. Defaults to 0.1.
+
+                seed          (int)         Random seed for reproducibility. Ignored if seed = None. Defaults to None.
+        """
         c = 1 if linear else 2
         alpha = 0 if linear else a
         A = numpy.zeros((self.out_d, self.in_d))
         A[(self.loc[1], self.loc[0])] = 1
         nnz = numpy.sum(A>0, axis = 1)[self.loc[1]]
+        if(not (seed is None)):
+            numpy.random.seed(seed)    
         with torch.no_grad():
             self.weight = torch.nn.Parameter(self.core.tensor(numpy.random.randn(len(self.loc[0]))*numpy.sqrt(c/(nnz*(1.0+alpha**2)))))
         
     def deprecatedHe(self, linear = False, a = 0.1, seed = None):
+        """Deprecated initialization routine. See dlroms.dnns.Sparse.He."""
         nw = len(self.weight)
         with torch.no_grad():
             self.weight = torch.nn.Parameter(torch.rand(nw)/numpy.sqrt(nw))
         
     def Xavier(self):
+        """Generalization of the Xavier initialization for Sparse Layers, as proposed in 'Franco, N. R., Manzoni, A., & Zunino, P. (2023).
+        Mesh-informed neural networks for operator learning in finite element spaces. Journal of Scientific Computing, 97(2), 35.'
+        Only recommended for layers that use nonlinear activations different from leakyReLUs (e.g., tanh, sigmoid).
+        """
         A = numpy.zeros((self.out_d, self.in_d))
         A[(self.loc[1], self.loc[0])] = 1
         nnz = numpy.sum(A>0, axis = 1)[self.loc[1]]
