@@ -766,11 +766,11 @@ class Trunk(Weightless):
     Other attributes: core, rho (None), training (False) (see dlroms.dnns.Weightless).
     """   
     def __init__(self, out_dim):
-    """Creates a Trunk layer with a given output dimension.
+        """Creates a Trunk layer with a given output dimension.
 
         Input:
                 out_dim       (int)        Output dimension.        
-    """
+        """
         super(Trunk, self).__init__()
         self.d = out_dim
         
