@@ -299,7 +299,7 @@ class Dense(Layer):
     Attributes:
             lin         (torch.nn.Module)        Affine part of the layer (i.e., the learnable map x -> Wx + b).
 
-    Other attributes: core, rho (see dlroms.dnns.Layer).
+    Other attributes: core, rho, training (see dlroms.dnns.Layer).
     """
     
     def __init__(self, input_dim, output_dim, activation = leakyReLU, bias = True):
@@ -352,7 +352,7 @@ class Residual(Layer):
     Attributes:
             lin         (torch.nn.Module)        Affine part of the layer (i.e., the learnable map x -> Wx + b).
 
-    Other attributes: core, rho (see dlroms.dnns.Layer).
+    Other attributes: core, rho, training (see dlroms.dnns.Layer).
     
     """
     
@@ -409,7 +409,7 @@ class Sparse(Layer):
                                                         in a tensor of shape (n,).
             bias        (torch.nn.Parameter)            Learnable bias vector.
 
-    Other attributes: core, rho (see dlroms.dnns.Layer).
+    Other attributes: core, rho, training (see dlroms.dnns.Layer).
     """
     
     def __init__(self, mask, activation = leakyReLU):
@@ -679,47 +679,115 @@ class Weightless(Layer):
         return dict()
 
 class Reshape(Weightless):
-    """Weightless layer used for reshaping tensors. Object of this class have the additional attribute:
+    """Class implementing reshape layers, that is, nonlearnable modules that reshape tensors.
+    Implemented as a subclass of dlroms.dnns.Weightless.
     
-    newdim (tuple): the new shape after reshaping. 
-    
-    As all Layers and Modules, it is expected to operate on multiple instances simultaneously.
-    If newdim = (p1,..., pj), then an input of size [n, d1,..., dk] is reshaped to [n, p1,..., pj]
-    as the new dimension is applied to each tensor in the sample.
-    It is expected that d1*...*dk = p1*...*pj.
-    """
+    Attributes:
+            newdim      (tuple of int)        Output shape (excluding batch dimension).
+
+    Other attributes: core, rho (None), training (False) (see dlroms.dnns.Weightless).
+    """    
+
     def __init__(self, *shape):
         """Creates a Reshape layer with newdim = shape."""
         super(Reshape, self).__init__()
         self.newdim = shape
         
     def forward(self, x):
-        """Reshapes the input tensor x."""
+        """Reshapes the input tensor x.
+
+        Input:
+                x        (torch.Tensor)        Tensor to be reshaped.
+
+        Output:
+                (torch.Tensor) reshaped version of x.
+        
+        Note: as all DNN modules, it operates in batches, i.e.: it expects an input of shape (batch_size, d1,..., dk)
+        and it outputs a corresponding tensor of shape (batch_size, p1,..., pj), where self.newdim = (p1,...,pj).
+        That is, all input instances of dimension (d1,..., dk) are reshaped independently. 
+        Note that, for this to work, one must ensure that d1*...*dk = p1*...*pj.           
+        """
         n = len(x)
         return x.reshape(n,*self.newdim)    
     
     def inputdim(self):
-        """Expected input dimension."""
+        """Expected input dimension. Note: any shape compatible with such dimension can be passed as input.
+
+        Output:
+                (int) dimension at input.
+        """
         return numpy.prod(self.newdim)
     
 class Inclusion(Weightless):
-    """Weightless layer that embedds R^m into R^n, m < n, with x -> [0,...,0, x]."""
+    """Class implementing nonlearnable layers that embedd R^m into R^n, m < n, with x -> [0,...,0, x].
+    Implemented as a subclass of dlroms.dnns.Weightless.
     
+    Attributes:
+            d      (int)        Number of new zero entries to be appended.
+
+    Other attributes: core, rho (None), training (False) (see dlroms.dnns.Weightless).
+    """   
+        
     def __init__(self, in_dim, out_dim):
+        """Creates an Inclusion layer for specific input and output dimensions.
+
+        Input:
+                in_dim        (int)        Input dimension.
+                out_dim       (int)        Output dimension.        
+        """
         super(Inclusion, self).__init__()
         self.d = out_dim - in_dim
+        if(self.d<=0):
+            raise RuntimeError("Output dimension of Inclusion layers should be strictly larger than the input dimension.")
         
     def forward(self, x):
+        """Embedds the input tensor x onto a larger spaces by zero padding.
+
+        Input:
+                x        (torch.Tensor)        Tensor to be embedded.
+
+        Output:
+                (torch.Tensor) embededd/padded version of x.
+        
+        Note: as all DNN modules, it operates in batches, i.e.: it expects an input of shape (batch_size, input_dim)
+        and it outputs a corresponding tensor of shape (batch_size, input_dim+self.d).
+        That is, all input instances of dimension (input_dim,) are padded independently.       
+        """
         z = self.core.zeros(len(x), self.d)
         return torch.cat((z, x), axis = 1)
     
 class Trunk(Weightless):
+    """Class implementing nonlearnable layers that trunkate inputs, [x_{1}, ..., x_{n}] -> [x_{1},..., x_{n-d}].
+    Implemented as a subclass of dlroms.dnns.Weightless.
     
+    Attributes:
+            d      (int)        Number of entries to be kept (starting from the first one).
+
+    Other attributes: core, rho (None), training (False) (see dlroms.dnns.Weightless).
+    """   
     def __init__(self, out_dim):
+    """Creates a Trunk layer with a given output dimension.
+
+        Input:
+                out_dim       (int)        Output dimension.        
+        """
         super(Trunk, self).__init__()
         self.d = out_dim
         
     def forward(self, x):
+        """Trunks the input tensor x by dropping extra entries.
+
+        Input:
+                x        (torch.Tensor)        Tensor to be truncated.
+
+        Output:
+                (torch.Tensor) trunked tensor.
+        
+        Note: as all DNN modules, it operates in batches, i.e.: it expects an input of shape (batch_size, input_dim)
+        and it outputs a corresponding tensor of shape (batch_size, self.d).
+        That is, all input instances of dimension (input_dim,) are trunked independently.     
+        Note that, for this to work properly, one should ensure that self.d <= input_dim.
+        """
         return x[:,:self.d]
 
 class Transpose(Weightless):
