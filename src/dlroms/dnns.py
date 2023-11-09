@@ -770,7 +770,7 @@ class Trunk(Weightless):
 
         Input:
                 out_dim       (int)        Output dimension.        
-        """
+    """
         super(Trunk, self).__init__()
         self.d = out_dim
         
