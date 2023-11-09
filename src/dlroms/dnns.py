@@ -30,6 +30,8 @@ class Layer(torch.nn.Module):
     Attributes:
             core         (dlroms.cores.Core)        Specifies wheather the layer is stored on CPU or GPU.
             rho          (function)                 Activation function at output.
+            training     (bool)                     Whether the layer is in training mode (weights and biases are learnable,
+                                                    and they can be optimized) or not.
     
     All objects of this class should implement an abstract method '.module()' that returns the underlying torch.nn.Module.
     Layers can be applied to tensors using .forward() or simply .(), i.e. via the __call__ method.
@@ -49,6 +51,7 @@ class Layer(torch.nn.Module):
         if(activation == None):
             self.rho = torch.nn.Identity()
         self.core = CPU
+        self.training = True
 
     def coretype(self):
         """Core where the layer is stored (either CPU or GPU), returned as a dlroms.cores.Core object."""
@@ -565,62 +568,104 @@ class Sparse(Layer):
         self.moveOn(CPU)
         
 class Weightless(Layer):
-    """Subclass of Layer that handles the case of weightless layers (no trainable parameters).
-    By default, this layers have .w() = None, .b() = None, .rho = None and .dof() = 0, etc.
-    All redundant methods have been overwritten."""
+    """Abstract class for nonlearnable layers, implemented as a subclass of 'dlroms.dnns.Layers'.
+
+    All objects of this class should implement a proper '.forward()' method.
+    """
     
     def __init__(self):
+        """Creates a Weightless layer.
+        """
         super(Weightless, self).__init__(None)
         self.rho = None
         self.core = CPU
         self.training = False
         
     def inherit(self, other):
+        """Leaves the layer unchanged. Overwrite when implementing a subclass that requires inheriting 
+        certain nonlearnable parameters."""
         None
         
     def scale(self, factor):
+        """Leaves the layer unchanged."""
         None
     
     def w(self):
+        """Returns None (Weightless layers have no weights).
+        
+        Output:
+                (None).
+        """
         return None
     
     def b(self):
+        """Returns None (Weightless layers have no bias).
+        
+        Output:
+                (None).
+        """
         return None
     
     def zeros(self):
+        """Leaves the layer unchanged."""
         None
         
     def cuda(self):
+        """Switches to GPU. Overwrite when implementing a subclass that uses nonlearnable tensors."""
+        self.core = GPU
         None
         
     def cpu(self):
+        """Switches to CPU. Overwrite when implementing a subclass that uses nonlearnable tensors."""
+        self.core = CPU
         None
         
     def l2(self):
+        """Returns 0.0 (Weightless layers have 0 l2-norm, as they do not come with learnable parameters).
+
+        Output:
+                (float).
+        """
         return 0.0
     
     def l1(self):
+        """Returns 0.0 (Weightless layers have 0 l1-norm, as they do not come with learnable parameters).
+
+        Output:
+                (float).
+        """
         return 0.0
         
     def dof(self):
+        """Returns 0 (Weightless layers have no dof, as they do not come with learnable parameters)."""
         return 0
     
-    def He(self, linear, a, seed):
+    def He(self, linear, a, seed):            
+        """Leaves the layer unchanged."""
         None
         
     def Xavier(self):
+        """Leaves the layer unchanged."""
         None
         
     def freeze(self, w = True, b = True):
+        """Leaves the layer unchanged."""
         None
         
     def unfreeze(self):
+        """Leaves the layer unchanged."""
         None
         
     def load(self, w, b):
+        """Leaves the layer unchanged. Overwrite when implementing a subclass that requires loading of certain attributes."""
         None
         
     def dictionary(self, label):
+        """Returns an empty dictionary (Weightless layers have no learnable parameters).
+
+        Output:
+                (dict).
+        """
         return dict()
 
 class Reshape(Weightless):
