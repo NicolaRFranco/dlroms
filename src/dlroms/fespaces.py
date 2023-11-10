@@ -353,6 +353,12 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
     except:
         raise RuntimeError("First argument should be either a dolfin.cpp.mesh.Mesh or a structure containing the dof values of some function (in which case 'space' must be != None).")
     plt.axis(axis)
+
+def multiplot(vs, shape, space, size = 4, **kwargs):
+    plt.figure(figsize = (shape[1]*size, shape[0]*size))
+    for j in range(len(vs)):
+        plt.subplot(shape[0], shape[1], j+1)
+        plot(vs[j], space, **kwargs)
     
 def gif(name, U, dt, T, space, axis = "off", figsize = (4,4), colorbar = False, cmap = None):
     """Builds a GIF animation given the values of a functional object at multiple time steps.
