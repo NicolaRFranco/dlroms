@@ -39,8 +39,9 @@ def setup():
     print("Installing gmsh... this should take about 30-60 seconds.")
     os.system('wget "https://fem-on-colab.github.io/releases/gmsh-install.sh" -O "/tmp/gmsh-install.sh" && bash "/tmp/gmsh-install.sh"')
 
-  clear_output(wait = True)
-  if(ready):
-    print("All requirements have been met: DL-ROMs library ready for use.")
-  else:
-    print("All complementary packages have been successfully installed. Please restart Runtime in order to operate.")
+  clear_output()
+  #clear_output(wait = True)
+  #if(ready):
+  #  print("All requirements have been met: DL-ROMs library ready for use.")
+  #else:
+  #  print("All complementary packages have been successfully installed. Please restart Runtime in order to operate.")
