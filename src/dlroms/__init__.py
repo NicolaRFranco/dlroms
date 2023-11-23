@@ -20,9 +20,12 @@
 #
 # Please cite the Author if you use this code for your work/research.
 
-if('google.colab' in str(get_ipython()) if hasattr(__builtins__,'__IPYTHON__') else False):
+try:
+  import google.colab
   from dlroms.colab import setup
   setup()
+except:
+  None
 
 from dlroms.minns import L2, H1, Local, Geodesic, iVersion
 from dlroms.dnns import Dense, train, Clock, num2p
