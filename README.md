@@ -98,16 +98,23 @@ and integrate the installation manually by installing [FEniCS](https://fenicspro
 Note: as before, make sure that pip is available if you are using conda.
 
 ### Colab installation
-You can also install the advanced version on Colab by running the following instructions
+The advanced version can also be installed on Google Colab. To this end, simply run
+
+    !pip install git+https://github.com/NicolaRFranco/dlroms.git
+
+This will install the basic version. Then, as soon as the dlroms package is imported, e.g. via
+
+    from dlroms import*
+    
+a complementary installation of FEniCS and gmsh will be carried out automatically (only of the first run). Equivalently, one may also put the following instructions at the beginning of the notebook
 
     try:
-      from dlroms import*
-    except ImportError:
-      !pip install git+https://github.com/NicolaRFranco/dlroms.git
-      from dlroms.colab import setup
-      setup()
-
-Once all the dependencies have been installed, **make sure you restart your notebook.** If the runtime is not restarted, you will only have access to the basic version of the DLROMs package.
+         from dlroms import*
+    except:
+         !pip install git+https://github.com/NicolaRFranco/dlroms.git
+         from dlroms import*
+    
+In this way, the Colab kernel can be restarted and run at any time (without redundant re-installations). 
 
 
 
