@@ -19,7 +19,11 @@
 #     DOI: https://doi.org/10.1016/j.finel.2023.104068
 #
 # Please cite the Author if you use this code for your work/research.
- 
+
+if('google.colab' in str(get_ipython()) if hasattr(__builtins__,'__IPYTHON__') else False):
+  from dlroms.colab import setup
+  setup()
+
 from dlroms.minns import L2, H1, Local, Geodesic, iVersion
 from dlroms.dnns import Dense, train, Clock, num2p
 from dlroms.roms import POD, project, snapshots, PODerrors, mre, mse, ROM, euclidean, boxplot, regcoeff, PODNN, DLROM, DFNN, mrei, msei, projectdown, projectup
