@@ -360,7 +360,7 @@ def multiplot(vs, shape, space, size = 4, **kwargs):
         plt.subplot(shape[0], shape[1], j+1)
         plot(vs[j], space, **kwargs)
     
-def gif(name, U, dt, T, space, axis = "off", figsize = (4,4), colorbar = False, cmap = None):
+def gif(name, U, space, dt = None, T = None, axis = "off", figsize = (4,4), colorbar = False, cmap = None):
     """Builds a GIF animation given the values of a functional object at multiple time steps.
     
     Input
@@ -374,7 +374,7 @@ def gif(name, U, dt, T, space, axis = "off", figsize = (4,4), colorbar = False, 
         figsize (tuple)                                             Sizes of the window where to plot, width = figsize[0], height = figsize[1].
                                                                     See matplotlib.pyplot.plot.
     """
-    frames = int(T/dt)
+    frames = len(U) if(T is None) else int(T/dt)
     N = len(U)
     step = N//frames
     vmin = U.min()
@@ -384,6 +384,12 @@ def gif(name, U, dt, T, space, axis = "off", figsize = (4,4), colorbar = False, 
         plot(U[i*step], space, axis = axis, vmin = vmin, vmax = vmax, colorbar = colorbar, cmap = cmap)
     gifs.save(drawframe, frames, name)
    
+def animate(U, space, dt = None, T = None, axis = "off", figsize = (4,4), colorbar = False, cmap = None):
+    rnd = numpy.random.randint(50000)
+    gif("temp%d-gif" % rnd, U, space, **kwargs)
+    from IPython.display import Image, display
+    display(Image("temp%d-gif.gif" % rnd))
+    os.remove("temp%d-gif.gif" % rnd)
 
 def dbc(expression, where, space, degree = 1):
     from fenics import DirichletBC, Expression
