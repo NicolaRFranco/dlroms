@@ -389,7 +389,8 @@ def animate(U, space, **kwargs):
     gif("temp%d-gif" % rnd, U, space, **kwargs)
     from IPython.display import Image, display
     display(Image("temp%d-gif.gif" % rnd))
-    os.remove("temp%d-gif.gif" % rnd)
+    from os import remove
+    remove("temp%d-gif.gif" % rnd)
 
 def dbc(expression, where, space, degree = 1):
     from fenics import DirichletBC, Expression
