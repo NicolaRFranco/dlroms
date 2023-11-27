@@ -384,7 +384,7 @@ def gif(name, U, space, dt = None, T = None, axis = "off", figsize = (4,4), colo
         plot(U[i*step], space, axis = axis, vmin = vmin, vmax = vmax, colorbar = colorbar, cmap = cmap)
     gifs.save(drawframe, frames, name)
    
-def animate(U, space, dt = None, T = None, axis = "off", figsize = (4,4), colorbar = False, cmap = None):
+def animate(U, space, **kwargs):
     rnd = numpy.random.randint(50000)
     gif("temp%d-gif" % rnd, U, space, **kwargs)
     from IPython.display import Image, display
