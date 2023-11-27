@@ -42,7 +42,7 @@ def save(drawframe, frames, name, remove = True):
         drawframe(i)
 
         # create file name and append it to a list
-        filename = f'{i}.png'
+        filename = 'temp-gif-frame%d.png' % i
         filenames.append(filename)
 
         # save frame
