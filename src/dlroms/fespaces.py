@@ -377,8 +377,8 @@ def gif(name, U, space, dt = None, T = None, axis = "off", figsize = (4,4), colo
     frames = len(U) if(T is None) else int(T/dt)
     N = len(U)
     step = N//frames
-    vmin = U.min()
-    vmax = U.max()
+    vmin = float(U.min())
+    vmax = float(U.max())
     def drawframe(i):
         plt.figure(figsize = figsize)
         plot(U[i*step], space, axis = axis, vmin = vmin, vmax = vmax, colorbar = colorbar, cmap = cmap)
