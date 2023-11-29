@@ -277,7 +277,7 @@ class Normal(object):
             ns.append(n if np.dot(n, self.nodes[innerpoint]-xc)<0 else -n)            
         return np.stack(ns, axis = 0)
 
-def Evaluation(Operator):
+class Evaluation(Operator):
     def __init__(self, mesh, space, points):
         Loc = Localizer(mesh)
         i = Loc(points)
