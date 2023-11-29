@@ -305,7 +305,7 @@ class Evaluate(Operator):
         eval = np.zeros((space.dim(), points.shape[0]))
         for s in stuff:
           eval[s[1], s[0]] = s[2]
-        super(Evaluation, self).__init__(eval)
+        super(Evaluate, self).__init__(eval)
 
 class Interpolate(Evaluate):
     def __init__(self, mesh, space1, space2):
