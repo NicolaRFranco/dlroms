@@ -277,7 +277,7 @@ class Normal(object):
             ns.append(n if np.dot(n, self.nodes[innerpoint]-xc)<0 else -n)            
         return np.stack(ns, axis = 0)
 
-class Evaluation(Operator):
+class Evaluate(Operator):
     def __init__(self, mesh, space, points):
         Loc = Localizer(mesh)
         i = Loc(points)
@@ -296,6 +296,7 @@ class Evaluation(Operator):
           u = np.zeros(space.dim())
           u[j] = 1.0
           u = fe.asvector(u, space)
+          u.set_allow_extrapolation(True)
           for r in result[j]:
             v = u(*points[r])
             if(abs(v)>1e-14):
@@ -305,6 +306,10 @@ class Evaluation(Operator):
         for s in stuff:
           eval[s[1], s[0]] = s[2]
         super(Evaluation, self).__init__(eval)
+
+class Interpolate(Evaluate):
+    def __init__(self, mesh, space1, space2):
+        super(Interpolate, self).__init__(mesh, space1, fe.coordinates(space2))
 
 def iVersion(Class):
     def iconstructor(self, V1, *args, **kwargs):
