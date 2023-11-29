@@ -84,6 +84,30 @@ class Navigator(object):
         tot = np.abs((x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))/2)
         diffs = np.abs(tot - area(P,A,B) - area(P,A,C) - area(P,B,C))
         return diffs.argmin(axis = 1)
+
+class Localizer(object):
+    def __init__(self, domain, mesh):        
+        cells = mesh.cells()
+        ne = len(cells)
+
+        adj = np.zeros((ne, ne))
+        A, B, C = cells.T
+        A, B, C = mesh.coordinates()[A], mesh.coordinates()[B], mesh.coordinates()[C]
+        self.A = A
+        self.B = B
+        self.C = C
+        self.adj = adj
+        self.cells = cells
+        self.nodes = mesh.coordinates()
+            
+    def finde(self, P):
+        A, B, C = self.A, self.B, self.C
+        x1, y1 = A.T
+        x2, y2 = B.T
+        x3, y3 = C.T
+        tot = np.abs((x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))/2)
+        diffs = np.abs(tot - area(P,A,B) - area(P,A,C) - area(P,B,C))
+        return diffs.argmin(axis = 1)
     
 class Geodesic(dnns.Sparse):
     def __init__(self, domain, x1, x2, support, accuracy = 1, activation = dnns.leakyReLU):
