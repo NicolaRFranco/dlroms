@@ -86,7 +86,7 @@ class Navigator(object):
         return diffs.argmin(axis = 1)
 
 class Localizer(object):
-    def __init__(self, domain, mesh):        
+    def __init__(self, mesh):        
         cells = mesh.cells()
         ne = len(cells)
 
@@ -100,7 +100,7 @@ class Localizer(object):
         self.cells = cells
         self.nodes = mesh.coordinates()
             
-    def finde(self, P):
+    def __call__(self, P):
         A, B, C = self.A, self.B, self.C
         x1, y1 = A.T
         x2, y2 = B.T
@@ -277,6 +277,34 @@ class Normal(object):
             ns.append(n if np.dot(n, self.nodes[innerpoint]-xc)<0 else -n)            
         return np.stack(ns, axis = 0)
 
+def Evaluation(Operator):
+    def __init__(self, mesh, space, points):
+        Loc = Localizer(mesh)
+        i = Loc(points)
+        P = fe.coordinates(space)
+        A, B, C = Loc.A[i], Loc.B[i], Loc.C[i]
+        x1, y1 = A.T
+        x2, y2 = B.T
+        x3, y3 = C.T
+        tot = np.abs((x1*(y2 - y3) + x2*(y3 - y1) + x3*(y1 - y2))/2)
+        diffs = np.abs(tot - area(P,A,B) - area(P,A,C) - area(P,B,C))
+        result = np.array([list(np.nonzero(q<1e-7)[0]) for q in diffs], dtype = 'object')
+        mask = np.array([bool(res) for res in result])
+        jj = np.nonzero(mask)[0]
+        stuff = []
+        for j in jj:
+          u = np.zeros(space.dim())
+          u[j] = 1.0
+          u = fe.asvector(u, space)
+          for r in result[j]:
+            v = u(*points[r])
+            if(abs(v)>1e-14):
+                stuff += [[r, j, v]]
+        
+        eval = np.zeros((space.dim(), points.shape[0]))
+        for s in stuff:
+          eval[s[1], s[0]] = s[2]
+        super(Evaluation, self).__init__(eval)
 
 def iVersion(Class):
     def iconstructor(self, V1, *args, **kwargs):
