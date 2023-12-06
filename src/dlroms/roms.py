@@ -233,6 +233,8 @@ class ROM(Consecutive):
 
         for e in range(epochs):   
 
+            eta = "N/D" if e == 0 else Clock.shortparse(clock.elapsed()*(epochs-e))
+            
             if(batchsize == None):
                 def closure():
                     optimizer.zero_grad()
@@ -276,11 +278,13 @@ class ROM(Consecutive):
                         string = string.replace("x","")
                     print(string)
                     print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + ("" if nvalid == 0 else ("\t" + conv(err[-1][2]))) + "\t" + conv(err[-1][1]) + ".")
+                    print("\nETA: %s." % eta)
                 if(nvalid > 0 and e > 3):
                     if((err[-1][2] > err[-2][2]) and (err[-1][0] < err[-2][0])):
                             if((err[-2][2] > err[-3][2]) and (err[-2][0] < err[-3][0])):
                                     break
-
+                if(e==0):
+                    clock.stop()
         clock.stop()
         optimizer.zero_grad()
         if(verbose):
