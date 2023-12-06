@@ -1236,11 +1236,11 @@ class Clock(object):
         s = time-3600*h-60*m
         
         if(h>0):
-            return ("%d h %d m %.2f s" % (h,m,s))
+            return ("%dh %dm %.2fs" % (h,m,s))
         elif(m>0):
-            return ("%d m %.2f s" % (m,s))
+            return ("%dm %.2fs" % (m,s))
         else:
-            return ("%.2f s" % s)
+            return ("%.2fs" % s)
         
         
 def train(dnn, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, lossf = None, error = None, verbose = True, until = None, nvalid = 0, conv = num2p,
