@@ -49,14 +49,13 @@ def snapshots(n, sampler, core = GPU, verbose = False, filename = None):
     mu, u = [], []
     for seed in range(n):
         if(verbose):
-            eta = "N/D" if seed == 0 else Clock.shortparse(clock.elapsed()*(n-seed))
+            eta = "N/D" if seed == 0 else Clock.shortparse(clock.elapsed()*(n/float(seed)-1.0))
             print("Generating snapshot n.%d... (ETA: %s)." % (seed+1, eta))
             clear_output(wait = True)
         mu0, u0 = sampler(seed)
         mu.append(mu0)
         u.append(u0)
-        if(seed == 0):
-            clock.stop()
+        clock.stop()
     clock.stop()
     if(verbose):
         clear_output()
@@ -233,7 +232,7 @@ class ROM(Consecutive):
 
         for e in range(epochs):   
 
-            eta = "N/D" if e == 0 else Clock.shortparse(clock.elapsed()*(epochs-e))
+            eta = "N/D" if e == 0 else Clock.shortparse(clock.elapsed()*(epochs/float(e)-1.0))
             
             if(batchsize == None):
                 def closure():
@@ -283,8 +282,7 @@ class ROM(Consecutive):
                     if((err[-1][2] > err[-2][2]) and (err[-1][0] < err[-2][0])):
                             if((err[-2][2] > err[-3][2]) and (err[-2][0] < err[-3][0])):
                                     break
-                if(e==0):
-                    clock.stop()
+                clock.stop()
         clock.stop()
         optimizer.zero_grad()
         if(verbose):
