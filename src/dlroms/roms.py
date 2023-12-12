@@ -166,7 +166,8 @@ def PAs(V1, V2, orth = True, inner = None, delta = 1e-5):
     return PVs(V1, V2, orth, inner, delta).arccos()
 
 def gdist(V1, V2, orth = True, inner = None, squared = False):
-    d2 = PAs(V1, V2, orth = orth, inner = inner).pow(2).sum(axis = -1)
+    d2 = PAs(V1 if len(V1.shape)==3 else V1.unsqueeze(0), (V2 if len(V2.shape)==3 else V2.unsqueeze(0), 
+             orth = orth, inner = inner).pow(2).sum(axis = -1)
     return d2 if squared else d2.sqrt()
     
 def PODerrors(u, upto, ntrain, error, inner = None, orth = False):
@@ -177,7 +178,6 @@ def PODerrors(u, upto, ntrain, error, inner = None, orth = False):
         uproj = project(pod[:n], u[ntrain:], inner = inner, orth = orth)
         errors.append(error(u[ntrain:], uproj))
     return errors
-
 
 class ROM(Consecutive):
     """Abstract class for handling Reduced Order Models as Python objects."""
