@@ -323,7 +323,7 @@ def vtk(u, space, filename):
     os.remove("%s.pvd" % filename)
     os.rename("%s000000.vtu" % filename, "%s.vtu" % filename)
     
-def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "off", shrink = 0.8, levels = 200, cmap = None):
+def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "off", shrink = 0.8, levels = 200, cmap = None, spaceticks = False):
     """Plots mesh and functional objects.
     
     Input
@@ -349,7 +349,9 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
             else:
                 c = dolfin.common.plotting.plot(uv, cmap = cmap)
             if(colorbar):
-                plt.colorbar(c, shrink = shrink)
+                cbar = plt.colorbar(c, shrink = shrink)
+                if(spaceticks):
+                    cbar.set_ticks([round(tick, 2) for tick in numpy.linspace(cbar.vmin, cbar.vmax, 6)])
     except:
         raise RuntimeError("First argument should be either a dolfin.cpp.mesh.Mesh or a structure containing the dof values of some function (in which case 'space' must be != None).")
     plt.axis(axis)
