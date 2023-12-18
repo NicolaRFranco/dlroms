@@ -345,10 +345,10 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
         else:
             uv = asvector(obj, space)
             if(space.element().value_dimension(0) == 1):
-                if("DG" in str(space._ufl_element)):    
-                    c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, cmap = cmap)
-                else:
+                try:
                     c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, levels = numpy.linspace(float(obj.min()), float(obj.max()), levels), cmap = cmap)
+                except:
+                    c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, cmap = cmap)
             else:
                 c = dolfin.common.plotting.plot(uv, cmap = cmap)
             if(colorbar):
