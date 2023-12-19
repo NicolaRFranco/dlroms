@@ -51,11 +51,12 @@ def snapshots(n, sampler, core = GPU, verbose = False, filename = None):
         if(verbose):
             eta = "N/D" if seed == 0 else Clock.shortparse(clock.elapsed()*(n/float(seed)-1.0))
             print("Generating snapshot n.%d... (ETA: %s)." % (seed+1, eta))
-            clear_output(wait = True)
         mu0, u0 = sampler(seed)
         mu.append(mu0)
         u.append(u0)
         clock.stop()
+        if(verbose):
+            clear_output(wait = True)
     clock.stop()
     if(verbose):
         clear_output()
