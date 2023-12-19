@@ -114,7 +114,10 @@ class Geodesic(dnns.Sparse):
         from dlroms.fespaces import coordinates, mesh
         coordinates1 = x1 if(isinstance(x1, np.ndarray)) else coordinates(x1)
         coordinates2 = x2 if(isinstance(x2, np.ndarray)) else coordinates(x2)
-        navigator = Navigator(domain, mesh(domain, resolution = accuracy))
+        try:
+            navigator = Navigator(domain, mesh(domain, resolution = accuracy))
+        except:
+            navigator = Navigator(domain, mesh(domain, stepsize = accuracy))
         
         E1 = navigator.finde(coordinates1).reshape(-1,1)
         E2 = navigator.finde(coordinates2).reshape(1,-1)
