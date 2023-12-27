@@ -16,7 +16,7 @@ This library was written, and is currently maintained, by **Nicola Rares Franco*
 
 Deep learning based reduced order models are efficient model surrogates that can emulate the accuracy of classical numerical solvers (hereby referred to as FOM: Full Order Models) by learning from high-quality simulations. For instance, let $\boldsymbol{\mu}\to u$ represent the action of a FOM solver, which, given a parameter instance $\boldsymbol{\mu}\in\mathbb{R}^{p}$ returns the corresponding PDE solution $u\in\mathbb{R}^{N_{h}}$, here represented by means of a suitable dof vector. Then, the construction of a DL-ROM can be sketched as:
 
-1. **Sampling**: collect high-fidelity data, $`M=[\boldsymbol{\mu}_{1};\dots;\boldsymbol{\mu}_{N}]\in\mathbb{R}^{N\times p}`$ and $`U=[u_{1};\dots;u_{N}]\in\mathbb{R}^{N\times N_{h}}`$, using the FOM solver.
+1. **Sampling**: collect high-fidelity data, $`M=[\boldsymbol{\mu}_{1};\dots;\boldsymbol{\mu}_{N}]\in\mathbb{R}^{N\times p}`$ and $`U=[u_{1};\dots;u_{N}]\in\mathbb{R}^{N\times N_{h}}`$, by repeatedly querying the FOM solver.
 2. **Design**: initialize a DL-ROM with trainable architectures $\psi_{1},\dots,\psi_{k}$.
 3. **Training**: optimize the components of the DL-ROM, thus learning to replicate the FOM.
 4. **Operate**: freeze the DL-ROM and use it freely at a negligible computational cost.
