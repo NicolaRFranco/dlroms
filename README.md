@@ -14,14 +14,14 @@ This library was written, and is currently maintained, by **Nicola Rares Franco*
 
 ## DL-ROMs in a nutshell
 
-Deep learning based reduced order models are efficient model surrogates that can emulate the accuracy of classical numerical solvers (hereby referred to as FOM: Full Order Models) by learning from high-quality simulations. The idea goes as follows. Let $\boldsymbol{\mu}\to u$ represent the action of a FOM solver, which, given a parameter instance $\boldsymbol{\mu}\in\mathbb{R}^{p}$ returns the corresponding PDE solution $u\in\mathbb{R}^{N_{h}}$, here represented by means of a suitable dof vector. Then, the construction of a DL-ROM can be sketched as:
+Deep learning based reduced order models are efficient model surrogates that can emulate the accuracy of classical numerical solvers (hereby referred to as FOM: Full Order Models) by learning from high-quality simulations. For instance, let $\boldsymbol{\mu}\to u$ represent the action of a FOM solver, which, given a parameter instance $\boldsymbol{\mu}\in\mathbb{R}^{p}$ returns the corresponding PDE solution $u\in\mathbb{R}^{N_{h}}$, here represented by means of a suitable dof vector. Then, the construction of a DL-ROM can be sketched as:
 
-1. Collect high-fidelity data, $`M=[\boldsymbol{\mu}_{1};\dots;\boldsymbol{\mu}_{N}]\in\mathbb{R}^{N\times p}`$ and $`U=[u_{1};\dots;u_{N}]\in\mathbb{R}^{N\times N_{h}}`$, using the FOM solver.
-2. Initialize a DL-ROM module with trainable architectures $\psi_{1},\dots,\psi_{k}$.
-3. Train the DL-ROM components to learn the FOM data.
-4. Freeze the DL-ROM and use it whenever you like to: the computational cost is now negligible!
+1. **Sampling**: collect high-fidelity data, $`M=[\boldsymbol{\mu}_{1};\dots;\boldsymbol{\mu}_{N}]\in\mathbb{R}^{N\times p}`$ and $`U=[u_{1};\dots;u_{N}]\in\mathbb{R}^{N\times N_{h}}`$, using the FOM solver.
+2. **Design**: initialize a DL-ROM with trainable architectures $\psi_{1},\dots,\psi_{k}$.
+3. **Training**: optimize the components of the DL-ROM, thus learning to replicate the FOM.
+4. **Operate**: freeze the DL-ROM and use it freely at a negligible computational cost.
 
-The code below shows a simple example in which a naive DNN model is used as a DL-ROM. For more advanced approaches, such as POD-NN or autoencoder-enhanced DL-ROMs, we refer to the *dlroms.roms* module.
+In the most simple setting, a DL-ROM may consist of a single DNN architecture $\psi:\mathbb{R}^{p}\to\mathbb{R}^{N_{h}}$ directly approximating the FOM, $\psi(\boldsymbol{\mu})\approx u$. The code below shows a simple example of such situation. Note however, that this is a very naive approach, not suited for most applications: for more advanced approaches, such as POD-NN or autoencoder-enhanced DL-ROMs, we refer to the *dlroms.roms* module.
 
     # Problem data
     p, Nh = 2, 501
@@ -29,6 +29,9 @@ The code below shows a simple example in which a naive DNN model is used as a DL
     # Toy example of a FOM solver: given mu = [m0, m1], it returns u(x) = (m1-m0)x+m0, 
     # i.e. the solution to: -u''=0 in (0,1), u(0)=m0, u(1)=m1. 
     # The solution u=u(x) is discretized over a uniform grid with 501 nodes.
+    # NB: this is merely a didactical example. In practical applications, the FOM sol-
+    # ver consists of an expensive numerical solver (otherwise, we wouldn't need a ROM
+    # surrogate!).
     import numpy as np
     def FOMsolver(mu):
          x = np.linspace(0, 1, Nh)
@@ -80,7 +83,7 @@ The whole library is documented using native Python syntax and can be directly i
 
 ## Installation
 ### Basic version
-The basic version of the DLROMs package allows users to create and train sophisticated neural network models, while also granting access to classical ROM techniques such as Principal Orthogonal Decomposition (POD). This version can be easily installed on Linux, Windows and MacOS. To install it, simply run
+The basic version of the DLROMs package allows users to create and train sophisticated neural network models, while also granting access to classical ROM techniques such as Principal Orthogonal Decomposition (POD). This version can be easily installed on Linux, Windows and MacOS. To do so, simply run
 
     pip install git+https://github.com/NicolaRFranco/dlroms.git
 
@@ -90,23 +93,10 @@ Note: if you are using **conda**, make sure that **pip** is available. If not, y
     conda install pip
 
 ### Advanced version
-The advanced version integrates the basic one with additional tools coming from the FEniCS library, allowing users to: compute integral and Sobolev norms, produce norm-aware POD projections, visualize mesh-based data and more. Installation is recommended on Linux and MacOS. To install (and enable) the advanced version run
-
-    pip install git+https://github.com/NicolaRFranco/dlroms.git
-
-and integrate the installation manually by installing [FEniCS](https://fenicsproject.org/) and any mesh generator of your choice (compatible choices incluide [mshr](https://anaconda.org/conda-forge/mshr) and [gmsh](https://anaconda.org/conda-forge/gmsh)).</br>
-Note: as before, make sure that pip is available if you are using conda.
+The advanced version integrates the basic one with additional tools coming from the FEniCS library, allowing users to: compute integral and Sobolev norms, produce norm-aware POD projections, visualize mesh-based data and more. Installation is recommended on Linux and MacOS. To get it: (i) install the basic version first, (ii) integrate the installation manually by installing [FEniCS](https://fenicsproject.org/) and any mesh generator of your choice (compatible choices incluide [mshr](https://anaconda.org/conda-forge/mshr) and [gmsh](https://anaconda.org/conda-forge/gmsh)). Note: as before, make sure that pip is available if you are using conda.
 
 ### Colab installation
-The advanced version can also be installed on Google Colab. To this end, simply run
-
-    !pip install git+https://github.com/NicolaRFranco/dlroms.git
-
-This will install the basic version. Then, as soon as the dlroms package is imported, e.g. via
-
-    from dlroms import*
-    
-a complementary installation of FEniCS and gmsh will be carried out automatically (only of the first run). Equivalently, one may also put the following instructions at the beginning of the notebook
+The advanced version of the dlroms package is also available on Google Colab. To have it available, include the following instructions at the beginning of your notebook:
 
     try:
          from dlroms import*
@@ -114,31 +104,26 @@ a complementary installation of FEniCS and gmsh will be carried out automaticall
          !pip install git+https://github.com/NicolaRFranco/dlroms.git
          from dlroms import*
     
-In this way, the Colab kernel can be restarted and run at any time (without redundant re-installations). 
+The pip instruction will install the basic version, while the importation of the dlrom package will automatically trigger the complementary installation of FEniCS and gmsh. At the same time, this syntax will avoid redundant installations if the kernel is restarted.
 
 
 
 ## Modules overview
 The DLROMs library consists of several modules, which we may synthesize as follows.
 
-* **dlroms.colab**</br> Integrative module for the installation in Colab.
-  
-* **dlroms.cores**</br> For handling, generating, and loading CPU/GPU torch tensors.
-  
-* **dlroms.dnns**</br> For constructing, saving and loading basic neural network architectures.
-  
-* **dlroms.minns**</br> An integrative module that allows users to create neural network architectures specifically tailored for mesh-based functional data, such as signals discretized via Finite Elements. It includes trainable models, such as, for instance, [Mesh-Informed Neural Networks (MINNs)](https://doi.org/10.1007/s10915-023-02331-1), and nonlearnable architectures for computing integral norms, geodesic distances and more.
-  
-* **dlroms.fespaces**</br> FEniCS based library for handling meshes and discretized functional data (visualization, dof-to-function conversion etc.).
-  
-* **dlroms.geometry**</br> Auxiliary module that allows fespaces.py to interact with gmsh (if installed).
-  
-* **dlroms.gp**</br> Complementary module for constructing Gaussian processes in Finite Element spaces.
-  
-* **dlroms.gifs**</br> Auxiliary library for the visualization of time-dependent solutions.
-  
-* **dlroms.roms**</br> Core library that allows users to construct data-driven Reduced Order Models. Includes basic algorithms, such as POD, and abstract classes for incorporating and training neural network models. It can be used to implement ROM strategies such as [POD-NN](https://doi.org/10.1016/j.jcp.2018.02.037), autoencoder based [DL-ROMs](https://doi.org/10.1090/mcom/3781), and more.
+### Main modules
+* **dlroms.roms**</br> *Costruction of data-driven ROMs*. Includes basic algorithms, such as POD, and abstract classes for incorporating and training neural network models. It can be used to implement ROM strategies such as [POD-NN](https://doi.org/10.1016/j.jcp.2018.02.037), autoencoder based [DL-ROMs](https://doi.org/10.1090/mcom/3781), and more.
+* **dlroms.dnns**</br> *Design of neural network architectures*. Pytorch based module for constructing, saving and loading basic DNN architectures.
+* **dlroms.fespaces**</br> *Handling meshes and discretized functional data*. FEniCS based module for data visualization, conversion (dof-to-function, torch-to-fenics representation) and more.
+* **dlroms.minns**</br> *Hybrid module bridging neural networks and finite element spaces*. Implements advanced neural network architectures for mesh-based functional data (e.g., data coming from Finite Element simulations). These include: (i) trainable architectures, such as [Mesh-Informed Neural Networks (MINNs)](https://doi.org/10.1007/s10915-023-02331-1), (ii) nonlearnable blocks, for computing, e.g., integral norms, geodesic distances and more.
 
-We remark that the main algorithms, classes and routines are also included in the **\_\_init\_\_.py** module. Thus, instead of navigating the whole library, users can easily import the main features of the DLROMs package by simply running
+### Auxiliary modules
+* **dlroms.cores**</br> Pytorch based library for handling, generating, and loading CPU/GPU tensors.
+* **dlroms.geometry**</br> Auxiliary module regulating the interaction between dlroms.fespaces and gmsh (if installed).
+* **dlroms.gp**</br> Complementary module implementing Gaussian processes in Finite Element spaces.
+* **dlroms.gifs**</br> Auxiliary library for the visualization of time-dependent solutions.
+* **dlroms.colab**</br> Integrative module for compatibility with Google Colab.
+  
+We remark that the main algorithms, classes and routines are also included in the **\_\_init\_\_.py** module, and thus readily avaiable after the following
 
     from dlroms import*
