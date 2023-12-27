@@ -73,9 +73,9 @@ In the most simple setting, a DL-ROM may consist of a single DNN architecture $\
     plot(FOMsolver(newmu))
     plot(model.solve(newmu), '--')
 
-Starting from this simple pipeline, the DL-ROM package then allows plenty of generalizations: complex customizable models based on multiple architecture that cooperate with each other, mesh-informed architectures, integral norms for Lebesgue/Sobolev like loss functions, and more! Furthermore, it naturally interacts with other powerful libraries such as numpy, torch and fenics.
+Starting from this simple pipeline, the DL-ROMs package provides access to a whole spectrum of more advanced techniques: complex customizable models based on multiple architecture that cooperate with each other, mesh-informed architectures, integral norms for Lebesgue/Sobolev like loss functions, and more! Furthermore, the DL_ROMs packages naturally interacts with other powerful libraries such as numpy, Pytorch and FEniCS.
 
-The whole library is documented using native Python syntax and can be directly inspected using the *help* command. E.g.,
+The whole library is documented using native Python syntax, and it can be inspected via the *help* command. E.g.,
 
      from dlroms.roms import POD
      help(POD)
