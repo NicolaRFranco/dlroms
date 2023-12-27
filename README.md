@@ -21,7 +21,7 @@ Deep learning based reduced order models are efficient model surrogates that can
 3. **Training**: optimize the components of the DL-ROM, thus learning to replicate the FOM.
 4. **Operate**: freeze the DL-ROM and use it freely at a negligible computational cost.
 
-In the most simple setting, a DL-ROM may consist of a single DNN architecture $\psi:\mathbb{R}^{p}\to\mathbb{R}^{N_{h}}$ directly approximating the FOM, $\psi(\boldsymbol{\mu})\approx u$. The code below shows a simple example of such situation. Note however, that this is a very naive approach, not suited for most applications: for more advanced approaches, such as POD-NN or autoencoder-enhanced DL-ROMs, we refer to the *dlroms.roms* module.
+In the most simple setting, a DL-ROM may consist of a single DNN architecture $\psi:\mathbb{R}^{p}\to\mathbb{R}^{N_{h}}$ directly approximating the FOM, $\psi(\boldsymbol{\mu})\approx u$. The code below shows a simple example of such situation. Note, however, that this is a very naive approach, not suited for most applications: for more advanced approaches, such as POD-NN or autoencoder-enhanced DL-ROMs, we refer to the *dlroms.roms* module.
 
     # Problem data
     p, Nh = 2, 501
