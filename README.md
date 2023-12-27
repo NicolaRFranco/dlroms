@@ -127,6 +127,6 @@ The DLROMs library consists of several modules, which we may synthesize as follo
 * **dlroms.gifs**</br> Auxiliary library for the visualization of time-dependent solutions.
 * **dlroms.colab**</br> Integrative module for compatibility with Google Colab.
   
-We remark that the main algorithms, classes and routines are also included in the **\_\_init\_\_.py** module, and thus readily avaiable after the following
+We remark that the main algorithms, classes and routines are also included in the **\_\_init\_\_.py** module, and thus readily available after
 
     from dlroms import*
