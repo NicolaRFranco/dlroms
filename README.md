@@ -112,7 +112,7 @@ The pip instruction will install the basic version, while the importation of the
 The DLROMs library consists of several modules, which we may synthesize as follows.
 
 ### Main modules
-* **dlroms.roms**</br> *Costruction of data-driven ROMs*. Includes basic algorithms, such as POD, and abstract classes for incorporating and training neural network models. It can be used to implement ROM strategies such as [POD-NN](https://doi.org/10.1016/j.jcp.2018.02.037), autoencoder based [DL-ROMs](https://doi.org/10.1090/mcom/3781), and more.
+* **dlroms.roms**</br> *Construction of data-driven ROMs*. Includes basic algorithms, such as POD, and abstract classes for incorporating and training neural network models. It can be used to implement ROM strategies such as [POD-NN](https://doi.org/10.1016/j.jcp.2018.02.037), autoencoder based [DL-ROMs](https://doi.org/10.1090/mcom/3781), and more.
   
 * **dlroms.dnns**</br> *Design of neural network architectures*. Pytorch based module for constructing, saving and loading basic DNN architectures.
   
