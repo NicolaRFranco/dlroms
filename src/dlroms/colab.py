@@ -30,7 +30,7 @@ def setup():
   except ImportError:
     ready = False
     print("Installing fenics... this should take about 30-60 seconds.")
-    os.system('wget "https://fem-on-colab.github.io/releases/fenics-install.sh" -O "/tmp/fenics-install.sh" && bash "/tmp/fenics-install.sh"')
+    os.system('wget "https://fem-on-colab.github.io/releases/fenics-install-real.sh" -O "/tmp/fenics-install.sh" && bash "/tmp/fenics-install.sh"')
 
   try:
     import gmsh
