@@ -29,7 +29,7 @@ except:
 
 from dlroms.minns import L2, H1, Local, Geodesic, iVersion
 from dlroms.dnns import Dense, train, Clock, num2p
-from dlroms.roms import POD, project, snapshots, PODerrors, mre, mse, ROM, euclidean, boxplot, regcoeff, PODNN, DLROM, DFNN, mrei, msei, projectdown, projectup
+from dlroms.roms import POD, project, snapshots, PODerrors, mre, mse, ROM, euclidean, boxplot, regcoeff, PODNN, DLROM, DFNN, mrei, msei, projectdown, projectup, neuclidean
 from dlroms.cores import CPU, GPU
 import dlroms.fespaces as fe
 import matplotlib.pyplot as plt
