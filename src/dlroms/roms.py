@@ -86,6 +86,8 @@ def POD(U, k, inner = None, svalues = True):
     w, v = eigh(M, eigvals = (N-k, N-1))
     basis, eigenvalues = np.dot((v/np.sqrt(w)).T, U0), w
     basis, eigenvalues = np.flip(basis, axis = 0)+0, np.flip(eigenvalues)+0
+    if(inner is None):
+        basis = QRgramschmidt(basis.T).T
     if(isinstance(U, torch.Tensor)):
         core = coreof(U)
         return (core.tensor(basis), core.tensor(eigenvalues)) if svalues else core.tensor(basis)
