@@ -87,7 +87,7 @@ def POD(U, k, inner = None, svalues = True):
     basis, eigenvalues = np.dot((v/np.sqrt(w)).T, U0), w
     basis, eigenvalues = np.flip(basis, axis = 0)+0, np.flip(eigenvalues)+0
     if(inner is None):
-        basis = QRgramschmidt(basis.T).T
+        basis = np.linalg.qr(basis.T, mode = 'reduced')[0].T
     if(isinstance(U, torch.Tensor)):
         core = coreof(U)
         return (core.tensor(basis), core.tensor(eigenvalues)) if svalues else core.tensor(basis)
