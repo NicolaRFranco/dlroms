@@ -85,14 +85,14 @@ def POD(U, k, inner = None, svalues = True):
     N = U.shape[0]
     w, v = eigh(M, eigvals = (N-k, N-1))
     basis, eigenvalues = np.dot((v/np.sqrt(w)).T, U0), w
-    basis, eigenvalues = np.flip(basis, axis = 0)+0, np.flip(eigenvalues)+0
+    basis, s_values = np.flip(basis, axis = 0)+0, np.sqrt(np.flip(eigenvalues)+0)
     if(inner is None):
         basis = np.linalg.qr(basis.T, mode = 'reduced')[0].T
     if(isinstance(U, torch.Tensor)):
         core = coreof(U)
-        return (core.tensor(basis), core.tensor(eigenvalues)) if svalues else core.tensor(basis)
+        return (core.tensor(basis), core.tensor(s_values)) if svalues else core.tensor(basis)
     else:
-        return (basis, eigenvalues) if svalues else basis
+        return (basis, s_values) if svalues else basis
 
 def projectdown(vbasis, u, inner = None):
     """Given a sequence of basis vbasis = [V1,..., Vk], where Vj has shape (b, Nh), and
