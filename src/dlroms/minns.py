@@ -242,6 +242,7 @@ class Normal(object):
         self.C = C        
         self.cells = cells
         self.nodes = mesh.coordinates()
+        self.bd = fe.boundary(mesh = mesh)
                 
     def findes(self, P):
         A, B, C = self.A, self.B, self.C
@@ -254,7 +255,7 @@ class Normal(object):
     
     def bfind(self, P):
         elements = self.findes(P)
-        bd = fe.boundary(mesh)
+        bd = self.bd
         elem = []
         for es in elements:
             for e in es:
