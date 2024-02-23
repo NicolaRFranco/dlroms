@@ -120,7 +120,7 @@ def boundary(mesh = None, V = None):
     """
     space = V if(not (V is None)) else dolfin.function.functionspace.FunctionSpace(mesh, 'CG', 1)
     indexes = list(dolfin.fem.dirichletbc.DirichletBC(space, 0.0, lambda x,y:y).get_boundary_values().keys())
-    return indexes if if(not (V is None)) else dolfin.cpp.fem.dof_to_vertex_map(space)[indexes]
+    return indexes if(not (V is None)) else dolfin.cpp.fem.dof_to_vertex_map(space)[indexes]
     
 def closest(mesh, x):
     """Given a mesh and a point, returns the closest mesh vertix to that point.
