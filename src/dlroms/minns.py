@@ -213,7 +213,20 @@ class Integral(dnns.Dense):
 class L1(Integral):
     def forward(self, x):
         return super(L1, self).forward(x.abs())
-    
+
+class Gradient(Weightless):    
+    def __init__(self, mesh, nodal = False):
+        super(Gradient, self).__init__()
+        grad = fe.assemblegrad(mesh, nodal = nodal)
+        self.grad = self.core.tensor(grad)
+    def cuda(self):
+        super(Gradient, self).cuda()
+        self.grad = self.core.tensor(self.grad.numpy()).transpose(1,2)       
+    def forward(self, x):
+        y = []
+        for derivative in self.grad:
+            y.append(x.mm(derivative))            
+        return torch.stack(y, axis = -1)
     
 class Divergence(Operator):
     def __init__(self, spacein, spaceout):
