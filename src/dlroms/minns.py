@@ -214,7 +214,7 @@ class L1(Integral):
     def forward(self, x):
         return super(L1, self).forward(x.abs())
 
-class Gradient(Weightless):    
+class Gradient(dnns.Weightless):    
     def __init__(self, mesh, nodal = False):
         super(Gradient, self).__init__()
         grad = fe.assemblegrad(mesh, nodal = nodal)
