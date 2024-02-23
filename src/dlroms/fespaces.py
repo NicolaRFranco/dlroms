@@ -109,7 +109,7 @@ def coordinates(space):
     """
     return space.tabulate_dof_coordinates().astype("float32")
 
-def boundary(mesh):
+def boundary(mesh = None, V = None):
     """Returns the indexes of those nodes that lie on the boundary of a given domain.
     
     Input
@@ -118,9 +118,9 @@ def boundary(mesh):
     Output
         (numpy.ndarray). Ex: calling mesh.coordinates()[boundary(mesh)] returns the coordinates of the nodes along the boundary.
     """
-    V = dolfin.function.functionspace.FunctionSpace(mesh, 'CG', 1)
-    indexes = list(dolfin.fem.dirichletbc.DirichletBC(V, 0.0, lambda x,y:y).get_boundary_values().keys())
-    return dolfin.cpp.fem.dof_to_vertex_map(V)[indexes]
+    space = V if(not (V is None)) else dolfin.function.functionspace.FunctionSpace(mesh, 'CG', 1)
+    indexes = list(dolfin.fem.dirichletbc.DirichletBC(space, 0.0, lambda x,y:y).get_boundary_values().keys())
+    return indexes if if(not (V is None)) else dolfin.cpp.fem.dof_to_vertex_map(space)[indexes]
     
 def closest(mesh, x):
     """Given a mesh and a point, returns the closest mesh vertix to that point.
