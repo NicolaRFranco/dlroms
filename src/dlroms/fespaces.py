@@ -303,6 +303,31 @@ def asvector(u, space):
     uv.vector()[:] = udata
     return uv
 
+def assemblegrad(mesh, nodal = False):
+    V = space(mesh, 'CG', 1)
+    D = space(mesh, 'DG', 0)
+    A = numpy.zeros((D.dim(), 3, 3))
+    A[:,:,:2] = mesh.coordinates()[mesh.cells().T].transpose(1,0,2)
+    A[:,:, 2] = 1.0
+    Ainv = numpy.linalg.inv(A)[:,:2,:]
+    u = numpy.eye(V.dim())
+    
+    from fenics import vertex_to_dof_map, dof_to_vertex_map
+    perm = vertex_to_dof_map(V)
+    u1u2u3 = u[:, perm][:, mesh.cells().T].transpose(2,1,0)
+    gradients = (Ainv@u1u2u3).transpose(1,0,2)
+    
+    if(nodal):
+        perm = dof_to_vertex_map(V)
+        M = numpy.zeros((D.dim(), V.dim()))
+        M[numpy.arange(len(M)), mesh.cells().T] = 1
+        M = (M/M.sum(axis = 0)).T
+        M = M[perm, :]
+        igrad = M@gradients
+        return igrad
+    else:
+        return gradients
+
 def vtk(u, space, filename):
     """Generates a VTK file (.vtu) for a given discretized function.
     
