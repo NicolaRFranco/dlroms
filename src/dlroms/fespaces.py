@@ -348,7 +348,7 @@ def vtk(u, space, filename):
     os.remove("%s.pvd" % filename)
     os.rename("%s000000.vtu" % filename, "%s.vtu" % filename)
     
-def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "off", shrink = 0.8, levels = 200, cmap = None, spaceticks = False):
+def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "off", shrink = 0.8, levels = 200, cmap = 'jet', spaceticks = False):
     """Plots mesh and functional objects.
     
     Input
@@ -390,7 +390,7 @@ def multiplot(vs, shape, space, size = 4, **kwargs):
         plt.subplot(shape[0], shape[1], j+1)
         plot(vs[j], space, **kwargs)
     
-def gif(name, U, space, dt = None, T = None, axis = "off", figsize = (4,4), colorbar = False, cmap = None):
+def gif(name, U, space, dt = None, T = None, axis = "off", figsize = (4,4), colorbar = False, cmap = 'jet'):
     """Builds a GIF animation given the values of a functional object at multiple time steps.
     
     Input
