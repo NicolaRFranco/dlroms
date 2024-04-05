@@ -20,9 +20,10 @@
 #
 # Please cite the Author if you use this code for your work/research.
 
-import imageio
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+import imageio
+from matplotlib import use, get_backend
 
 def save(drawframe, frames, name, dt = 1.0/24.0):
     """Constructs a GIF given a way to plot each frame.
@@ -32,8 +33,11 @@ def save(drawframe, frames, name, dt = 1.0/24.0):
                                         that being the number of the current frame.
         frames          (int)           Total number of frames.
         name            (str)           Path where to save the GIF file.
+        dt              (float)         Time duration of each frame.
     """
     arrays = []
+    backend = get_backend()
+    use('agg')
     for i in range(frames):
         drawframe(i)
         fig = plt.gcf()
@@ -42,3 +46,4 @@ def save(drawframe, frames, name, dt = 1.0/24.0):
         plt.close(fig)
 
     imageio.mimsave(name.replace(".gif", "") + ".gif", arrays, duration = dt)
+    use(backend)
