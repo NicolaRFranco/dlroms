@@ -20,11 +20,11 @@
 #
 # Please cite the Author if you use this code for your work/research.
 
-import os
 import imageio
 import matplotlib.pyplot as plt
+import numpy as np
 
-def save(drawframe, frames, name, remove = True):
+def save(drawframe, frames, name, dt = 1.0/24.0):
     """Constructs a GIF given a way to plot each frame.
     
     Input
@@ -32,29 +32,13 @@ def save(drawframe, frames, name, remove = True):
                                         that being the number of the current frame.
         frames          (int)           Total number of frames.
         name            (str)           Path where to save the GIF file.
-        transparency    (bool)          Whether to impose or not a transparent background. Defaults to False.
-        remove          (bool)          Whether to leave on the disk or not the files corresponding to each frame.
-                                        Defaults to True.
     """
-    filenames = []
+    arrays = []
     for i in range(frames):
-        # plot frame
         drawframe(i)
+        fig = plt.gcf()
+        fig.canvas.draw()
+        arrays.append(np.array(fig.canvas.renderer.buffer_rgba()))
+        plt.close(fig)
 
-        # create file name and append it to a list
-        filename = 'temp-gif-frame%d.png' % i
-        filenames.append(filename)
-
-        # save frame
-        plt.savefig(filename)
-        plt.close()
-    # build gif
-    with imageio.get_writer(name + '.gif', mode='I') as writer:
-        for filename in filenames:
-            image = imageio.imread(filename)
-            writer.append_data(image)
-
-    # Remove files
-    if(remove):
-        for filename in set(filenames):
-            os.remove(filename)
+    imageio.mimsave(name.replace(".gif", "") + ".gif", arrays, duration = dt)
