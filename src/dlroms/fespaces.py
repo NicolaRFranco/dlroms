@@ -418,7 +418,7 @@ def animate(U, space, **kwargs):
     rnd = numpy.random.randint(50000)
     gif("temp%d-gif" % rnd, U, space, **kwargs)
     from IPython.display import Image, display
-    display(Image("temp%d-gif.gif" % rnd))
+    display(Image("temp%d-gif.gif" % rnd), metadata={'image/gif': {'loop': True}})
     from os import remove
     remove("temp%d-gif.gif" % rnd)
 
