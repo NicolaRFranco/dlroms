@@ -209,90 +209,100 @@ class ROM(Consecutive):
     def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0,
               verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0):
 
-        conv = (lambda x: num2p(x)) if notation == '%' else (lambda z: ("%.2"+notation) % z)
-        optimizer = optim(self.parameters(), lr = lr)
+        success = False
+        checkpoint = self.write()
 
-        M = (mu,) if(isinstance(mu, torch.Tensor)) else (mu if (isinstance(mu, tuple)) else None)
-        U = (u,) if(isinstance(u, torch.Tensor)) else (u if (isinstance(u, tuple)) else None)
-
-        if(M == None):
-             raise RuntimeError("Input data should be either a torch.Tensor or a tuple of torch.Tensors.")
-        if(U == None):
-             raise RuntimeError("Output data should be either a torch.Tensor or a tuple of torch.Tensors.")
-
-        ntest = len(U[0])-ntrain
-        Mtrain, Utrain = tuple([m[:(ntrain-nvalid)] for m in M]), tuple([um[:(ntrain-nvalid)] for um in U])
-        Mvalid, Uvalid = tuple([m[(ntrain-nvalid):ntrain] for m in M]), tuple([um[(ntrain-nvalid):ntrain] for um in U])
-        Mtest, Utest = tuple([m[-ntest:] for m in M]), tuple([um[-ntest:]for um in U])
-
-        getout = (lambda y: y[0]) if len(U)==1 else (lambda y: y)
-        errorf = (lambda a, b: error(a, b)) if error != None else (lambda a, b: loss(a, b))
-        validerr = (lambda : np.nan) if nvalid == 0 else (lambda : errorf(getout(Uvalid), self(*Mvalid)).item())                                                          
-
-        err = []
-        clock = Clock()
-        clock.start()      
-
-        for e in range(epochs):   
-
-            eta = "N/D" if e == 0 else Clock.shortparse(clock.elapsed()*(epochs/float(e)-1.0))
-            
-            if(batchsize == None):
-                def closure():
-                    optimizer.zero_grad()
-                    lossf = slope*loss(getout(Utrain), self(*Mtrain))
-                    lossf.backward()
-                    return lossf
-                optimizer.step(closure)
-            else:
-                indexes = np.random.permutation(ntrain-nvalid)
-                nbatch = ntrain//batchsize
-                for j in range(nbatch):
-                    ubatch = tuple([um[indexes[(j*batchsize):((j+1)*batchsize)]] for um in Utrain])
-                    mubatch = tuple([m[indexes[(j*batchsize):((j+1)*batchsize)]] for m in  Mtrain])
+        while(not success):
+            conv = (lambda x: num2p(x)) if notation == '%' else (lambda z: ("%.2"+notation) % z)
+            optimizer = optim(self.parameters(), lr = lr)
+    
+            M = (mu,) if(isinstance(mu, torch.Tensor)) else (mu if (isinstance(mu, tuple)) else None)
+            U = (u,) if(isinstance(u, torch.Tensor)) else (u if (isinstance(u, tuple)) else None)
+    
+            if(M == None):
+                 raise RuntimeError("Input data should be either a torch.Tensor or a tuple of torch.Tensors.")
+            if(U == None):
+                 raise RuntimeError("Output data should be either a torch.Tensor or a tuple of torch.Tensors.")
+    
+            ntest = len(U[0])-ntrain
+            Mtrain, Utrain = tuple([m[:(ntrain-nvalid)] for m in M]), tuple([um[:(ntrain-nvalid)] for um in U])
+            Mvalid, Uvalid = tuple([m[(ntrain-nvalid):ntrain] for m in M]), tuple([um[(ntrain-nvalid):ntrain] for um in U])
+            Mtest, Utest = tuple([m[-ntest:] for m in M]), tuple([um[-ntest:]for um in U])
+    
+            getout = (lambda y: y[0]) if len(U)==1 else (lambda y: y)
+            errorf = (lambda a, b: error(a, b)) if error != None else (lambda a, b: loss(a, b))
+            validerr = (lambda : np.nan) if nvalid == 0 else (lambda : errorf(getout(Uvalid), self(*Mvalid)).item())                                                          
+    
+            err = []
+            clock = Clock()
+            clock.start()      
+    
+            for e in range(epochs):   
+    
+                eta = "N/D" if e == 0 else Clock.shortparse(clock.elapsed()*(epochs/float(e)-1.0))
+                
+                if(batchsize == None):
                     def closure():
                         optimizer.zero_grad()
-                        lossf = loss(getout(ubatch), self(*mubatch))
+                        lossf = slope*loss(getout(Utrain), self(*Mtrain))
                         lossf.backward()
                         return lossf
                     optimizer.step(closure)
-
-            with torch.no_grad():
-                try:
-                    broken = self.l2().isnan().item()
-                except:
-                    broken = False
-                if(broken):
-                    break
-                err.append([errorf(getout(Utrain), self(*Mtrain)).item(),
-                            errorf(getout(Utest), self(*Mtest)).item() if ntest > 0 else np.nan,
-                            validerr(),
-                           ])
-                if(verbose):
-                    if(refresh):
-                            clear_output(wait = True)
-                    
-                    string = "" if title == None else (title+"\n")
-                    string += "\t\tTrain%s\txTest" % ("\txValid" if nvalid > 0 else "")
-                    if(notation == 'e'):
-                        string = string.replace("x", "\t")
-                    else:
-                        string = string.replace("x","")
-                    print(string)
-                    print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + ("" if nvalid == 0 else ("\t" + conv(err[-1][2]))) + "\t" + conv(err[-1][1]) + ".")
-                    print("\n>> ETA: %s." % eta)
-                if(nvalid > 0 and e > 3):
-                    if((err[-1][2] > err[-2][2]) and (err[-1][0] < err[-2][0])):
-                            if((err[-2][2] > err[-3][2]) and (err[-2][0] < err[-3][0])):
-                                    break
-                clock.stop()
-        clock.stop()
-        optimizer.zero_grad()
-        if(verbose):
-            print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
-        err = np.stack(err)
-        self.training_time = clock.elapsed()
-        self.errors['Train'], self.errors['Test'], self.errors['Validation'] = err.T
+                else:
+                    indexes = np.random.permutation(ntrain-nvalid)
+                    nbatch = ntrain//batchsize
+                    for j in range(nbatch):
+                        ubatch = tuple([um[indexes[(j*batchsize):((j+1)*batchsize)]] for um in Utrain])
+                        mubatch = tuple([m[indexes[(j*batchsize):((j+1)*batchsize)]] for m in  Mtrain])
+                        def closure():
+                            optimizer.zero_grad()
+                            lossf = loss(getout(ubatch), self(*mubatch))
+                            lossf.backward()
+                            return lossf
+                        optimizer.step(closure)
+    
+                with torch.no_grad():
+                    try:
+                        broken = self.l2().isnan().item()
+                    except:
+                        broken = False
+                    if(broken):
+                        break
+                    err.append([errorf(getout(Utrain), self(*Mtrain)).item(),
+                                errorf(getout(Utest), self(*Mtest)).item() if ntest > 0 else np.nan,
+                                validerr(),
+                               ])
+                    if(verbose):
+                        if(refresh):
+                                clear_output(wait = True)
+                        
+                        string = "" if title == None else (title+"\n")
+                        string += "\t\tTrain%s\txTest" % ("\txValid" if nvalid > 0 else "")
+                        if(notation == 'e'):
+                            string = string.replace("x", "\t")
+                        else:
+                            string = string.replace("x","")
+                        print(string)
+                        print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + ("" if nvalid == 0 else ("\t" + conv(err[-1][2]))) + "\t" + conv(err[-1][1]) + ".")
+                        print("\n>> ETA: %s." % eta)
+                    if(nvalid > 0 and e > 3):
+                        if((err[-1][2] > err[-2][2]) and (err[-1][0] < err[-2][0])):
+                                if((err[-2][2] > err[-3][2]) and (err[-2][0] < err[-3][0])):
+                                        break
+                    clock.stop()
+            clock.stop()
+            optimizer.zero_grad()
+            if(verbose):
+                print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
+            err = np.stack(err)
+            self.training_time = clock.elapsed()
+            self.errors['Train'], self.errors['Test'], self.errors['Validation'] = err.T
+            success = not broken
+            if(broken):
+                clear_output(wait = True)
+                print("Optimizer broken. Restarting...")
+                self.read(checkpoint)
+                self.He()
 
     def eval(self):
         self.freeze()
