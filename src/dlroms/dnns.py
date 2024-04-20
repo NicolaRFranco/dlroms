@@ -1005,19 +1005,17 @@ class Consecutive(torch.nn.Sequential):
             numpy.savez(path, **params)
         else:
             Consecutive(*self.stretch()).save(path, label)
-        
-    def load(self, path, label = ""):
-        """Loads the architecture parameters from stored data.
-        
-        Input:
-        path (string): system path where the parameters are stored.
-        label (string): additional label required if the stored data had one.
-        """
+
+    def write(self, label = ""):
+        """Equivalent to self.dictionary(label), up to stretching of the architecture."""
         if(len(self) == len(self.stretch())):
-            try:
-                params = numpy.load(path)
-            except:
-                params = numpy.load(path+".npz")
+            return self.dictionary(label)
+        else:
+            return Consecutive(*self.stretch()).write(label)
+
+    def read(self, params):
+        """Equivalent to self.load(label) but relies on data available within a dictionary, rather than on locally stored data."""
+        if(len(self) == len(self.stretch())):
             k = 0
             for nn in self:
                 k += 1
@@ -1029,7 +1027,21 @@ class Consecutive(torch.nn.Sequential):
                 except:
                     None
         else:
-             Consecutive(*self.stretch()).load(path, label)   
+             Consecutive(*self.stretch()).read(params)
+        
+    def load(self, path, label = ""):
+        """Loads the architecture parameters from stored data.
+        
+        Input:
+        path (string): system path where the parameters are stored.
+        label (string): additional label required if the stored data had one.
+        """
+        try:
+            params = numpy.load(path)
+        except:
+            params = numpy.load(path+".npz")
+        self.read(params)
+
                 
     def __add__(self, other):
         """Augments the current architecture by connecting it with a second one.
