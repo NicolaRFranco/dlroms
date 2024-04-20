@@ -1013,8 +1013,8 @@ class Consecutive(torch.nn.Sequential):
         else:
             return Consecutive(*self.stretch()).write(label)
 
-    def read(self, params):
-        """Equivalent to self.load(label) but relies on data available within a dictionary, rather than on locally stored data."""
+    def read(self, params, label = ""):
+        """Equivalent to self.load(label) but relies on data available within the dictionary 'params', rather than on locally stored data."""
         if(len(self) == len(self.stretch())):
             k = 0
             for nn in self:
@@ -1040,7 +1040,7 @@ class Consecutive(torch.nn.Sequential):
             params = numpy.load(path)
         except:
             params = numpy.load(path+".npz")
-        self.read(params)
+        self.read(params, label)
 
                 
     def __add__(self, other):
