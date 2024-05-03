@@ -291,13 +291,15 @@ class ROM(Consecutive):
                                         break
                     clock.stop()
             clock.stop()
-            optimizer.zero_grad()
-            if(verbose):
-                print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
-            err = np.stack(err)
-            self.training_time = clock.elapsed()
-            self.errors['Train'], self.errors['Test'], self.errors['Validation'] = err.T
             success = not broken
+            optimizer.zero_grad()
+
+            if(success):
+                if(verbose):
+                    print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
+                err = np.stack(err)
+                self.training_time = clock.elapsed()
+                self.errors['Train'], self.errors['Test'], self.errors['Validation'] = err.T      
             if(broken):
                 clear_output(wait = True)
                 print("Optimizer broken. Restarting...")
