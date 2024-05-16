@@ -114,6 +114,8 @@ class Core(object):
     
 CPU = Core("CPU")
 GPU = Core("GPU")
+from torch.cuda import is_available
+dv = GPU if(is_available()) else CPU
 
 def coreof(u):
     """Returns the core where the given tensor is stored.
