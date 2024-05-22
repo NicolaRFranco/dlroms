@@ -917,7 +917,9 @@ class Compound(torch.nn.Module):
     
     Objects of this class support indexing, so that self[k] returns the kth Layer (or sub-module) in the architecture.
     """
-
+    def forward(self, *args):
+        raise RuntimeError("No forward method specified!")
+                
     def coretype(self):
         return self[0].coretype()
         
