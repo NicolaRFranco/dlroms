@@ -1042,6 +1042,22 @@ class Consecutive(torch.nn.Sequential):
             params = numpy.load(path+".npz")
         self.read(params, label)
 
+    def download(self, gdrive_link):
+        """Downloads architecture parameters from Google Drive.
+
+        Input:
+        gdrive_link (string): Google drive link
+        """
+        import gdown
+        import os
+        gdrive_id = gdrive_link[(gdrive_link.find("/d/")+3):gdrive_link.find("/view")]
+        random_id = int(numpy.random.rand()*10000)
+        filename = "temp_dnn_%d.npz" % random_id
+        gdown.download(id = gdrive_id, output = filename, quiet=False)
+        clear_output()
+        self.load(filename)
+        os.remove(filename)        
+        
                 
     def __add__(self, other):
         """Augments the current architecture by connecting it with a second one.
