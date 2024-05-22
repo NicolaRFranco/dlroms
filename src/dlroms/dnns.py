@@ -911,9 +911,9 @@ class Deconv1D(Deconvolutional):
         self.deconv = torch.nn.ConvTranspose1d(channels[0], channels[1], window, stride = stride, padding = padding, groups = groups, dilation = dilation)
 
         
-class Compound(torch.nn.Module):
+class Compound(torch.nn.Sequential):
     """Class that handles deep neural networks, obtained by connecting arbitrary architectures in multiple ways. 
-    It is implemented as a subclass of torch.nn.Module.
+    It is implemented as a subclass of torch.nn.Sequential.
     
     Objects of this class support indexing, so that self[k] returns the kth Layer (or sub-module) in the architecture.
     """
