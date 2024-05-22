@@ -329,7 +329,7 @@ def regcoeff(x, y):
 class DFNN(ROM):
     def forward(self, x):
         for nn in self:
-            x = module(x)
+            x = nn(x)
         return x
 
 class PODNN(ROM):
