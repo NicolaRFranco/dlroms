@@ -25,7 +25,7 @@ from scipy.linalg import eigh
 from scipy.linalg import solve as scisolve
 import torch
 from dlroms.cores import coreof, CPU, GPU
-from dlroms.dnns import Consecutive, Clock, num2p
+from dlroms.dnns import Compound, Consecutive, Clock, num2p
 from IPython.display import clear_output
 import matplotlib.pyplot as plt
 
@@ -182,15 +182,12 @@ def PODerrors(u, upto, ntrain, error, inner = None, orth = False):
         errors.append(error(u[ntrain:], uproj))
     return errors
 
-class ROM(Consecutive):
+class ROM(Compound):
     """Abstract class for handling Reduced Order Models as Python objects."""
     def __init__(self, *args, **kwargs):
         super(ROM, self).__init__(*args)
         self.__dict__.update(kwargs)  
         self.__dict__.update({'errors':{'Train':[], 'Test':[], 'Validation':[]}, 'training_time':0})
-        
-    def forward(self, *args):
-        raise RuntimeError("No forward method specified!")
 
     def solve(self, *args):
         newargs = []
@@ -331,7 +328,9 @@ def regcoeff(x, y):
 
 class DFNN(ROM):
     def forward(self, x):
-        return super(ROM, self).forward(x)
+        for nn in self:
+            x = module(x)
+        return x
 
 class PODNN(ROM):
     def __init__(self, *args, **kwargs):
