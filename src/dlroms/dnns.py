@@ -160,12 +160,12 @@ class Layer(torch.nn.Module):
        
         Input:
                 self        (dlroms.dnns.Layer)                                   Current layer
-                other       (dlroms.dnns.Layer or dlroms.dnns.Consecutive)        Architecture to be connected on top of 'self'.
+                other       (dlroms.dnns.Layer or dlroms.dnns.Compound)        Architecture to be connected on top of 'self'.
         
         Output:
                 (dlroms.dnns.Consecutive) Combined architecture.
         """
-        if(isinstance(other, Consecutive) and (not isinstance(other, Parallel))):
+        if(isinstance(other, Consecutive)):
             n = len(other)
             layers = [self]+[other[i] for i in range(n)]
             return Consecutive(*tuple(layers))
@@ -911,11 +911,11 @@ class Deconv1D(Deconvolutional):
         self.deconv = torch.nn.ConvTranspose1d(channels[0], channels[1], window, stride = stride, padding = padding, groups = groups, dilation = dilation)
 
         
-class Consecutive(torch.nn.Sequential):
-    """Class that handles deep neural networks, obtained by connecting multiple layers. 
-    It is implemented as a subclass of torch.nn.Sequential.
+class Compound(torch.nn.Module):
+    """Class that handles deep neural networks, obtained by connecting arbitrary architectures in multiple ways. 
+    It is implemented as a subclass of torch.nn.Module.
     
-    Objects of this class support indexing, so that self[k] returns the kth Layer in the architecture.
+    Objects of this class support indexing, so that self[k] returns the kth Layer (or sub-module) in the architecture.
     """
 
     def coretype(self):
@@ -982,7 +982,7 @@ class Consecutive(torch.nn.Sequential):
     def stretch(self):
         res = []
         for nn in self:
-            if(isinstance(nn, Consecutive)):
+            if(isinstance(nn, Compound)):
                 res += nn.stretch()
             else:
                 res += [nn]
@@ -1004,14 +1004,14 @@ class Consecutive(torch.nn.Sequential):
             params = self.dictionary(label)
             numpy.savez(path, **params)
         else:
-            Consecutive(*self.stretch()).save(path, label)
+            Compound(*self.stretch()).save(path, label)
 
     def write(self, label = ""):
         """Equivalent to self.dictionary(label), up to stretching of the architecture."""
         if(len(self) == len(self.stretch())):
             return self.dictionary(label)
         else:
-            return Consecutive(*self.stretch()).write(label)
+            return Compound(*self.stretch()).write(label)
 
     def read(self, params, label = ""):
         """Equivalent to self.load(label) but relies on data available within the dictionary 'params', rather than on locally stored data."""
@@ -1027,7 +1027,7 @@ class Consecutive(torch.nn.Sequential):
                 except:
                     None
         else:
-             Consecutive(*self.stretch()).read(params)
+             Compound(*self.stretch()).read(params)
         
     def load(self, path, label = ""):
         """Loads the architecture parameters from stored data.
@@ -1057,7 +1057,6 @@ class Consecutive(torch.nn.Sequential):
         clear_output()
         self.load(filename)
         os.remove(filename)        
-        
                 
     def __add__(self, other):
         """Augments the current architecture by connecting it with a second one.
@@ -1069,7 +1068,7 @@ class Consecutive(torch.nn.Sequential):
         Output:
         A Consecutive object consisting of the nested neural network self+other. 
         """
-        if(isinstance(other, Consecutive) and (not isinstance(other, Parallel))):
+        if(isinstance(other, Consecutive)):
             n1 = len(self)
             n2 = len(other)
             layers = [self[i] for i in range(n1)]+[other[i] for i in range(n2)]
@@ -1157,39 +1156,25 @@ class Consecutive(torch.nn.Sequential):
                 
     def files(self, string):
         return [string+".npz"]
-        
-class Parallel(Consecutive):
-    """Architecture with multiple layers that work in parallel but channel-wise. Implemented as a subclass of dlroms.dnns.Consecutive.
+
+class Consecutive(Compound):
+    """Architecture with multiple layers that work sequentially. Implemented as a subclass of dlroms.dnns.Compound.
+    If f1,...,fk is the collection of layers, then Consecutive(f1,..,fk)(x) = fk(...(f2(f1(x))))."""   
+    def forward(self, x):
+        for nn in self:
+            x = nn(x)
+        return x  
+            
+class Parallel(Compound):
+    """Architecture with multiple layers that work in parallel but channel-wise. Implemented as a subclass of dlroms.dnns.Compound.
     If f1,...,fk is the collection of layers, then Parallel(f1,..,fk)(x) = [f1(x1),..., fk(xk)], where x = [x1,...,xk] is
-    structured in k channels."""
-        
+    structured in k channels."""   
     def forward(self, x):
         res = [self[k](x[:,k]) for k in range(len(self))]
         return torch.stack(res, axis = 1)    
-                    
-    def __add__(self, other):
-        """Augments the current architecture by connecting it with a second one.
-        
-        Input:
-        self (Parallel): current architecture.
-        other (Layer / Consecutive): neural network to be added at the end.
-        
-        Output:
-        A Consecutive object consisting of the nested neural network self+other. 
-        """
-        if(isinstance(other, Consecutive) and (not isinstance(other, Parallel))):
-            n1 = len(self)
-            n2 = len(other)
-            layers = [self]+[other[i] for i in range(n2)]
-            return Consecutive(*tuple(layers))
-        else:
-            if(other == 0.0):
-                return self
-            else:
-                return Consecutive(self, other) 
     
-class Channelled(Consecutive):
-    """Architecture with multiple layers that work in parallel but channel-wise. Implemented as a subclass of dlroms.dnns.Consecutive.
+class Channelled(Compound):
+    """Architecture with multiple layers that work in parallel but channel-wise. Implemented as a subclass of dlroms.dnns.Compound.
     If f1,...,fk is the collection of layers, then Channelled(f1,..,fk)(x) = f1(x1)+...+fk(xk), where x = [x1,...,xk] is
     structured in k channels."""        
     def forward(self, x):
