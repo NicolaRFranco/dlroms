@@ -567,7 +567,7 @@ class Sparse(Layer):
         """
         super(Sparse, self).load(w, b)
         if(isinstance(indexes, numpy.ndarray)):
-            self.loc = indexes
+            self.loc = list(indexes)
         
     def cuda(self):
         """Transfers the layer to the GPU."""
