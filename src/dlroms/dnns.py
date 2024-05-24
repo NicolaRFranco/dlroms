@@ -827,6 +827,21 @@ class Transpose(Weightless):
         (N, 8, 3, 5).
         """
         return x.transpose(dim0 = self.d0+1, dim1 = self.d1+1)
+
+class Fourier(Weightless):
+    def __init__(self, freqs, which = None):
+        super(Fourier, self).__init__()
+        self.k = freqs
+        self.which = which
+        
+    def forward(self, x):
+        z = [x[:,j] for j in range(x.shape[1])]
+        js = range(x.shape[1]) if self.which is None else self.which
+        for j in js:
+            for k in range(1, self.k+1):
+                z.append((k*x[:, j]).cos())
+                z.append((k*x[:, j]).sin())
+        return torch.stack(z, axis = 1)
         
 class Convolutional(Layer):
     def module(self):
