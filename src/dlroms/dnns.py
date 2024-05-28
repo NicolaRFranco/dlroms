@@ -1174,6 +1174,9 @@ class Compound(torch.nn.Sequential):
     def files(self, string):
         return [string+".npz"]
 
+    def jacobian(self, x):
+        return torch.autograd.functional.jacobian(self, x)
+
 class Consecutive(Compound):
     """Architecture with multiple layers that work sequentially. Implemented as a subclass of dlroms.dnns.Compound.
     If f1,...,fk is the collection of layers, then Consecutive(f1,..,fk)(x) = fk(...(f2(f1(x))))."""   
