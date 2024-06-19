@@ -67,7 +67,10 @@ class Core(object):
             (torch.Tensor).
         """
         return tzeros(*shape, dtype = self.dtype, device = self.device)
-            
+
+    def copy(self, x):
+        return self.tensor(x.detach().cpu().numpy())
+        
     def load(self, *paths):
         """Loads a list of arrays into a single tensor.
         
