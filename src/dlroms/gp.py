@@ -58,7 +58,10 @@ class GaussianRandomField(object):
             distances = None
         else:
             space = fespaces.space(mesh, 'CG', 1)
-            navigator = Navigator(domain, fespaces.mesh(domain, resolution = geodesic_accuracy))
+            try:
+                navigator = Navigator(domain, fespaces.mesh(domain, resolution = geodesic_accuracy))
+            except KeyError:
+                navigator = Navigator(domain, fespaces.mesh(domain, stepsize = geodesic_accuracy))
             E1 = navigator.finde(fespaces.coordinates(space)).reshape(-1,1)
             E2 = navigator.finde(fespaces.coordinates(space)).reshape(1,-1)
             distances = navigator.D[E1, E2]   
