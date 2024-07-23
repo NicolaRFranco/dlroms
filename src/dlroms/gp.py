@@ -60,7 +60,7 @@ class GaussianRandomField(object):
             space = fespaces.space(mesh, 'CG', 1)
             try:
                 navigator = Navigator(domain, fespaces.mesh(domain, resolution = geodesic_accuracy))
-            except KeyError:
+            except (KeyError, TypeError):
                 navigator = Navigator(domain, fespaces.mesh(domain, stepsize = geodesic_accuracy))
             E1 = navigator.finde(fespaces.coordinates(space)).reshape(-1,1)
             E2 = navigator.finde(fespaces.coordinates(space)).reshape(1,-1)
