@@ -12,6 +12,11 @@
 This library was written, and is currently maintained, by **Nicola Rares Franco**, **Ph.D.**, MOX, Politecnico di Milano. For a tensorflow alternative, we recommend the repositories by [Stefania Fresca, Ph.D](https://github.com/stefaniafresca).
 
 
+NB: if you are using this repository for your own research, please cite as
+
+     Franco, N. R. (2024). NicolaRFranco/dlroms: First release (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.13254758
+
+
 ## DL-ROMs in a nutshell
 
 Deep learning based reduced order models are efficient model surrogates that can emulate the accuracy of classical numerical solvers (hereby referred to as FOM: Full Order Models) by learning from high-quality simulations. For instance, let $\boldsymbol{\mu}\to u$ represent the action of a FOM solver, which, given a parameter instance $\boldsymbol{\mu}\in\mathbb{R}^{p}$ returns the corresponding PDE solution $u\in\mathbb{R}^{N_{h}}$, here represented by means of a suitable dof vector. Then, the construction of a DL-ROM can be sketched as:
