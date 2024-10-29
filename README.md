@@ -14,7 +14,8 @@ This library was written, and is currently maintained, by **Nicola Rares Franco*
 
 NB: if you are using this repository for your own research, please cite as
 
-     Franco, N. R. (2024). NicolaRFranco/dlroms: First release (v1.0.0). Zenodo. https://doi.org/10.5281/zenodo.13254758
+     Franco, N. R. (2024). NicolaRFranco/dlroms: First release (v1.0.0). Zenodo.
+     https://doi.org/10.5281/zenodo.13254758
 
 
 ## DL-ROMs in a nutshell
