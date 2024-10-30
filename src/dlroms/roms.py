@@ -204,7 +204,7 @@ class ROM(Compound):
         return self.solve(*args)
            
     def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0,
-              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0):
+              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0, nstop = 5):
 
         success = False
         checkpoint = self.write()
@@ -282,10 +282,12 @@ class ROM(Compound):
                         print(string)
                         print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + ("" if nvalid == 0 else ("\t" + conv(err[-1][2]))) + "\t" + conv(err[-1][1]) + ".")
                         print("\n>> ETA: %s." % eta)
-                    if(nvalid > 0 and e > 3):
-                        if((err[-1][2] > err[-2][2]) and (err[-1][0] < err[-2][0])):
-                                if((err[-2][2] > err[-3][2]) and (err[-2][0] < err[-3][0])):
-                                        break
+                    if(nvalid > 0 and e > (nstop+1)):
+                        should_stop = (err[-1][2] > err[-2][2]) and (err[-1][0] < err[-2][0])
+                        for js in range(nstop-1):
+                            should_stop = should_stop and ((err[-2-js][2] > err[-3-js][2]) and (err[-2-js][0] < err[-3-js][0]))
+                        if(should_stop):
+                            break
                     clock.stop()
             clock.stop()
             success = not broken
