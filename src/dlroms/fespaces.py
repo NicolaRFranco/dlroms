@@ -425,3 +425,35 @@ def animate(U, space, **kwargs):
 def dbc(expression, where, space, degree = 1):
     from fenics import DirichletBC, Expression
     return DirichletBC(space, Expression(expression, degree = degree), where)
+
+def interpolate(expression, V):
+    """
+    Interpolates a given continuous function onto a given Finite Element space.
+
+    Input:
+       expression   (function or float)          Function to be interpolated, defined analytically
+                                                 as a Python function (either using "def" or lambda functions).
+                                                 If a float value is detected, the function is assumed to be 
+                                                 constant. 
+
+                                                 Ex: letting expression = 1.0 or expression = lambda x: 1.0 is
+                                                 exactly equivalent.
+
+       V            (fenics.FunctionSpace)       Finite Element space (cf. fem.FEspace) where the
+                                                 interpolation is supposed to happen.
+
+    Output:
+       Function representative of "expression" within the space V. Returned as a fenics.Function object.
+    """
+    c = coordinates(V).T
+    if(callable(expression)):
+        values = expression(c)
+    else:
+        values = expression
+    if(isinstance(values, list)):
+        from numpy import stack
+        values = stack([v + 0*q for v, q in zip(values, c)], axis = 1)[::2].reshape(-1)
+    else:
+        values = values + 0*c[0]
+
+    return values
