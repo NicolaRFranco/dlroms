@@ -26,7 +26,7 @@ import os
 def setup():
   ready = True
   try:
-    import dolfinx
+    import dolfin
   except ImportError:
     ready = False
     print("Installing fenics... this should take about 30-60 seconds.")
