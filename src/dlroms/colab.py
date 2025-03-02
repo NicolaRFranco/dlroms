@@ -29,8 +29,8 @@ def setup():
     import dolfinx
   except ImportError:
     ready = False
-    print("Installing fenicsx... this should take about 30-60 seconds.")
-    os.system('wget "https://fem-on-colab.github.io/releases/fenicsx-install-release-real.sh" -O "/tmp/fenicsx-install-release-real.sh" && bash "/tmp/fenicsx-install-release-real.sh"')
+    print("Installing fenics... this should take about 30-60 seconds.")
+    os.system('wget "https://fem-on-colab.github.io/releases/fenics-install-release-real.sh" -O "/tmp/fenics-install-release-real.sh" && bash "/tmp/fenics-install-release-real.sh"')
 
   try:
     import gmsh
