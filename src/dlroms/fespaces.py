@@ -319,6 +319,29 @@ def asfunction(u, space):
     """
     return asvector(u, space)
 
+def dofs(obj):
+    """Given a Finite Element space or a function belonging to it, it returns their degrees of freedom (dofs). If obj is a Finite Element space, this will result
+    in a N x d array listing the coordinates (d) of all Lagrangian nodes (N). If obj is a function in a Finite Element space, it will return
+    its dof representation, namely, the N-dimensional vector [obj(x1), ..., obj(xN)], where x1, ..., xN are the Lagrangian nodes of the underlying FE space.
+    
+    Input
+        u       (numpy.ndarray or torch.Tensor)                     Vector collecting the values of the function at the
+                                                                    degrees of freedom. If u has shape (n,), then
+                                                                    the functional space of interest should have n dof.
+                                                                    
+        space   (dolfin.function.functionspace.FunctionSpace).      Functional space to which u belongs.
+    
+    Output    
+        (dolfin.function.function.Function). 
+        
+    """
+    if(isinstance(obj, Function)):
+        return obj.vector()[:]
+    elif(isinstance(obj, FunctionSpace)):
+        return coordinates(obj)
+    else:
+        raise RuntimeError("Can only extract dofs from Finite Element spaces or from functions belonging to some Finite Element space.")        
+
 def assemblegrad(mesh, nodal = False):
     V = space(mesh, 'CG', 1)
     D = space(mesh, 'DG', 0)
