@@ -303,6 +303,22 @@ def asvector(u, space):
     uv.vector()[:] = udata
     return uv
 
+def asfunction(u, space):
+    """Given a vector of dof values, returns the corresponding object in the functional space.
+    
+    Input
+        u       (numpy.ndarray or torch.Tensor)                     Vector collecting the values of the function at the
+                                                                    degrees of freedom. If u has shape (n,), then
+                                                                    the functional space of interest should have n dof.
+                                                                    
+        space   (dolfin.function.functionspace.FunctionSpace).      Functional space to which u belongs.
+    
+    Output    
+        (dolfin.function.function.Function). 
+        
+    """
+    return asvector(u, space)
+
 def assemblegrad(mesh, nodal = False):
     V = space(mesh, 'CG', 1)
     D = space(mesh, 'DG', 0)
