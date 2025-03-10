@@ -511,15 +511,8 @@ class DirichletBC(object):
         Input:
            where    (function)        Boolean valued function that, given the coordinates of a point x
                                       ON the boundary, returns True or False depending whether the point
-                                      lies on the interested region of the boundary.
-
-                                      Ex: for 1D problems on (a, b) pass 
-                                      where = lambda x: x < a + 1e-12,
-                                      or even
-                                      where = lambda x: x < (a+b)/2.0
-                                      to indicate a Dirichlet condition on x = a.
-                                      For multi-dimensional problems, the function should accept coordinates
-                                      as additional inputs, e.g. where = lambda x,y in 2D.
+                                      lies on the interested region of the boundary. Here, x is assumed
+                                      to be a d-dimensional vector if the spatial domain is d-dimensional.
 
            value    (function or float)  Function defined on the domain boundary, corresponding to the
                                          Dirichlet boundary condition. If a float is detected, a space-constant
@@ -556,8 +549,8 @@ class DirichletBC(object):
            Modified version of F, hard-coded with the Dirichlet boundary condition.
         """
         from fenics import DirichletBC as dBC
-        where = lambda x, on: on and self.where(*x)
-        bds = dBC(V, interpolate(self.value, V), where).get_boundary_values()
+        where = lambda x, on: on and self.where(x)
+        bds = dBC(V, asfunction(interpolate(self.value, V), V), where).get_boundary_values()
         if(len(F.shape) == 2):
             F = F.tolil()
             for j in bds.keys():
