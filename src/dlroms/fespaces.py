@@ -48,22 +48,21 @@ except:
     warnings.warn("Either dolfin or fenics are not available. Some functions might not be available or work as expected.")
 
 
-def space(mesh, obj, deg, scalar = True, bubble = False):
+def space(mesh, obj, deg, vector_valued = False, bubble = False):
     """Returns the Finite Element (FE) space of specified type (e.g. continuous/discontinuous galerkin) and degree.
-    Note: only constructs FE spaces of scalar-valued functions.
     
     Input
-        mesh    (dolfin.cpp.mesh.Mesh)  Underlying mesh of reference
-        obj     (str)                   Type of space. 'CG' = Continuous Galerkin, 'DG' = Discontinuous Galerkin
-        deg     (int)                   Polynomial degree at each element
-        scalar  (bool)                  Whether the space consists of scalar or vector-valued functions (in which
-                                        case scalar == True and scalar == False respectively). Defaults to True.
-        bubble  (bool)                  If True, enriches each element with bubble polynomials. Defaults to False.
+        mesh           (dolfin.cpp.mesh.Mesh)  Underlying mesh of reference
+        obj            (str)                   Type of space. 'CG' = Continuous Galerkin, 'DG' = Discontinuous Galerkin
+        deg            (int)                   Polynomial degree at each element
+        vector_valued  (bool)                  Whether the space consists of scalar (False) or vector-valued functions (True).
+                                               Defaults to False.
+        bubble         (bool)                  If True, enriches each element with bubble polynomials. Defaults to False.
         
     Output
         (dolfin.function.functionspace.FunctionSpace).
     """
-    if(scalar):
+    if(vector_valued):
         if(bubble):
             element = FiniteElement(obj, mesh.ufl_cell(), deg) +  FiniteElement("Bubble", mesh.ufl_cell(), mesh.topology().dim() + 1)
         else:
