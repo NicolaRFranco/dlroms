@@ -155,6 +155,7 @@ def assemble(F, V):
     u, v = TrialFunction(V), TestFunction(V)
     
     try:
+        from scipy.sparse import csr_matrix
         L = F(u, v)
         A = assmb(L)
         return csr_matrix(A.array())  
