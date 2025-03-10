@@ -62,7 +62,7 @@ def space(mesh, obj, deg, vector_valued = False, bubble = False):
     Output
         (dolfin.function.functionspace.FunctionSpace).
     """
-    if(vector_valued):
+    if(not vector_valued):
         if(bubble):
             element = FiniteElement(obj, mesh.ufl_cell(), deg) +  FiniteElement("Bubble", mesh.ufl_cell(), mesh.topology().dim() + 1)
         else:
