@@ -492,10 +492,6 @@ def animate(U, space, **kwargs):
     from os import remove
     remove("temp%d-gif.gif" % rnd)
 
-def dbc(expression, where, space, degree = 1):
-    from fenics import DirichletBC, Expression
-    return DirichletBC(space, Expression(expression, degree = degree), where)
-
 def interpolate(expression, V):
     """
     Interpolates a given continuous function onto a given Finite Element space.
@@ -527,3 +523,114 @@ def interpolate(expression, V):
         values = values + 0*c[0]
 
     return values
+
+
+class DirichletBC(object):
+    """
+    Python class for defining Dirichlet boundary conditions.
+    """
+
+    def __init__(self, where, value):
+        """Creates a Dirichlet boundary condition at a specified portion of the domain boundary, with
+        a specified value.
+        
+        Input:
+           where    (function)        Boolean valued function that, given the coordinates of a point x
+                                      ON the boundary, returns True or False depending whether the point
+                                      lies on the interested region of the boundary.
+
+                                      Ex: for 1D problems on (a, b) pass 
+                                      where = lambda x: x < a + 1e-12,
+                                      or even
+                                      where = lambda x: x < (a+b)/2.0
+                                      to indicate a Dirichlet condition on x = a.
+                                      For multi-dimensional problems, the function should accept coordinates
+                                      as additional inputs, e.g. where = lambda x,y in 2D.
+
+           value    (function or float)  Function defined on the domain boundary, corresponding to the
+                                         Dirichlet boundary condition. If a float is detected, a space-constant
+                                         condition is imposed (same value on all points in the desired portion
+                                         of the boundary); see also fem.interpolate.
+                                         
+                                         For 1D problems, float values are suggested.
+
+        Output:
+           Dirichlet boundary condition, encoded as a fem.DirichletBC object. Objects of this class
+           have two attributes: where and value, corresponding to the two arguments in the 
+           constructor DirichletBC.__init__.
+        """
+        self.where = where
+        self.value = value   
+
+    def apply(self, F, V):
+        """
+        Apply a Dirichlet boundary condition to either a vector (RHS) or a matrix (LHS).
+        Given a linear system Au = F subject to a boundary condition, this method should be applied
+        to both A and F (with two separate calls).
+
+        Input:
+           F    (numpy.ndarray or scipy.sparse.csr_matrix)     Vector/matrix to which the Dirichlet
+                                                               condition should be applied. If F
+                                                               is a vector, it is assumed to be the RHS
+                                                               of the equation. If F is a matrix, it
+                                                               is assumed to be matrix of the linear system
+                                                               under study.
+
+           V    (fenics.FunctionSpace)                         Function space where F was assembled.
+
+        Output:
+           Modified version of F, hard-coded with the Dirichlet boundary condition.
+        """
+        from fenics import DirichletBC as dBC
+        where = lambda x, on: on and self.where(*x)
+        bds = dBC(V, interpolate(self.value, V), where).get_boundary_values()
+        if(len(F.shape) == 2):
+            F = F.tolil()
+            for j in bds.keys():
+              F[j, :] = 0
+              F[j, j] = 1
+            return F.tocsr()
+
+        else:
+            for key in bds.keys():
+              F[key] = bds[key]
+            return F
+
+def applyBCs(F, V, *dbcs):
+    """
+    Apply a list of Dirichlet boundary conditions to either a vector (RHS) or a matrix (LHS).
+    Given a linear system Au = F subject to a boundary condition, this method should be applied
+    to both A and F (with two separate calls).
+
+    Input:
+        F    (numpy.ndarray or scipy.sparse.csr_matrix)     Vector/matrix to which the Dirichlet
+                                                            conditions should be applied. If F
+                                                            is a vector, it is assumed to be the RHS
+                                                            of the equation. If F is a matrix, it
+                                                            is assumed to be matrix of the linear system
+                                                            under study.
+
+        V    (fenics.FunctionSpace)                         Function space where F was assembled.
+
+        dbcs (list or tuple of fem.DirichletBC)             Sequence of Dirichlet conditions to be
+                                                            applied.
+
+    Note: this function is implemented using the * operator on positional arguments. Consequently,
+    acceptable calls can be
+
+    applyBCs(F, V, dbc1)
+    applyBCs(F, V, dbc1, dbc2)
+
+    but NOT 
+    applyBCs(F, V, [dbc1, dbc2])
+
+    In fact, the "list" dbcs is assumed to be unpacked (all elements in dbcs are passed sequentially as
+    additional arguments). Pythonically, writing applyBCs(F, V, dbc1, dbc2) is equivalent to
+    applyBCs(F, V, *[dbc1, dbc2]).
+
+    Output:
+        Modified version of F, hard-coded with all Dirichlet boundary conditions.
+    """
+    for dbc in dbcs:
+        F = dbc.apply(F, V)
+    return F
