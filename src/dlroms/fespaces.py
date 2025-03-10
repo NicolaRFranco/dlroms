@@ -133,6 +133,38 @@ def closest(mesh, x):
     """
     return numpy.argmin(numpy.sum((numpy.array(x)-mesh.coordinates())**2, axis = 1))
 
+def assemble(F, V):
+    """
+    Assemble a variational form over a given Finite Element space.
+
+    Input:
+       F   (function)   Python function accepting either one input v (linear functional)
+                        or two inputs u, v (bilinear form). It should define a suitable variational
+                        form in a symbolic way, using u as a trial function and v as a test function,
+                        typically relying on dx and ds to indicate domain or boundary integration (cf. fem.dx, fem.ds).
+
+       V   (fenics.FunctionSpace)  Function space where to assemble the variational form (otherwise defined
+                                   in an infinite-dimensional space).
+
+    Output:
+       Discrete representation of F, returned either as a numpy vector (if F is a linear functional) or
+       as a sparse matrix in csr format (if F is a bilinear form). In the latter case, .todense() can be used to
+       obtain a dense representation in numpy format.
+    """
+    from fenics import TrialFunction, TestFunction, assemble as assmb
+    u, v = TrialFunction(V), TestFunction(V)
+    
+    try:
+        L = F(u, v)
+        A = assmb(L)
+        clear_output()
+        return csr_matrix(A.array())  
+    except:
+        f = F(v)
+        rhs = assmb(f)
+        clear_output()
+        return rhs[:] 
+
 def loadmesh(path):
     """Loads a mesh in .xml format from the given path.
     
