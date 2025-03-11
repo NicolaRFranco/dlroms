@@ -25,7 +25,7 @@ class Problem(object):
 
     def params_summary(self):
         import pandas as pd
-        return pd.DataFrame(self.parameters)
+        return pd.DataFrame(self.parameters, index = [""]*len(self.parameters['Parameter']))
 
     def FOM_summary(self):
         from dlroms.dnns import Clock
