@@ -409,23 +409,23 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
         shrink      (float)                                                 Shrinks the colorbar by the specified factor (defaults to 0.8). Ignored if colorbar = False.
     """
     try:
-        if(space == None):
-            dolfin.common.plotting.plot(obj)
+        uv = obj if(space is None) else asfunction(obj, space)
+        if(space.element().value_dimension(0) == 1):
+            try:
+                c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, levels = numpy.linspace(float(obj.min()), float(obj.max()), levels), cmap = cmap)
+            except:
+                c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, cmap = cmap)
         else:
-            uv = asvector(obj, space)
-            if(space.element().value_dimension(0) == 1):
-                try:
-                    c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, levels = numpy.linspace(float(obj.min()), float(obj.max()), levels), cmap = cmap)
-                except:
-                    c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, cmap = cmap)
-            else:
-                c = dolfin.common.plotting.plot(uv, cmap = cmap)
-            if(colorbar):
-                cbar = plt.colorbar(c, shrink = shrink)
-                if(spaceticks):
-                    cbar.set_ticks([round(tick, 2) for tick in numpy.linspace(cbar.vmin, cbar.vmax, 6)])
+            c = dolfin.common.plotting.plot(uv, cmap = cmap)
+        if(colorbar):
+            cbar = plt.colorbar(c, shrink = shrink)
+            if(spaceticks):
+                cbar.set_ticks([round(tick, 2) for tick in numpy.linspace(cbar.vmin, cbar.vmax, 6)])
     except:
-        raise RuntimeError("First argument should be either a dolfin.cpp.mesh.Mesh or a structure containing the dof values of some function (in which case 'space' must be != None).")
+        try:
+            dolfin.common.plotting.plot(obj)
+        except:
+            raise RuntimeError("First argument should be either a: i) dolfin.cpp.mesh.Mesh, ii) dolfin.function.Function, iii) an array listing the dof values of some function (in which case the optional argument 'space' must be provided).")
     plt.axis(axis)
 
 def multiplot(vs, shape, space, size = 4, **kwargs):
@@ -496,7 +496,7 @@ def interpolate(expression, V):
     else:
         values = values + 0*c[0]
 
-    return values
+    return fe.asfunction(values, V)
 
 
 class DirichletBC(object):
