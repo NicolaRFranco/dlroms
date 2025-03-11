@@ -496,7 +496,7 @@ def interpolate(expression, V):
     else:
         values = values + 0*c[0]
 
-    return fe.asfunction(values, V)
+    return asfunction(values, V)
 
 
 class DirichletBC(object):
