@@ -410,7 +410,7 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
     """
     try:
         uv = obj if(space is None) else asfunction(obj, space)
-        if(space.element().value_dimension(0) == 1):
+        if(uv.function_space().element().value_dimension(0) == 1):
             try:
                 c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, levels = numpy.linspace(float(obj.min()), float(obj.max()), levels), cmap = cmap)
             except:
