@@ -552,7 +552,7 @@ class DirichletBC(object):
         """
         from fenics import DirichletBC as dBC
         where = lambda x, on: on and self.where(x)
-        bds = dBC(V, asfunction(interpolate(self.value, V), V), where).get_boundary_values()
+        bds = dBC(V, interpolate(self.value, V), where).get_boundary_values()
         if(len(F.shape) == 2):
             F = F.tolil()
             for j in bds.keys():
