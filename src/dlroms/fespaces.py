@@ -410,11 +410,13 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
     """
     try:
         uv = obj if(space is None) else asfunction(obj, space)
+        vvmin = vmin if(not (vmin is None)) else dofs(uv).min()
+        vvmax = vmax if(not (vmax is None)) else dofs(uv).max()
         if(uv.function_space().element().value_dimension(0) == 1):
             try:
-                c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, levels = numpy.linspace(float(obj.min()), float(obj.max()), levels), cmap = cmap)
+                c = dolfin.common.plotting.plot(uv, vmin = vvmin, vmax = vvmax, levels = numpy.linspace(float(vvmin), float(vvmax), levels), cmap = cmap)
             except:
-                c = dolfin.common.plotting.plot(uv, vmin = vmin, vmax = vmax, cmap = cmap)
+                c = dolfin.common.plotting.plot(uv, vmin = vvmin, vmax = vvmax, cmap = cmap)
         else:
             c = dolfin.common.plotting.plot(uv, cmap = cmap)
         if(colorbar):
