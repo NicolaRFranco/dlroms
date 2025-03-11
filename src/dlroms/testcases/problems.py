@@ -52,9 +52,9 @@ def FOMdata(label):
 def generate_data(problem_label, ndata, summary = True, filename = None):
     problem = Problem(*FOMdata(problem_label))
     if(summary):
+        name = filename if(not (filename is None)) else (problem_label + "_snapshots")
+        problem.generate(ndata, filename = name + ".npz")
+        print("\n")
         problem.FOM_summary()
         print("\n")
         print(problem.params_summary())
-        print("\n")
-        name = filename if(not (filename is None)) else (problem_label + "_snapshots")
-        problem.generate(ndata, filename = name + ".npz")    
