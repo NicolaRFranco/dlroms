@@ -58,3 +58,12 @@ def generate_data(problem_label, ndata, summary = True, filename = None):
         print("Generated samples: %d." % nsamp)
         print("\n")
         print(problem.params_summary())
+
+def FOMspace(label):
+    import importlib
+    module_name = f"dlroms.testcases.{label}"
+    try:
+        module = importlib.import_module(module_name)
+        return getattr(module, "Vh")
+    except (ModuleNotFoundError, AttributeError) as e:
+        raise ImportError(f"Could not import 'FOM space Vh' from {module_name}") from e
