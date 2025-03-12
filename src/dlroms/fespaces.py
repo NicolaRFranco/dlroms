@@ -391,8 +391,21 @@ def vtk(u, space, filename):
     vtkfile << asvector(u, space)
     os.remove("%s.pvd" % filename)
     os.rename("%s000000.vtu" % filename, "%s.vtu" % filename)
+
+def warpmesh(u, V):
+    from os import remove
+    mesh = V.mesh()
+    rnd = "tmp-mesh-rnd-%d.xml" % numpy.random.randint(1000)
+    savemesh(rnd, mesh)
+    deformed = loadmesh(rnd)
+    remove(rnd)
+    d = mesh.topology().dim()
+    deltas = asfunction(u, V).compute_vertex_values(mesh).reshape(d, -1)
+    for j in range(d):
+        deformed.coordinates()[:, j] = deformed.coordinates()[:, j] + deltas[j]
+    return deformed
     
-def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "off", shrink = 0.8, levels = 200, cmap = 'jet', spaceticks = False):
+def plot(obj, space = None, vmin = None, vmax = None, warp = False, colorbar = False, axis = "off", shrink = 0.8, levels = 200, cmap = 'jet', spaceticks = False):
     """Plots mesh and functional objects.
     
     Input
@@ -404,31 +417,38 @@ def plot(obj, space = None, vmin = None, vmax = None, colorbar = False, axis = "
         vmin        (float)                                                 If a colorbar is added, then the color legend is calibrated in such a way that vmin
                                                                             is considered the smallest value. Ignored if space = None.
         vmax        (float)                                                 Analogous to vmin.
+        warp        (bool)                                                  Whether to display a warped mesh. Used only if obj is a vector field, ignored otherwise.
         colorbar    (bool)                                                  Whether to add or not a colorbar. Ignored if len(*args)=1.
         axis        (obj)                                                   Axis specifics (cf. matplotlib.pyplot.axis). Defaults to "off", thus hiding the axis.
         shrink      (float)                                                 Shrinks the colorbar by the specified factor (defaults to 0.8). Ignored if colorbar = False.
     """
-    try:
+
+    if(warp):
         uv = obj if(space is None) else asfunction(obj, space)
-        vvmin = vmin if(not (vmin is None)) else dofs(uv).min()
-        vvmax = vmax if(not (vmax is None)) else dofs(uv).max()
-        if(uv.function_space().element().value_dimension(0) == 1):
-            try:
-                c = dolfin.common.plotting.plot(uv, vmin = vvmin, vmax = vvmax, levels = numpy.linspace(float(vvmin), float(vvmax), levels), cmap = cmap)
-            except:
-                c = dolfin.common.plotting.plot(uv, vmin = vvmin, vmax = vvmax, cmap = cmap)
-        else:
-            c = dolfin.common.plotting.plot(uv, cmap = cmap)
-        if(colorbar):
-            cbar = plt.colorbar(c, shrink = shrink)
-            if(spaceticks):
-                cbar.set_ticks([round(tick, 2) for tick in numpy.linspace(cbar.vmin, cbar.vmax, 6)])
-    except:
+        Vspace = uv.function_space()
+        plot(warpmesh(uv, Vspace), axis = axis)
+    else:
         try:
-            dolfin.common.plotting.plot(obj)
+            uv = obj if(space is None) else asfunction(obj, space)
+            vvmin = vmin if(not (vmin is None)) else dofs(uv).min()
+            vvmax = vmax if(not (vmax is None)) else dofs(uv).max()
+            if(uv.function_space().element().value_dimension(0) == 1):
+                try:
+                    c = dolfin.common.plotting.plot(uv, vmin = vvmin, vmax = vvmax, levels = numpy.linspace(float(vvmin), float(vvmax), levels), cmap = cmap)
+                except:
+                    c = dolfin.common.plotting.plot(uv, vmin = vvmin, vmax = vvmax, cmap = cmap)
+            else:
+                c = dolfin.common.plotting.plot(uv, cmap = cmap)
+            if(colorbar):
+                cbar = plt.colorbar(c, shrink = shrink)
+                if(spaceticks):
+                    cbar.set_ticks([round(tick, 2) for tick in numpy.linspace(cbar.vmin, cbar.vmax, 6)])
         except:
-            raise RuntimeError("First argument should be either a: i) dolfin.cpp.mesh.Mesh, ii) dolfin.function.Function, iii) an array listing the dof values of some function (in which case the optional argument 'space' must be provided).")
-    plt.axis(axis)
+            try:
+                dolfin.common.plotting.plot(obj)
+            except:
+                raise RuntimeError("First argument should be either a: i) dolfin.cpp.mesh.Mesh, ii) dolfin.function.Function, iii) an array listing the dof values of some function (in which case the optional argument 'space' must be provided).")
+        plt.axis(axis)
 
 def multiplot(vs, shape, space, size = 4, **kwargs):
     plt.figure(figsize = (shape[1]*size, shape[0]*size))
