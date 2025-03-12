@@ -1,1 +1,1 @@
-from dlroms.testcases.problems import generate_data
+from dlroms.testcases.problems import generate_data, FOMspace
