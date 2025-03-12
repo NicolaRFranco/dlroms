@@ -424,8 +424,8 @@ def plot(obj, space = None, vmin = None, vmax = None, warp = False, colorbar = F
     """
 
     if(warp):
-        uv = obj if(space is None) else asfunction(obj, space)
-        Vspace = uv.function_space()
+        uv = obj if(not(space is None)) else obj.vector()[:]
+        Vspace = space if(not(space is None)) else obj.function_space()
         plot(warpmesh(uv, Vspace), axis = axis)
     else:
         try:
