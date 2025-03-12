@@ -54,7 +54,7 @@ def generate_data(problem_label, ndata, summary = True, filename = None):
         print("PDE parameters:\t%d." % p)
         print("FOM dimension:\t%d." % nh)
         print("FOM exec. time:\t%s per call." % clock.parse(extime/nsamp))
-        print("Generated samples: %d." % nsamp)
+        print("\nGenerated samples: %d." % nsamp)
         print("\n")
         print(problem.params_summary())
 
