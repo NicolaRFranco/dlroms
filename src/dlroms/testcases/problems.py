@@ -18,7 +18,7 @@ class Problem(object):
         
         def FOMsampler(seed):
             mu = self.sampler(p, seed = seed)*(pmax-pmin) + pmin
-            u = self.FOM(mu)
+            u = self.FOM(mu = mu)
             return mu, u
 
         from dlroms.roms import snapshots
