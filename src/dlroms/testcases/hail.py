@@ -5,7 +5,7 @@ from dlroms import*
 import numpy as np
 
 mesh = fe.unitsquaremesh(20, 20)
-Vh = fe.space(mesh, 'CG', 1)
+Vh = fe.space(mesh, 'CG', 1, vector_valued = True)
 clc()
 
 parameters = {'Parameter':['rho', 'lambda', 'nu', 'm', 'delta', 'x0', 'theta'],
