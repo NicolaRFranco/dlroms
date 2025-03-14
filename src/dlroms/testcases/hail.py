@@ -15,8 +15,7 @@ parameters = {'Parameter':['rho', 'lambda', 'nu', 'm', 'delta', 'x0', 'theta'],
                           'Second Lamé parameter (shield)', 'Mass (hail grain)', 'Diameter (hail grain)',
                          'Impact location', 'Angle of impact']}
 
-def FOMsolver(**kwargs):
-  mu = kwargs['mu']
+def FOMsolver(mu):
   rho, lambda_, nu, mass, delta, x0, theta = mu
 
   from ufl_legacy import nabla_div
