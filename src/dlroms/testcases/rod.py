@@ -14,8 +14,7 @@ parameters = {'Parameter':['T1', 'T2', 'T3', 'log10(f)', 'log(10)(alpha)'],
               'Max': [120, 120, 120, 5, -1.5],
               'Meaning': ['Contact temperature']*3 + ['External heat source', 'Thermal radiation coefficient']}
 
-def FOMsolver(**kwargs):
-    mu = kwargs['mu']
+def FOMsolver(mu):
     from fenics import Function, TestFunction, Constant, DirichletBC, dx, inner, grad, exp, solve
     
     # Portions of domain boundary subject to Dirichlet b.c.
