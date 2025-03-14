@@ -4,9 +4,9 @@ from fenics import inner, grad, dx
 from IPython.display import clear_output as clc
 from scipy.sparse.linalg import spsolve
 
-parameters = {'Parameter':['log10(s0)', 'log10(s1)', 'log10(s2)', 'log10(s3)'],
-              'Min': [-2, -2, -2, -2],
-              'Max': [ 2,  2,  2,  2],
+parameters = {'Parameter':['sqrt(s0)', 'sqrt(s1)', 'sqrt(s2)', 'sqrt(s3)'],
+              'Min': [0, 0, 0, 0],
+              'Max': [3, 3, 3, 3],
               'Meaning': ['Conductivity jth cookie']*4}
 
 # Problem data and discretization
@@ -53,7 +53,7 @@ fe.applyBCs(fh, Vh, bc)
 clc()
 
 def FOMsolver(mu):
-  xi = 10.0**mu
+  xi = mu**2
   Ah = A_out + xi[0]*A0 + xi[1]*A1 + xi[2]*A2 + xi[3]*A3
   Ah = fe.applyBCs(Ah, Vh, bc)
 
