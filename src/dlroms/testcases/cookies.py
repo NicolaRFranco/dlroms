@@ -4,7 +4,7 @@ from fenics import inner, grad, dx
 from IPython.display import clear_output as clc
 from scipy.sparse.linalg import spsolve
 
-parameters = {'Parameter':['log10(s0)', 'log10(s1)', 'log10(s2)', 'log10(s3)', 'log10(s4)'],
+parameters = {'Parameter':['log10(s0)', 'log10(s1)', 'log10(s2)', 'log10(s3)'],
               'Min': [-2, -2, -2, -2],
               'Max': [ 2,  2,  2,  2],
               'Meaning': ['Conductivity jth cookie']*4}
