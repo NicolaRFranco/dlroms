@@ -87,7 +87,7 @@ def FOMsolver(mu, steps = 50, dt = 0.001):
 def loadData():
     import gdown
     import numpy as np
-    gdown.download(id = "1Qc0kG5ODo24fYbdl5jxULjXhzOwk27_j", output = "FOMdata.npz", quiet=False)
+    gdown.download(id = "1YB9JzZ4sYLKUJd2qwDFdYB7YQv0GQAvq", output = "FOMdata.npz", quiet=False)
     data = np.load("FOMdata.npz")
     clc()
     return data['mu'], data['u']
