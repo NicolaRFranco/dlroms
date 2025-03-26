@@ -34,6 +34,8 @@ from dlroms.cores import CPU, GPU, dv
 import dlroms.fespaces as fe
 import matplotlib.pyplot as plt
 
+from torch.nn.functional import gelu
+
 def plot(*args, **kwargs):
   from torch import Tensor
   newargs = [(a if not isinstance(a, Tensor) else a.detach().cpu().numpy())  for a in args]
