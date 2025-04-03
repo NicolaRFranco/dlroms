@@ -189,6 +189,16 @@ class ROM(Compound):
         self.__dict__.update(kwargs)  
         self.__dict__.update({'errors':{'Train':[], 'Test':[], 'Validation':[]}, 'training_time':0})
 
+    def pipeline(self, *args):
+        raise RuntimeError("Cannot run forward passes as there is no specific pipeline for this model.")
+
+    def forward(self, *args):
+        try:
+            self.pipeline(*args)
+        except TypeError as e:
+            tensor_args = tuple([self.coretype().tensor(x) for x in args])
+            self.pipeline(*tensor_args)
+    
     def solve(self, *args):
         newargs = []
         for arg in args:
@@ -329,7 +339,7 @@ def regcoeff(x, y):
     return b0, b1
 
 class DFNN(ROM):
-    def forward(self, x):
+    def pipeline(self, x):
         for nn in self:
             x = nn(x)
         return x
@@ -350,7 +360,7 @@ class PODNN(ROM):
     def redmap(self, mu):
         return self[0](mu)
     
-    def forward(self, x):
+    def pipeline(self, x):
         b = self.redmap(x)
         return b if(self.trainable) else self.decode(b)
 
@@ -372,7 +382,7 @@ class DLROM(ROM):
     def redmap(self, mu):
         return self[0](mu)
 
-    def forward(self, *args):
+    def pipeline(self, *args):
         if (self.trainable):
             mu, u = args
             newmu, nu = self.redmap(mu), self.encode(u)
