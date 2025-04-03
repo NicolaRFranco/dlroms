@@ -196,8 +196,11 @@ class ROM(Compound):
         try:
             return self.pipeline(*args)
         except TypeError as e:
-            tensor_args = tuple([self.coretype().tensor(x) for x in args])
-            return self.pipeline(*tensor_args)
+            if(not self.training):
+                tensor_args = tuple([self.coretype().tensor(x) for x in args])
+                return self.pipeline(*tensor_args).cpu().numpy()
+            else:
+                raise RuntimeError("Cannot process inputs that are not torch tensors (unless the model has been frozen, in which case numpy arrays can be given as well).")
     
     def solve(self, *args):
         newargs = []
