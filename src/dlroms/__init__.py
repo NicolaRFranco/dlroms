@@ -35,6 +35,8 @@ import dlroms.fespaces as fe
 import matplotlib.pyplot as plt
 
 from torch.nn.functional import gelu
+from dlroms.dnns import leakyReLU as leaky
+from dlroms.dnns import ReLU as relu
 
 def plot(*args, **kwargs):
   from torch import Tensor
