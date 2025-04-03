@@ -194,10 +194,10 @@ class ROM(Compound):
 
     def forward(self, *args):
         try:
-            self.pipeline(*args)
+            return self.pipeline(*args)
         except TypeError as e:
             tensor_args = tuple([self.coretype().tensor(x) for x in args])
-            self.pipeline(*tensor_args)
+            return self.pipeline(*tensor_args)
     
     def solve(self, *args):
         newargs = []
