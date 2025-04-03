@@ -278,7 +278,7 @@ class Layer(torch.nn.Module):
         Output:
                 (dict)        Dictionary containing the learnable weights and biases of the layer.        
         """
-        return {('w'+label):self.w().detach().cpu().numpy(), ('b'+label):self.b().detach().cpu().numpy()}
+        return {('w'+label):self.w().detach().cpu().numpy() + 0.0, ('b'+label):self.b().detach().cpu().numpy() + 0.0}
     
     def parameters(self):
         """List with all the learnable parameters within the layer.
@@ -553,7 +553,7 @@ class Sparse(Layer):
                 (dict)        Dictionary containing the learnable weights and biases of the layer, plus the indexes associated
                               to the active entries of the weight matrix.        
         """
-        return {('w'+label):self.w().detach().cpu().numpy(), ('b'+label):self.b().detach().cpu().numpy(), ('indexes'+label):self.loc}
+        return {('w'+label):self.w().detach().cpu().numpy() + 0.0, ('b'+label):self.b().detach().cpu().numpy() + 0.0, ('indexes'+label):self.loc}
 
     def load(self, w, b = None, indexes = None):
         """Loads a given a pair of weights and biases as model parameters. The indexes dictating the sparsity pattern (and thus the
