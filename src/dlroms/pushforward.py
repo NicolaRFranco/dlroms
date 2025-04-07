@@ -11,9 +11,9 @@ class RandomEnrichmentLayer(Dense):
 
   def forward(self, x):
     if(self.share):
-      z = dv.zeros(*x.shape[:-1], 1) + dv.randn(1, self.r)
+      z = self.coretype().zeros(*x.shape[:-1], 1) + self.coretype().randn(1, self.r)
     else:
-      z = dv.randn(*x.shape[:-1], self.r)
+      z = self.coretype().randn(*x.shape[:-1], self.r)
     return super(RandomEnrichmentLayer, self).forward(torch.cat([x, z], axis = -1))
 
   def set_sharing(self, share):
