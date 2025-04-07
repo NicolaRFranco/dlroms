@@ -17,9 +17,6 @@ class RandomEnrichmentLayer(Dense):
       z = self.coretype().randn(*x.shape[:-1], self.r)
     return super(RandomEnrichmentLayer, self).forward(torch.cat([x, self.sigma*z], axis = -1))
 
-  def parameters(self):
-    return super(RandomEnrichmentLayer, self).parameters() + [self.sigma]
-
   def set_sharing(self, share):
     self.share = share
 
