@@ -8,14 +8,13 @@ class RandomEnrichmentLayer(Dense):
     super(RandomEnrichmentLayer, self).__init__(m+r, n, activation = activation)
     self.r = r
     self.share = False
-    self.sigma = torch.nn.Parameter(self.coretype().tensor(1.0))
 
   def forward(self, x):
     if(self.share):
       z = self.coretype().zeros(*x.shape[:-1], 1) + self.coretype().randn(1, self.r)
     else:
       z = self.coretype().randn(*x.shape[:-1], self.r)
-    return super(RandomEnrichmentLayer, self).forward(torch.cat([x, self.sigma*z], axis = -1))
+    return super(RandomEnrichmentLayer, self).forward(torch.cat([x, z], axis = -1))
 
   def set_sharing(self, share):
     self.share = share
