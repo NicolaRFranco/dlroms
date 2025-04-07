@@ -21,7 +21,7 @@ class RandomEnrichmentLayer(Dense):
 
 class PushForward(DFNN):
   def forward(self, x):
-    return super(PushForward, self).forward(x.unsqueeze(1) + dv.zeros(1, self.repeats, 1))
+    return super(PushForward, self).forward(x.unsqueeze(1) + self.coretype().zeros(1, self.repeats, 1))
 
   def initFrom(self, other):
     for i in range(len(other)):
