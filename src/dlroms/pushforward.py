@@ -32,7 +32,7 @@ class PushForward(DFNN):
         w = deterministic.w().detach().cpu().numpy() + 0.0
         b = deterministic.b().detach().cpu().numpy() + 0.0
       
-        if(isinstance(random, RandomLayer)):
+        if(isinstance(random, RandomEnrichmentLayer)):
           w = np.concatenate((w, np.zeros((w.shape[0], random.r))), axis = 1)
           random.load(w, b)
         else:
