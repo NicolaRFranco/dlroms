@@ -37,6 +37,7 @@ import matplotlib.pyplot as plt
 from torch.nn.functional import gelu
 from dlroms.dnns import leakyReLU as leaky
 from dlroms.dnns import ReLU as relu
+from IPython.display import clear_output as clc
 
 def plot(*args, **kwargs):
   from torch import Tensor
