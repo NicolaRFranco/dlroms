@@ -30,7 +30,7 @@ def FOMsolver(mu):
     dbc3 = DirichletBC(Vh, Constant(mu[2]), rag)
     
     u, v = Function(Vh), TestFunction(Vh)
-    L = inner((1000+exp(u/8.0))*grad(u), grad(v))*dx - Constant(10**mu[3])*v*dx + (10**mu[4])*(u**4)*v*dx
+    L = inner((1000+exp(u/8.0))*grad(u), grad(v))*dx - Constant(10.0**mu[3])*v*dx + (10.0**mu[4])*(u**4)*v*dx
     clc()
     
     u.vector()[:] = (mu[0]+mu[1]+mu[2])/3.0 # Initial guess for nonlinear solver
