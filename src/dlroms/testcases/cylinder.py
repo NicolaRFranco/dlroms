@@ -1,8 +1,9 @@
-from dlroms import*
+from fenics import *
+import gdown
 import numpy as np
-from fenics import inner, grad, dx
 from IPython.display import clear_output as clc
-from scipy.sparse.linalg import spsolve
+from dlroms import num2p
+import dlroms.fespaces as fe
 
 parameters = {'Parameter':['eps', 'rho'],
               'Min': [10.0**(-3.5), 0.5],
@@ -15,7 +16,6 @@ num_steps = int(1000*T)
 dt = T / num_steps        
 
 # Load mesh and define function spaces
-import gdown
 gdown.download(id = "1pkKBI4qGB2C6IGiXgAiY5CvZx0DEm88O", output = "nstokes_mesh.xml")
 mesh = fe.loadmesh("nstokes_mesh.xml")
 V = VectorFunctionSpace(mesh, 'P', 2)
