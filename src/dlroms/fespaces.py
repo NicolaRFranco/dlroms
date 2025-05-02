@@ -483,8 +483,15 @@ def gif(name, U, space, dt = None, T = None, axis = "off", figsize = (4,4), colo
 def animate(U, space, **kwargs):
     rnd = numpy.random.randint(50000)
     gif("temp%d-gif" % rnd, U, space, **kwargs)
+
+    from PIL import Image, ImageSequence
+    path = "temp%d-gif.gif" % rnd
+    with Image.open(path) as im:
+        frames = [frame.copy() for frame in ImageSequence.Iterator(im)]
+        frames[0].save(path, save_all=True, append_images=frames[1:], loop=0, duration=im.info.get('duration', 100))
+    
     from IPython.display import Image, display
-    display(Image("temp%d-gif.gif" % rnd), metadata={'image/gif': {'loop': True}})
+    display(Image("temp%d-gif.gif" % rnd))
     from os import remove
     remove("temp%d-gif.gif" % rnd)
 
