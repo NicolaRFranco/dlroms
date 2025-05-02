@@ -5,10 +5,10 @@ from IPython.display import clear_output as clc
 from dlroms import num2p
 import dlroms.fespaces as fe
 
-parameters = {'Parameter':['eps', 'rho'],
-              'Min': [10.0**(-3.5), 0.5],
-              'Max': [10.0**(-2.5), 1.0],
-              'Meaning': ['Viscosity', 'Density']}
+parameters = {'Parameter':['log10eps', 'rho'],
+              'Min': [-3.5, 0.5],
+              'Max': [-2.5, 1.0],
+              'Meaning': ['Viscosity (log10 scale)', 'Density']}
 
 # Time discretization
 T = 3.5                  
@@ -40,8 +40,9 @@ bcp = [bcp_outflow]
 
 clc()
 
-def FOMsolver(mu):
-    eps, rho = mu
+def FOMsolver(mu, verbose = True):
+    log10eps, rho = mu
+    eps = 10.0**log10eps
   
     # Trial and test functions
     u = TrialFunction(V)
