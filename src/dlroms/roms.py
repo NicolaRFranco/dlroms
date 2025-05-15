@@ -217,7 +217,7 @@ class ROM(Compound):
         return self.solve(*args)
            
     def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0,
-              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0, nstop = 5):
+              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0, nstop = 5, shuffle = True):
 
         success = False
         checkpoint = self.write()
@@ -259,7 +259,7 @@ class ROM(Compound):
                         return lossf
                     optimizer.step(closure)
                 else:
-                    indexes = np.random.permutation(ntrain-nvalid)
+                    indexes = np.random.permutation(ntrain-nvalid) if shuffle else np.arange(ntrain-nvalid)
                     nbatch = ntrain//batchsize
                     for j in range(nbatch):
                         ubatch = tuple([um[indexes[(j*batchsize):((j+1)*batchsize)]] for um in Utrain])
