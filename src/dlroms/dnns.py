@@ -225,12 +225,13 @@ class Layer(torch.nn.Module):
 
                 seed          (int)         Random seed for reproducibility. Ignored if seed = None. Defaults to None.
         """
-        if(not(seed is None)):
-            torch.manual_seed(seed)
-        if(linear):
-            torch.nn.init.xavier_normal_(self.module().weight)
-        else:
-            torch.nn.init.kaiming_normal_(self.module().weight, mode='fan_out', nonlinearity='leaky_relu', a = a)
+        if(len(self.parameters())>0):
+                if(not(seed is None)):
+                    torch.manual_seed(seed)
+                if(linear):
+                    torch.nn.init.xavier_normal_(self.module().weight)
+                else:
+                    torch.nn.init.kaiming_normal_(self.module().weight, mode='fan_out', nonlinearity='leaky_relu', a = a)
         
     def Xavier(self):
         """Xavier initialization of the weights: see 'Glorot, X., & Bengio, Y. (2010, March).
