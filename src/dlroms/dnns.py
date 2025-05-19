@@ -679,6 +679,13 @@ class Weightless(Layer):
         """
         return dict()
 
+class Matrix(Weightless):
+    def __init__(self, A):
+        super(Matrix, self).__init__()
+        self.At = A.T
+    def forward(self, x):
+        return x @ self.At
+
 class Reshape(Weightless):
     """Class implementing reshape layers, that is, nonlearnable modules that reshape tensors.
     Implemented as a subclass of dlroms.dnns.Weightless.
