@@ -9,7 +9,7 @@
      
 - [Mesh-Informed Neural Networks for Operator Learning in Finite Element Spaces](https://doi.org/10.1007/s10915-023-02331-1), Franco et al., *Journal of Scientific Computing*, 97(2), 35 (2023).
 
-This library was written, and is currently maintained, by **Nicola Rares Franco**, **Ph.D.**, MOX, Politecnico di Milano. For a tensorflow alternative, we recommend the repositories by [Stefania Fresca, Ph.D](https://github.com/stefaniafresca).
+This library was written, and is currently maintained, by **Nicola Rares Franco**, **Ph.D.**, MOX, Politecnico di Milano.
 
 
 NB: if you are using this repository for your own research, please cite as
