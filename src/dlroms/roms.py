@@ -83,7 +83,7 @@ def POD(U, k, inner = None, svalues = True):
         else: 
             raise RuntimeError("Non Euclidean inner products are only supported for torch.Tensors. Please convert U to a torch.Tensor (see, e.g., dlroms.cores).")
     N = U.shape[0]
-    w, v = eigh(M, eigvals = (N-k, N-1))
+    w, v = eigh(M, subset_by_index = (N-k, N-1))
     basis, eigenvalues = np.dot((v/np.sqrt(w)).T, U0), w
     basis, s_values = np.flip(basis, axis = 0)+0, np.sqrt(np.flip(eigenvalues)+0)
     if(inner is None):
