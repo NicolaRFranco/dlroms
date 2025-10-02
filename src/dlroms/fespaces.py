@@ -282,6 +282,18 @@ def mesh(domain, **kwargs):
         from mshr.cpp import generate_mesh
         return generate_mesh(domain, resolution = kwargs['resolution'])        
 
+def unitinterval(n):
+    """Yields a evenly spaced grid in [0,1] with n subintervals.
+    
+    Input
+        n   (int)   Number of intervals in the grid.
+        
+    Output
+        (dolfin.cpp.mesh.Mesh).
+    """
+    from fenics import IntervalMesh
+    return IntervalMesh(n, 0, 1)
+
 def unitsquaremesh(n, ny = None):
     """Yields a structured triangular (rectangular) mesh on the unit square [0,1]^2.
     
@@ -436,7 +448,10 @@ def plot(obj, space = None, vmin = None, vmax = None, warp = False, colorbar = F
                 try:
                     c = dolfin.common.plotting.plot(uv, vmin = vvmin, vmax = vvmax, levels = numpy.linspace(float(vvmin), float(vvmax), levels), cmap = cmap)
                 except:
-                    c = dolfin.common.plotting.plot(uv, vmin = vvmin, vmax = vvmax, cmap = cmap)
+                    try:
+                        c = dolfin.common.plotting.plot(uv, vmin = vvmin, vmax = vvmax, cmap = cmap)
+                    except:
+                        dolfin.common.plotting.plot(uv)
             else:
                 c = dolfin.common.plotting.plot(uv, cmap = cmap)
             if(colorbar):
