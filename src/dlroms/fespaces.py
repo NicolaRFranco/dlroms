@@ -282,7 +282,7 @@ def mesh(domain, **kwargs):
         from mshr.cpp import generate_mesh
         return generate_mesh(domain, resolution = kwargs['resolution'])        
 
-def unitinterval(n):
+def unitintervalmesh(n):
     """Yields a evenly spaced grid in [0,1] with n subintervals.
     
     Input
