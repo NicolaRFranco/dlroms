@@ -441,7 +441,7 @@ def plot(obj, space = None, vmin = None, vmax = None, warp = False, colorbar = F
         plot(warpmesh(uv, Vspace), axis = axis)
     else:
         try:
-            uv = obj if(space is None) else asfunction(obj, space)
+            uv = obj if(space is None) else asfunction(obj + 0.0, space)
             vvmin = vmin if(not (vmin is None)) else dofs(uv).min()
             vvmax = vmax if(not (vmax is None)) else dofs(uv).max()
             if(uv.function_space().element().value_dimension(0) == 1):
