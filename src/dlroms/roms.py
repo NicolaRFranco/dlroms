@@ -192,6 +192,9 @@ class ROM(Compound):
     def pipeline(self, *args):
         raise RuntimeError("Cannot run forward passes as there is no specific pipeline for this model.")
 
+    def callback(self):
+        return ""
+
     def forward(self, *args):
         try:
             return self.pipeline(*args)
@@ -295,6 +298,7 @@ class ROM(Compound):
                         print(string)
                         print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + ("" if nvalid == 0 else ("\t" + conv(err[-1][2]))) + "\t" + conv(err[-1][1]) + ".")
                         print("\n>> ETA: %s." % eta)
+                        print(self.callback())
                     if(nvalid > 0 and e > (nstop+1)):
                         should_stop = (err[-1][2] > err[-2][2]) and (err[-1][0] < err[-2][0])
                         for js in range(nstop-1):
