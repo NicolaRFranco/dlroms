@@ -313,7 +313,6 @@ class ROM(Compound):
             if(success):
                 if(verbose):
                     print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
-                    print(self.callback())
                 err = np.stack(err)
                 self.training_time = clock.elapsed()
                 self.errors['Train'], self.errors['Test'], self.errors['Validation'] = err.T      
