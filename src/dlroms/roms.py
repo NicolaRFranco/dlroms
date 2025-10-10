@@ -288,6 +288,7 @@ class ROM(Compound):
                     if(len(err)>2):
                         if(keepbest and ((nvalid == 0 and (err[-1][0] < err[-2][0])) or (nvalid > 0 and (err[-1][-1] < err[-2][-1])))  ):
                             checkpoint = self.write()
+                            print("New best!")
                     if(verbose):
                         if(refresh):
                                 clear_output(wait = True)
