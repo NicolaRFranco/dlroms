@@ -248,7 +248,8 @@ class ROM(Compound):
     
             err = []
             clock = Clock()
-            clock.start()      
+            clock.start()     
+            tminloss, vminloss = np.inf, np.inf
     
             for e in range(epochs):   
     
@@ -285,10 +286,10 @@ class ROM(Compound):
                                 errorf(getout(Utest), self(*Mtest)).item() if ntest > 0 else np.nan,
                                 validerr(),
                                ])
-                    if(len(err)>2):
-                        if(keepbest and ((nvalid == 0 and (err[-1][0] < err[-2][0])) or (nvalid > 0 and (err[-1][-1] < err[-2][-1])))  ):
-                            checkpoint = self.write()
-                            print("New best!")
+                    if(keepbest and ((nvalid == 0 and (err[-1][0] < tminloss)) or (nvalid > 0 and (err[-1][-1] < vminloss)))  ):
+                        checkpoint = self.write()
+                        tminloss = err[-1][0]
+                        vminloss = err[-1][-1]
                     if(verbose):
                         if(refresh):
                                 clear_output(wait = True)
