@@ -220,7 +220,7 @@ class ROM(Compound):
         return self.solve(*args)
            
     def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0,
-              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0, nstop = 5, shuffle = True):
+              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0, nstop = 5, shuffle = True, keepbest = False):
 
         success = False
         checkpoint = self.write()
@@ -285,6 +285,9 @@ class ROM(Compound):
                                 errorf(getout(Utest), self(*Mtest)).item() if ntest > 0 else np.nan,
                                 validerr(),
                                ])
+                    if(len(err)>2):
+                        if(keepbest and ((nvalid == 0 and (err[-1][0] < err[-2][0])) or (nvalid > 0 and (err[-1][-1] < err[-2][-1])))  ):
+                            checkpoint = self.write()
                     if(verbose):
                         if(refresh):
                                 clear_output(wait = True)
@@ -315,7 +318,9 @@ class ROM(Compound):
                     print("\nTraining complete. Elapsed time: " + clock.elapsedTime() + ".")
                 err = np.stack(err)
                 self.training_time = clock.elapsed()
-                self.errors['Train'], self.errors['Test'], self.errors['Validation'] = err.T      
+                self.errors['Train'], self.errors['Test'], self.errors['Validation'] = err.T
+                if(keepbest):
+                    self.read(checkpoint)
             if(broken):
                 clear_output(wait = True)
                 print("Optimizer broken. Restarting...")
