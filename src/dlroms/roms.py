@@ -324,7 +324,7 @@ class ROM(Compound):
             if(broken):
                 clear_output(wait = True)
                 print("Optimizer broken. Restarting...")
-                #self.read(checkpoint)
+                self.read(checkpoint)
                 self.He()
 
     def eval(self):
