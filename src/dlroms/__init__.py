@@ -47,7 +47,9 @@ def plot(*args, **kwargs):
   newargs = [(a if not isinstance(a, Tensor) else a.detach().cpu().numpy())  for a in args]
   plt.plot(*newargs, **kwargs)
 
-
-iDense = iVersion(Dense)
-iLocal = iVersion(Local)
-iGeodesic = iVersion(Geodesic)
+try:
+  iDense = iVersion(Dense)
+  iLocal = iVersion(Local)
+  iGeodesic = iVersion(Geodesic)
+except:
+  None
