@@ -27,16 +27,19 @@ try:
 except:
   None
 
-from dlroms.minns import L2, H1, Local, Geodesic, iVersion
-from dlroms.dnns import Dense, train, Clock, num2p
-from dlroms.roms import POD, project, snapshots, PODerrors, mre, mse, ROM, euclidean, boxplot, regcoeff, PODNN, DLROM, DFNN, mrei, msei, projectdown, projectup, neuclidean
-from dlroms.cores import CPU, GPU, dv
-import dlroms.fespaces as fe
-import matplotlib.pyplot as plt
-
-from torch.nn.functional import gelu
-from dlroms.dnns import leakyReLU as leaky
-from dlroms.dnns import ReLU as relu
+try:
+  from dlroms.minns import L2, H1, Local, Geodesic, iVersion
+  from dlroms.dnns import Dense, train, Clock, num2p
+  from dlroms.roms import POD, project, snapshots, PODerrors, mre, mse, ROM, euclidean, boxplot, regcoeff, PODNN, DLROM, DFNN, mrei, msei, projectdown, projectup, neuclidean
+  from dlroms.cores import CPU, GPU, dv
+  import dlroms.fespaces as fe
+  import matplotlib.pyplot as plt
+  
+  from torch.nn.functional import gelu
+  from dlroms.dnns import leakyReLU as leaky
+  from dlroms.dnns import ReLU as relu
+except:
+  None
 from IPython.display import clear_output as clc
 
 def plot(*args, **kwargs):
