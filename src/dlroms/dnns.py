@@ -948,6 +948,9 @@ class Compound(torch.nn.Sequential):
                 
     def coretype(self):
         return self[0].coretype()
+
+    def to(self, core):
+        super(Compound, self).to(core.device)
         
     def scale(self, factor):
         """Scales all layers in the architecture (see Layer.scale)."""
