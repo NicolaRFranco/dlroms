@@ -69,6 +69,7 @@ class Layer(torch.nn.Module):
 
     def to(self, core):
         super(Layer, self).to(core.device)
+        self.core = core
         
     def w(self):
         """Weights of the layer."""
@@ -951,6 +952,8 @@ class Compound(torch.nn.Sequential):
 
     def to(self, core):
         super(Compound, self).to(core.device)
+        for layer in self:
+                layer.to(core)
         
     def scale(self, factor):
         """Scales all layers in the architecture (see Layer.scale)."""
