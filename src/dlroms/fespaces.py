@@ -24,11 +24,11 @@ import matplotlib.pyplot as plt
 import numpy
 try:
     import torch
+    from dlroms.cores import coreof
 except:
     None
 import warnings
 from dlroms import gifs
-from dlroms.cores import coreof
 try:
     import dolfin
     try:
