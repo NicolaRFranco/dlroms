@@ -22,7 +22,10 @@
 
 import matplotlib.pyplot as plt
 import numpy
-import torch
+try:
+    import torch
+except:
+    None
 import warnings
 from dlroms import gifs
 from dlroms.cores import coreof
