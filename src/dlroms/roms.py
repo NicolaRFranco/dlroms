@@ -220,7 +220,7 @@ class ROM(Compound):
         return self.solve(*args)
            
     def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0,
-              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0, nstop = 5, shuffle = True, keepbest = False):
+              verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0, nstop = 5, shuffle = True, keepbest = True):
 
         success = False
         checkpoint = self.write()
