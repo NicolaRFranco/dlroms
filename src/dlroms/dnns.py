@@ -66,6 +66,9 @@ class Layer(torch.nn.Module):
     def coretype(self):
         """Core where the layer is stored (either CPU or GPU), returned as a dlroms.cores.Core object."""
         return self.core
+
+    def to(self, core):
+        super(Layer, self).to(core.device)
         
     def w(self):
         """Weights of the layer."""
