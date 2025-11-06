@@ -135,6 +135,9 @@ class Operator(dnns.Sparse):
     def moveOn(self, core):
         super(Operator, self).moveOn(core)
         self.freeze()
+
+    def to(self, core):
+        self.moveOn(core)
     
     def He(self, linear = False, a = 0.1, seed = None):
         None
