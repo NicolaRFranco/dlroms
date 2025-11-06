@@ -454,7 +454,10 @@ class Sparse(Layer):
             else:
                 self.weight = torch.nn.Parameter(self.weight.cpu())
                 self.bias = torch.nn.Parameter(self.bias.cpu())
-        
+
+    def to(self, core):
+        self.moveOn(core)
+            
     def module(self):
         """Returns the layer it self. This is done to ensure that calls such as self.module().weight have a result
         compatible with the one obtained for the other classes.
