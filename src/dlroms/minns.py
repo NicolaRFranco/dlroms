@@ -135,9 +135,6 @@ class Operator(dnns.Sparse):
     def moveOn(self, core):
         super(Operator, self).moveOn(core)
         self.freeze()
-
-    def to(self, core):
-        self.moveOn(core)
     
     def He(self, linear = False, a = 0.1, seed = None):
         None
@@ -163,6 +160,15 @@ class Bilinear(Operator):
     
     def cuda(self):
         self.M = self.M.cuda()
+
+    def cpu(self):
+        self.M = self.M.cpu()
+
+    def to(self, core):
+        if(core == GPU):
+            self.cuda()
+        else:
+            self.cpu()
 
     def forward(self, x1, x2):
         return self.dualize(x1).mm(x2.T)
