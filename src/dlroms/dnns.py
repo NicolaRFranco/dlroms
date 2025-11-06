@@ -456,7 +456,11 @@ class Sparse(Layer):
                 self.bias = torch.nn.Parameter(self.bias.cpu())
 
     def to(self, core):
-        self.moveOn(core)
+        self.core = core
+        if(core == GPU):
+            self.cuda()
+        else:
+            self.cpu()
             
     def module(self):
         """Returns the layer it self. This is done to ensure that calls such as self.module().weight have a result
