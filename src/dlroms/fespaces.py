@@ -494,10 +494,13 @@ def gif(name, U, space, dt = None, T = None, shape = None, **kwargs):
     step = N//frames
     vmin = float(u[0].min())
     vmax = float(u[0].max())
+    shp = (1, len(u)) if shape is None else shape
     def drawframe(i):
-        multiplot([uj[i*step] for uj in u], (1, len(u)) if shape is None else shape, space, vmin = vmin, vmax = vmax, **kwargs)
+        multiplot([uj[i*step] for uj in u], shp, space, vmin = vmin, vmax = vmax, **kwargs)
         if(not (dt is None)):
-            plt.title("t = %.2f" % (i*dt))
+            for j in range(len(u)):
+                plt.subplot(shp[0], shp[1], j+1)
+                plt.title("t = %.2f" % (i*dt))
     gifs.save(drawframe, frames, name)
    
 def animate(U, space, **kwargs):
