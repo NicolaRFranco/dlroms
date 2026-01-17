@@ -150,7 +150,7 @@ class Bilinear(Operator):
         for bc in bcs:
             bc.apply(M)
         super(Bilinear, self).__init__(M.array())        
-        self.M = torch.sparse_coo_tensor(np.stack(self.loc, axis = 0), self.weight.detach().cpu().numpy(), (self.in_d, self.in_d))
+        self.M = torch.sparse_coo_tensor(np.stack(self.loc, axis = 0), self.weight.detach().cpu().numpy(), (self.out_d, self.in_d))
         
     def W(self):
         return self.M
