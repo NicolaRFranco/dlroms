@@ -219,7 +219,7 @@ class ROM(Compound):
     def predict(self, *args):
         return self.solve(*args)
            
-    def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0,
+    def train(self, mu, u, ntrain, epochs, optim = torch.optim.LBFGS, lr = 1, loss = None, error = None, nvalid = 0, stochastic = False,
               verbose = True, refresh = True, notation = 'e', title = None, batchsize = None, slope = 1.0, nstop = 5, shuffle = True, keepbest = True):
 
         success = False
@@ -264,7 +264,7 @@ class ROM(Compound):
                     optimizer.step(closure)
                 else:
                     indexes = np.random.permutation(ntrain-nvalid) if shuffle else np.arange(ntrain-nvalid)
-                    nbatch = ntrain//batchsize
+                    nbatch = ntrain//batchsize if (not stochastic) else 1
                     for j in range(nbatch):
                         ubatch = tuple([um[indexes[(j*batchsize):((j+1)*batchsize)]] for um in Utrain])
                         mubatch = tuple([m[indexes[(j*batchsize):((j+1)*batchsize)]] for m in  Mtrain])
@@ -301,7 +301,8 @@ class ROM(Compound):
                         else:
                             string = string.replace("x","")
                         print(string)
-                        print("Epoch "+ str(e+1) + ":\t" + conv(err[-1][0]) + ("" if nvalid == 0 else ("\t" + conv(err[-1][2]))) + "\t" + conv(err[-1][1]) + ".")
+                        ep = "Epoch" if (not stochastic) else "Iter "
+                        print(ep + " "+ str(e+1) + ":\t" + conv(err[-1][0]) + ("" if nvalid == 0 else ("\t" + conv(err[-1][2]))) + "\t" + conv(err[-1][1]) + ".")
                         print("\n>> ETA: %s." % eta)
                         print(self.callback())
                     if(nvalid > 0 and e > (nstop+1)):
