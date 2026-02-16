@@ -468,12 +468,8 @@ def plot(obj, space = None, vmin = None, vmax = None, warp = False, colorbar = F
                 raise RuntimeError("First argument should be either a: i) dolfin.cpp.mesh.Mesh, ii) dolfin.function.Function, iii) an array listing the dof values of some function (in which case the optional argument 'space' must be provided).")
         plt.axis(axis)
 
-def multiplot(vs, shape, space, size = 4, **kwargs):
-    if("figsize" in kwargs.keys()):
-        fg = kwargs["figsize"]
-    else:
-        fg = (shape[1]*size, shape[0]*size)
-    plt.figure(figsize = fg)
+def multiplot(vs, shape, space, size = 4, figsize = None, **kwargs):
+    plt.figure(figsize = (shape[1]*size, shape[0]*size) if (figsize is None) else figsize)
     for j in range(len(vs)):
         plt.subplot(shape[0], shape[1], j+1)
         plot(vs[j], space, **kwargs)
