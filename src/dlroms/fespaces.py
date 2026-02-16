@@ -474,7 +474,7 @@ def multiplot(vs, shape, space, size = 4, **kwargs):
         plt.subplot(shape[0], shape[1], j+1)
         plot(vs[j], space, **kwargs)
     
-def gif(name, U, space, dt = None, T = None, shape = None, **kwargs):
+def gif(name, U, space, dt = None, T = None, shape = None, figsize = None, **kwargs):
     """Builds a GIF animation given the values of a functional object at multiple time steps.
     
     Input
@@ -496,6 +496,8 @@ def gif(name, U, space, dt = None, T = None, shape = None, **kwargs):
     vmax = float(u[0].max())
     shp = (1, len(u)) if shape is None else shape
     def drawframe(i):
+        if(not (figsize is None)):
+            plt.figure(figsize = figsize)
         multiplot([uj[i*step] for uj in u], shp, space, vmin = vmin, vmax = vmax, **kwargs)
         if(not (dt is None)):
             for j in range(len(u)):
