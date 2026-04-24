@@ -4,7 +4,7 @@ from dlroms import*
 import numpy as np
 import gdown
 
-gdown.download(id = "1-YmekOC5d1ACFsCAO0IEg5AuWji03SxF", output = "rod.xml", quiet = True)
+gdown.download(id = "1Yd2HE0zuepjOAj9gGF23PGSgagUHqzoS", output = "rod.xml", quiet = True)
 mesh = fe.loadmesh("rod.xml")
 Vh = fe.space(mesh, 'CG', 1)
 clc()
