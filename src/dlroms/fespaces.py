@@ -123,6 +123,72 @@ def boundary(mesh = None, V = None):
     space = V if(not (V is None)) else dolfin.function.functionspace.FunctionSpace(mesh, 'CG', 1)
     indexes = list(dolfin.fem.dirichletbc.DirichletBC(space, 0.0, lambda x,y:y).get_boundary_values().keys())
     return indexes if(not (V is None)) else dolfin.cpp.fem.dof_to_vertex_map(space)[indexes]
+
+def boundary_paths(mesh):
+    """Mesh vertices that trace the boundary of the domain, collected by connected components.
+    
+    Input
+        mesh    (dolfin.cpp.Mesh)    mesh to be considered
+
+    Output
+        (list of numpy.ndarrays) a list of C arrays. Each array refers to a different connected component of the boundary and lists its vertices in order.
+    """
+    bpoints = mesh.coordinates()[fe.boundary(mesh)]
+    h = mesh.hmax()
+    circuits = [[bpoints[0]]]
+    left = np.array([False] + [True]*(len(bpoints)-1))
+    while(any(left)):
+        current = circuits[-1][-1]
+        candidates = bpoints[left]
+        distances = np.linalg.norm(current.reshape(1, -1)-candidates, axis = -1)
+        inewp = distances.argmin()
+        newp = candidates[inewp]
+        left[np.linalg.norm(newp.reshape(1, -1)-bpoints, axis = -1).argmin()] = False
+    if(distances[inewp]<=h):
+        circuits[-1].append(newp)
+    else:
+        circuits.append([newp])
+    for i in range(len(circuits)):
+        circuits[i].append(circuits[i][0])
+        circuits[i] = np.array(circuits[i])
+    return circuits
+
+def bedges(mesh):
+    """Start and end vertex of each boundary edge in the mesh. Assumes 2D geometry.
+    
+    Input
+        mesh    (dolfin.cpp.Mesh)    mesh to be considered
+
+    Output
+        (numpy.ndarray, numpy.ndarray) two arrays, a and b, of shape (M, 2), where M is the number of boundary edges in the mesh. The kth edge has vertices a[k] and b[k].
+    """
+    circuits = boundary_paths(mesh)
+    a = []
+    b = []
+    for c in circuits:
+        a += list(c[:-1])
+        b += list(c[1:])
+    return np.array(a), np.array(b)
+
+def dist2AB(p, a, b):
+    """Distances between a point p and a collection of segments having vertices (a_i, b_i). Assumes a 2D geometry.
+    
+    Input
+        p    (numpy.ndarray)    1D array listing the coordinates of the point
+        a    (numpy.ndarray)    2D array of shape (M, 2) listing the coordinates of the first vertex in each of the M segments
+        b    (numpy.ndarray)    2D array of shape (M, 2) listing the coordinates of the last vertex in each of the M segments
+
+    Output
+        (numpy.ndarray) array of shape (M,) containing the distance between p and each of the M segments.
+    """
+    direction = (b-a)/np.linalg.norm(b-a, axis = -1).reshape(-1, 1)
+    tval = np.sum((p.reshape(1, -1)-a)*direction, axis = -1)
+    p_proj = tval.reshape(-1, 1)*direction + a
+    tval = tval/np.linalg.norm(b-a, axis = -1).reshape(-1, 1)
+    return (tval>=0)*(tval<=1)*np.linalg.norm(p-p_proj, axis = -1) + ((tval<0)+(tval>1))*np.minimum(np.linalg.norm(p-a, axis = -1), np.linalg.norm(p-b, axis = -1))
+
+def dist2boundary(p, mesh):
+    return dist2AB(p, *bedges(mesh)).min()
     
 def closest(mesh, x):
     """Given a mesh and a point, returns the closest mesh vertix to that point.
