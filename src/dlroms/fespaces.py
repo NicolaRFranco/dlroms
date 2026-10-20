@@ -188,6 +188,15 @@ def dist2AB(p, a, b):
     return (tval>=0)*(tval<=1)*np.linalg.norm(p-p_proj, axis = -1) + ((tval<0)+(tval>1))*np.minimum(np.linalg.norm(p-a, axis = -1), np.linalg.norm(p-b, axis = -1))
 
 def dist2boundary(p, mesh):
+    """Distance of a point from the boundary of the mesh. Assumes 2D geometry. Suboptimal if used for repeated queries on different p.
+    
+    Input
+        p       (numpy.ndarray)      2D array with the coordinates of the point
+        mesh    (dolfin.cpp.Mesh)    mesh to be considered
+
+    Output
+        (float) distance between p and the domain boundary.
+    """
     return dist2AB(p, *bedges(mesh)).min()
     
 def closest(mesh, x):
