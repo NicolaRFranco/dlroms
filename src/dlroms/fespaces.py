@@ -136,21 +136,21 @@ def boundary_paths(mesh):
     bpoints = mesh.coordinates()[boundary(mesh)]
     h = mesh.hmax()
     circuits = [[bpoints[0]]]
-    left = np.array([False] + [True]*(len(bpoints)-1))
+    left = numpy.array([False] + [True]*(len(bpoints)-1))
     while(any(left)):
         current = circuits[-1][-1]
         candidates = bpoints[left]
-        distances = np.linalg.norm(current.reshape(1, -1)-candidates, axis = -1)
+        distances = numpy.linalg.norm(current.reshape(1, -1)-candidates, axis = -1)
         inewp = distances.argmin()
         newp = candidates[inewp]
-        left[np.linalg.norm(newp.reshape(1, -1)-bpoints, axis = -1).argmin()] = False
+        left[numpy.linalg.norm(newp.reshape(1, -1)-bpoints, axis = -1).argmin()] = False
     if(distances[inewp]<=h):
         circuits[-1].append(newp)
     else:
         circuits.append([newp])
     for i in range(len(circuits)):
         circuits[i].append(circuits[i][0])
-        circuits[i] = np.array(circuits[i])
+        circuits[i] = numpy.array(circuits[i])
     return circuits
 
 def bedges(mesh):
@@ -168,7 +168,7 @@ def bedges(mesh):
     for c in circuits:
         a += list(c[:-1])
         b += list(c[1:])
-    return np.array(a), np.array(b)
+    return numpy.array(a), numpy.array(b)
 
 def dist2AB(p, a, b):
     """Distances between a point p and a collection of segments having vertices (a_i, b_i). Assumes a 2D geometry.
@@ -181,11 +181,11 @@ def dist2AB(p, a, b):
     Output
         (numpy.ndarray) array of shape (M,) containing the distance between p and each of the M segments.
     """
-    direction = (b-a)/np.linalg.norm(b-a, axis = -1).reshape(-1, 1)
-    tval = np.sum((p.reshape(1, -1)-a)*direction, axis = -1)
+    direction = (b-a)/numpy.linalg.norm(b-a, axis = -1).reshape(-1, 1)
+    tval = numpy.sum((p.reshape(1, -1)-a)*direction, axis = -1)
     p_proj = tval.reshape(-1, 1)*direction + a
-    tval = tval/np.linalg.norm(b-a, axis = -1).reshape(-1, 1)
-    return (tval>=0)*(tval<=1)*np.linalg.norm(p-p_proj, axis = -1) + ((tval<0)+(tval>1))*np.minimum(np.linalg.norm(p-a, axis = -1), np.linalg.norm(p-b, axis = -1))
+    tval = tval/numpy.linalg.norm(b-a, axis = -1).reshape(-1, 1)
+    return (tval>=0)*(tval<=1)*numpy.linalg.norm(p-p_proj, axis = -1) + ((tval<0)+(tval>1))*numpy.minimum(numpy.linalg.norm(p-a, axis = -1), numpy.linalg.norm(p-b, axis = -1))
 
 def dist2boundary(p, mesh):
     """Distance of a point from the boundary of the mesh. Assumes 2D geometry. Suboptimal if used for repeated queries on different p.
