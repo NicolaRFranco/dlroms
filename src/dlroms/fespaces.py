@@ -144,10 +144,10 @@ def boundary_paths(mesh):
         inewp = distances.argmin()
         newp = candidates[inewp]
         left[numpy.linalg.norm(newp.reshape(1, -1)-bpoints, axis = -1).argmin()] = False
-    if(distances[inewp]<=h):
-        circuits[-1].append(newp)
-    else:
-        circuits.append([newp])
+        if(distances[inewp]<=h):
+            circuits[-1].append(newp)
+        else:
+            circuits.append([newp])
     for i in range(len(circuits)):
         circuits[i].append(circuits[i][0])
         circuits[i] = numpy.array(circuits[i])
