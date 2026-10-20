@@ -133,7 +133,7 @@ def boundary_paths(mesh):
     Output
         (list of numpy.ndarrays) a list of C arrays. Each array refers to a different connected component of the boundary and lists its vertices in order.
     """
-    bpoints = mesh.coordinates()[fe.boundary(mesh)]
+    bpoints = mesh.coordinates()[boundary(mesh)]
     h = mesh.hmax()
     circuits = [[bpoints[0]]]
     left = np.array([False] + [True]*(len(bpoints)-1))
